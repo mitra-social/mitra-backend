@@ -1,0 +1,8 @@
+{
+  "name": "mitra-social/backend",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.4",
+    "slim/slim": "^4.4.0"
+  }
+}
