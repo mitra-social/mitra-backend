@@ -5,7 +5,10 @@ ARG HOST_USER
 
 # SYS: Install required packages
 RUN apk --no-cache upgrade && \
-    apk add bash
+    apk add bash nodejs npm
+
+# NODE: install nodemon
+RUN npm install -g nodemon fsevents
 
 COPY files/bin/ /usr/local/bin/
 

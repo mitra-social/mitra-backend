@@ -1,0 +1,16 @@
+{
+  "verbose": false,
+  "ignore": [
+    ".git",
+    ".idea",
+    ".vscode",
+    ".phpunit.result.cache",
+    "var/log",
+    "build"
+  ],
+  "execMap": {
+    "php": "php"
+  },
+  "ext": "php",
+  "restartable": "r"
+}
