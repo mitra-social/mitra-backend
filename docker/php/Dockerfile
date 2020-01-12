@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-alpine
+FROM php:7.4-alpine
 
 ARG HOST_USER_ID
 ARG HOST_USER
@@ -8,7 +8,7 @@ RUN apk --no-cache upgrade && \
     apk add bash nodejs npm
 
 # NODE: install nodemon
-RUN npm install -g nodemon fsevents
+RUN npm install -g nodemon --no-optional
 
 COPY files/bin/ /usr/local/bin/
 
@@ -20,6 +20,7 @@ RUN adduser -u $HOST_USER_ID -D -H $HOST_USER
 
 # SYS: add ssh config (for GitHub)
 COPY files/.ssh/config /home/$HOST_USER/.ssh/config
+COPY files/startup.sh /usr/bin/startup.sh
 
 RUN ln -s /run/secrets/ssh_host_key /home/$HOST_USER/.ssh/id_rsa && \
     chown -R $HOST_USER:www-data /home/$HOST_USER && \
@@ -30,14 +31,12 @@ RUN ln -s /run/secrets/ssh_host_key /home/$HOST_USER/.ssh/id_rsa && \
 RUN mkdir -p /var/log/php && \
     chown -R www-data:www-data /var/log/* && \
     chmod g+w /var/log/php && \
+    chmod +x /usr/bin/startup.sh && \
     chmod 777 /tmp
 
 USER $HOST_USER
 
 WORKDIR /var/www/html
 
-COPY files/startup.sh /usr/bin/startup.sh
-
 # ENTRYPOINT
-#ENTRYPOINT ["/usr/bin/startup.sh"]
-CMD ["/usr/local/sbin/php-fpm", "-c", "/usr/local/etc/php-fpm.conf", "-F"]
+ENTRYPOINT ["/usr/bin/startup.sh"]
