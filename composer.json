@@ -2,8 +2,14 @@
   "name": "mitra-social/backend",
   "license": "MIT",
   "require": {
-    "php": ">=7.4",
-    "slim/slim": "^4.4.0"
+    "php": ">=7.3",
+    "slim/slim": "^4.4.0",
+    "react/event-loop": "^1.1",
+    "react/http": "^0.8.5",
+    "pimple/pimple": "^3.2.3",
+    "slim/http": "^1.0",
+    "slim/psr7": "^1.0",
+    "chubbyphp/chubbyphp-config": "^2.1"
   },
   "autoload": {
     "psr-4": {
