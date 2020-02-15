@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Mitra;
 
 use Mitra\Controller\System\PingController;
+use Mitra\Controller\User\CreateUserController;
 use Mitra\ServiceProvider\SlimServiceProvider;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\CallableResolver;
-use Slim\Http\Factory\DecoratedResponseFactory;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
 use Pimple\Psr11\Container as PsrContainer;
@@ -28,8 +28,8 @@ final class AppFactory
         $container = $app->getContainer();
 
         $app->addErrorMiddleware($container->get('debug'), true, true);
-        $app->get('/ping', PingController::class)
-            ->setName('ping');
+        $app->get('/ping', PingController::class)->setName('ping');
+        $app->post('/user', CreateUserController::class)->setName('user-create');
 
         return $app;
     }

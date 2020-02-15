@@ -7,7 +7,10 @@ namespace Mitra;
 use Chubbyphp\Config\ConfigProvider;
 use Chubbyphp\Config\ServiceProvider\ConfigServiceProvider;
 use Mitra\Config\DevConfig;
+use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
+use Mitra\ServiceProvider\SerializationServiceProvider;
+use Mitra\ServiceProvider\ValidatorServiceProvider;
 use Pimple\Container;
 use Pimple\Psr11\Container as PsrContainer;
 
@@ -31,6 +34,9 @@ final class AppContainer
 
         // Own
         $container
+            ->register(new SerializationServiceProvider())
+            ->register(new CommandBusServiceProvider())
+            ->register(new ValidatorServiceProvider())
             ->register(new ControllerServiceProvider())
             ->register(new ConfigServiceProvider(
                 (new ConfigProvider([

@@ -3,13 +3,16 @@
   "license": "MIT",
   "require": {
     "php": ">=7.3",
+    "ext-json": "*",
     "slim/slim": "^4.4.0",
     "react/event-loop": "^1.1",
     "react/http": "^0.8.5",
     "pimple/pimple": "^3.2.3",
     "slim/http": "^1.0",
     "slim/psr7": "^1.0",
-    "chubbyphp/chubbyphp-config": "^2.1"
+    "chubbyphp/chubbyphp-config": "^2.1",
+    "league/tactician": "2.0-rc1",
+    "symfony/validator": "^5.0.4"
   },
   "autoload": {
     "psr-4": {

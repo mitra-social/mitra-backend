@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Controller\System\PingController;
+use Mitra\Controller\User\CreateUserController;
+use Mitra\Serialization\Decode\DecoderInterface;
+use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Slim\Psr7\Factory\ResponseFactory;
@@ -19,6 +23,15 @@ final class ControllerServiceProvider implements ServiceProviderInterface
     {
         $container[PingController::class] = function () use ($container) {
             return new PingController($container[ResponseFactory::class]);
+        };
+
+        $container[CreateUserController::class] = function () use ($container) {
+            return new CreateUserController(
+                $container[ResponseFactory::class],
+                $container[DecoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[CommandBusInterface::class]
+            );
         };
     }
 }
