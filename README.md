@@ -11,3 +11,11 @@ $ cd docker && docker-compose run composer install
 ```
 $ cd docker && docker-compose up
 ```
+
+## Access
+
+Once the Mitra backend is up and running it is reachable over:
+
+```
+http://localhost:1337
+```

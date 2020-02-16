@@ -1,0 +1,33 @@
+language: php
+
+php:
+  - 7.3
+  - 7.4
+
+cache:
+  directories:
+    - $HOME/.composer
+
+before_install:
+  - composer self-update
+
+install:
+  - composer global require hirak/prestissimo
+  - travis_retry composer install --prefer-dist
+
+script:
+  - make test
+
+jobs:
+  include:
+    - stage: code-style
+      name: "Code style"
+      script: make code-style
+    - stage: static-analysis
+      name: "Static analysis"
+      script: make static-analysis
+
+stages:
+  - code-style
+  - static-analysis
+  - test
