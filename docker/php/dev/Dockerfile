@@ -5,22 +5,28 @@ ARG HOST_USER
 
 # SYS: Install required packages
 RUN apk --no-cache upgrade && \
-    apk add bash nodejs npm
+    apk add autoconf bash gcc g++ git make nodejs npm shadow sudo
 
 # NODE: install nodemon
 RUN npm install -g nodemon --no-optional
 
-COPY files/bin/ /usr/local/bin/
+COPY prod/files/bin/ /usr/local/bin/
 
 # PHP: Install php extensions
-RUN docker-php-ext-install pdo_mysql opcache > /dev/null 2>&1 && \
-    docker-php-ext-enable pdo_mysql opcache > /dev/null 2>&1
+RUN pecl channel-update pecl.php.net && \
+    pecl install xdebug && \
+    docker-php-ext-install pdo_mysql opcache > /dev/null 2>&1 && \
+    docker-php-ext-enable pdo_mysql opcache xdebug > /dev/null 2>&1
 
 RUN adduser -u $HOST_USER_ID -D -H $HOST_USER
 
+# USER: set /bin/bash and allow www-data to become root
+RUN usermod -s /bin/bash www-data && \
+    echo 'www-data ALL=(ALL) NOPASSWD: ALL' > '/etc/sudoers.d/www-data'
+
 # SYS: add ssh config (for GitHub)
-COPY files/.ssh/config /home/$HOST_USER/.ssh/config
-COPY files/startup.sh /usr/bin/startup.sh
+COPY prod/files/.ssh/config /home/$HOST_USER/.ssh/config
+COPY prod/files/startup.sh /usr/bin/startup.sh
 
 RUN ln -s /run/secrets/ssh_host_key /home/$HOST_USER/.ssh/id_rsa && \
     chown -R $HOST_USER:www-data /home/$HOST_USER && \

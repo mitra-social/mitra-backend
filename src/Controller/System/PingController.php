@@ -25,7 +25,7 @@ final class PingController
         $response = $this->responseFactory->createResponse(235, 'OK')
             ->withHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->withHeader('Pragma', 'no-cache')
-            ->withHeader('Expires', 0)
+            ->withHeader('Expires', '0')
         ;
 
         $response->getBody()->write(date('Y-m-d\TH:i:sT'));
