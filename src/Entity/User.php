@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace Mitra\Entity;
 
+use Ramsey\Uuid\Uuid;
+
 final class User
 {
+
+    /**
+     * @var string
+     */
+    private $id;
 
     /**
      * @var string
@@ -18,11 +25,13 @@ final class User
     private $email;
 
     /**
+     * @param string $id
      * @param string $preferredUsername
      * @param string $email
      */
-    public function __construct(string $preferredUsername, string $email)
+    public function __construct(string $id, string $preferredUsername, string $email)
     {
+        $this->id = $id;
         $this->preferredUsername = $preferredUsername;
         $this->email = $email;
     }

@@ -6,9 +6,13 @@ namespace Mitra;
 
 use Chubbyphp\Config\ConfigProvider;
 use Chubbyphp\Config\ServiceProvider\ConfigServiceProvider;
+use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineDbalServiceProvider;
+use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineOrmServiceProvider;
 use Mitra\Config\DevConfig;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
+use Mitra\ServiceProvider\DoctrineServiceProvider;
+use Mitra\ServiceProvider\ProxyManagerServiceProvider;
 use Mitra\ServiceProvider\SerializationServiceProvider;
 use Mitra\ServiceProvider\ValidatorServiceProvider;
 use Pimple\Container;
@@ -30,13 +34,17 @@ final class AppContainer
         };
 
         // Third party
-
+        $container
+            ->register(new DoctrineOrmServiceProvider())
+            ->register(new DoctrineDbalServiceProvider());
 
         // Own
         $container
             ->register(new SerializationServiceProvider())
             ->register(new CommandBusServiceProvider())
             ->register(new ValidatorServiceProvider())
+            ->register(new DoctrineServiceProvider())
+            ->register(new ProxyManagerServiceProvider())
             ->register(new ControllerServiceProvider())
             ->register(new ConfigServiceProvider(
                 (new ConfigProvider([

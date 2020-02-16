@@ -31,4 +31,7 @@ RUN mkdir -p /var/log/php && \
 
 USER $HOST_USER
 
+# COMPOSER: add prestissimo for composer parallelism
+RUN composer global require hirak/prestissimo
+
 WORKDIR /app

@@ -13,6 +13,7 @@ use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Ramsey\Uuid\Uuid;
 
 final class CreateUserController
 {
@@ -94,6 +95,6 @@ final class CreateUserController
 
     private function createEntityFromDto(UserDto $userDto): User
     {
-        return new User($userDto->preferredUsername, $userDto->email);
+        return new User(Uuid::uuid4()->toString(), $userDto->preferredUsername, $userDto->email);
     }
 }
