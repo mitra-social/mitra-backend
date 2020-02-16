@@ -1,4 +1,8 @@
-FROM composer:latest
+FROM composer:latest AS composer
+
+FROM php:7.4-cli-alpine
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 ARG HOST_USER_ID
 ARG HOST_USER

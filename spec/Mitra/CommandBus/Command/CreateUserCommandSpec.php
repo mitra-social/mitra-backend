@@ -7,7 +7,7 @@ use Mitra\Entity\User;
 use PhpSpec\ObjectBehavior;
 use Ramsey\Uuid\Uuid;
 
-class CreateUserCommandSpec extends ObjectBehavior
+final class CreateUserCommandSpec extends ObjectBehavior
 {
 
     public function let(): void

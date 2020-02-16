@@ -14,6 +14,7 @@
     "ramsey/uuid": "^3.9.2",
     "react/event-loop": "^1.1",
     "react/http": "^0.8.5",
+    "ocramius/proxy-manager": "2.5.*",
     "pimple/pimple": "^3.2.3",
     "slim/http": "^1.0",
     "slim/psr7": "^1.0",
