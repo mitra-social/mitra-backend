@@ -39,8 +39,8 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
 
     private function registerHandlers(Container $container): void
     {
-        $container[CreateUserCommandHandler::class] = function () {
-            return new CreateUserCommandHandler();
+        $container[CreateUserCommandHandler::class] = function () use ($container) {
+            return new CreateUserCommandHandler($container['doctrine.orm.em']);
         };
     }
 }

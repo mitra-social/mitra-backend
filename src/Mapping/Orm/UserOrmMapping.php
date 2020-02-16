@@ -39,7 +39,7 @@ final class UserOrmMapping implements ClassMapMappingInterface
 
         $metadata->mapField([
             'fieldName' => 'email',
-            'type' => 'datetime',
+            'type' => 'string',
             'nullable' => false,
             'unique' => true,
         ]);
