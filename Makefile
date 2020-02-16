@@ -1,11 +1,11 @@
 .PHONY: clean code-style coverage help test test-unit test-integration static-analysis install-dependencies xdebug-enable xdebug-disable
 .DEFAULT_GOAL := test
 
-PHPUNIT = APP_ENV=test APP_DEBUG=false ./vendor/bin/phpunit -c ./phpunit.xml.dist --no-coverage
-PHPSPEC = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpspec run  -c ./phpspec.yml.dist --no-coverage \
+PHPUNIT = APP_ENV=test APP_DEBUG=false ./vendor/bin/phpunit -c ./phpunit.xml --no-coverage
+PHPSPEC = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpspec run  -c ./phpspec.yml --no-coverage \
           --format dot -vvv --no-interaction
-PHPUNIT_COV = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpunit -c ./phpunit.xml.dist
-PHPSPEC_COV = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpspec run -c ./phpspec.yml.dist \
+PHPUNIT_COV = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpunit -c ./phpunit.xml
+PHPSPEC_COV = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpspec run -c ./phpspec.yml \
               --format dot -vvv --no-interaction
 PHPSTAN = ./vendor/bin/phpstan
 PHPCS = ./vendor/bin/phpcs
@@ -36,7 +36,7 @@ test-integration:
 	${PHPUNIT} --group=Integration
 
 static-analysis:
-	${PHPSTAN} analyse --no-progress
+	${PHPSTAN} analyse
 
 xdebug-enable:
 	sudo php-ext-enable xdebug
