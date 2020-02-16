@@ -11,7 +11,19 @@ before_install:
 install:
   - travis_retry composer install --prefer-dist
 
-script:
-  - make code-style
-  - make static-analysis
-  - make test
+jobs:
+  include:
+    - stage: test
+      name: "Test"
+      script: make test
+    - stage: code-style
+      name: "Code style"
+      script: make code-style
+    - stage: static-analysis
+      name: "Static analysis"
+      script: make static-analysis
+
+stages:
+  - code-style
+  - static-analysis
+  - test
