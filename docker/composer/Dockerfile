@@ -39,3 +39,5 @@ USER $HOST_USER
 RUN composer global require hirak/prestissimo
 
 WORKDIR /app
+
+ENTRYPOINT ["composer"]
