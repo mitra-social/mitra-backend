@@ -11,11 +11,11 @@ before_install:
 install:
   - travis_retry composer install --prefer-dist
 
+script:
+  - make test
+
 jobs:
   include:
-    - stage: test
-      name: "Test"
-      script: make test
     - stage: code-style
       name: "Code style"
       script: make code-style
