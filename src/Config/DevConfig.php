@@ -87,6 +87,10 @@ final class DevConfig implements ConfigInterface
 
     public function getEnv(): string
     {
-        return getenv(self::ENV_APP_ENV);
+        if (false === ($env = getenv(self::ENV_APP_ENV))) {
+            throw new \InvalidArgumentException(sprintf('Environment variable `%s` is not set.', self::ENV_APP_ENV));
+        }
+
+        return $env;
     }
 }

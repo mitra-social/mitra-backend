@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace Mitra\ServiceProvider;
 
 use Chubbyphp\DoctrineDbServiceProvider\Command\CreateDatabaseDoctrineCommand;

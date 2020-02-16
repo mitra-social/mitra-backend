@@ -18,7 +18,9 @@ use League\Tactician\Handler\Mapping\FailedToMapCommand;
  */
 final class TacticianMapByStaticClassList implements CommandToHandlerMapping
 {
-    /** @var array<string, array<string>> */
+    /**
+     * @var array<string, string>
+     */
     private $mapping;
 
     public function __construct(array $mapping)
