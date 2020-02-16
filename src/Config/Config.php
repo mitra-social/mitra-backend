@@ -6,8 +6,16 @@ namespace Mitra\Config;
 
 use Chubbyphp\Config\ConfigInterface;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
+use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\CommandBus\Handler\CreateUserCommandHandler;
+use Mitra\Dto\NestedDto;
+use Mitra\Dto\UserDto;
+use Mitra\Entity\User;
+use Mitra\Mapping\Orm\UserOrmMapping;
+use Mitra\Mapping\Validation\NestedDtoValidationMapping;
+use Mitra\Mapping\Validation\UserDtoValidationMapping;
 
-final class DevConfig implements ConfigInterface
+final class Config implements ConfigInterface
 {
 
     /**
@@ -67,8 +75,20 @@ final class DevConfig implements ConfigInterface
                 'proxies.auto_generate' => AbstractProxyFactory::AUTOGENERATE_EVAL,
             ],
             'doctrine.migrations.directory' => $this->rootDir . '/migrations/',
-            'doctrine.migrations.namespace' => 'Jobcloud\Marketplace\Core\Migrations',
+            'doctrine.migrations.namespace' => 'Mitra\Core\Migrations',
             'doctrine.migrations.table' => 'doctrine_migration_version',
+            'mappings' => [
+                'orm' => [
+                    User::class => UserOrmMapping::class,
+                ],
+                'validation' => [
+                    UserDto::class => new UserDtoValidationMapping(),
+                    NestedDto::class => new NestedDtoValidationMapping(),
+                ],
+                'command_handlers' => [
+                    CreateUserCommand::class => CreateUserCommandHandler::class
+                ],
+            ]
         ];
     }
 

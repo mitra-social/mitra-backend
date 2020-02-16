@@ -35,9 +35,7 @@ class DoctrineServiceProvider implements ServiceProviderInterface
                 [
                     'type' => 'class_map',
                     'namespace' => 'Mitra\Entity',
-                    'map' => [
-                        User::class => UserOrmMapping::class,
-                    ]
+                    'map' => $container['mappings']['orm']
                 ]
             ],
         ];

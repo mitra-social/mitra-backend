@@ -25,13 +25,9 @@ final class ValidatorServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[ValidatorInterface::class] = function () {
-
+        $container[ValidatorInterface::class] = function ($container) {
             $metadataFactory = new LazyLoadingMetadataFactory(
-                new ClassMapLoader([
-                    UserDto::class => new UserDtoValidationMapping(),
-                    NestedDto::class => new NestedDtoValidationMapping(),
-                ])
+                new ClassMapLoader($container['mappings']['validation'])
             );
 
             $symfonyValidator = (new ValidatorBuilder())->setMetadataFactory($metadataFactory)->getValidator();

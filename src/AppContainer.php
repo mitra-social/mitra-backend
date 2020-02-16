@@ -8,7 +8,7 @@ use Chubbyphp\Config\ConfigProvider;
 use Chubbyphp\Config\ServiceProvider\ConfigServiceProvider;
 use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineOrmServiceProvider;
-use Mitra\Config\DevConfig;
+use Mitra\Config\Config;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
@@ -29,6 +29,10 @@ final class AppContainer
     {
         $container = new Container(['env' => $env]);
 
+        // Config
+        $container->register(new ConfigServiceProvider(new Config(__DIR__ . '/..')));
+
+        // Psr11 container decorator
         $container[PsrContainer::class] = function () use ($container) {
             return new PsrContainer($container);
         };
@@ -46,14 +50,7 @@ final class AppContainer
             ->register(new DoctrineServiceProvider())
             ->register(new ProxyManagerServiceProvider())
             ->register(new ControllerServiceProvider())
-            ->register(new ConfigServiceProvider(
-                (new ConfigProvider([
-                    new DevConfig(__DIR__ . '/..'),
-                ]))->get($env)
-            ))
         ;
-
-        //Always keep that provider at the end
 
         return $container;
     }

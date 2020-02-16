@@ -28,9 +28,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
         $container[CommandBusInterface::class] = function () use ($container) {
             $handlerMiddleware = new CommandHandlerMiddleware(
                 $container[PsrContainer::class],
-                new TacticianMapByStaticClassList([
-                    CreateUserCommand::class => CreateUserCommandHandler::class
-                ])
+                new TacticianMapByStaticClassList($container['mappings']['command_handlers'])
             );
 
             return new TacticianCommandBus(new CommandBus($handlerMiddleware));
