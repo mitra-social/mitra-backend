@@ -18,7 +18,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[CommandBusInterface::class] = function () use ($container) {
+        $container[CommandBusInterface::class] = function () {
             return new TacticianCommandBus(new CommandBus());
         };
     }

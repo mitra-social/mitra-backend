@@ -11,5 +11,5 @@ interface ValidatorInterface
      * @param array|null $groups
      * @return ViolationListInterface
      */
-    public function validate(object  $object, array $groups = null): ViolationListInterface;
+    public function validate(object $object, array $groups = null): ViolationListInterface;
 }

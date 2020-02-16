@@ -40,14 +40,12 @@ final class AppContainer
             ->register(new ControllerServiceProvider())
             ->register(new ConfigServiceProvider(
                 (new ConfigProvider([
-                    new DevConfig(__DIR__.'/..'),
+                    new DevConfig(__DIR__ . '/..'),
                 ]))->get($env)
             ))
         ;
 
-
         //Always keep that provider at the end
-
 
         return $container;
     }

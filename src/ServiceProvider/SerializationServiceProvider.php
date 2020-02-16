@@ -19,7 +19,7 @@ final class SerializationServiceProvider implements ServiceProviderInterface
     public function register(Container $container): void
     {
 
-        $container[DecoderInterface::class] = function () use ($container) {
+        $container[DecoderInterface::class] = function () {
             $decoder = new DelegateDecoder();
 
             $decoder->addDecoder('application/json', new JsonDecoder());

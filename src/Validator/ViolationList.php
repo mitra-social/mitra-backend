@@ -10,7 +10,7 @@ final class ViolationList implements ViolationListInterface
 {
 
     /**
-     * @var array|ValidationException[]
+     * @var array[]
      */
     private $violations;
 
