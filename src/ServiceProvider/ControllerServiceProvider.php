@@ -7,7 +7,9 @@ namespace Mitra\ServiceProvider;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\User\CreateUserController;
+use Mitra\Dto\DataToDtoManager;
 use Mitra\Serialization\Decode\DecoderInterface;
+use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -28,9 +30,11 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[CreateUserController::class] = function () use ($container) {
             return new CreateUserController(
                 $container[ResponseFactory::class],
+                $container[EncoderInterface::class],
                 $container[DecoderInterface::class],
                 $container[ValidatorInterface::class],
-                $container[CommandBusInterface::class]
+                $container[CommandBusInterface::class],
+                $container[DataToDtoManager::class]
             );
         };
     }

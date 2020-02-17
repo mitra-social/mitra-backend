@@ -8,12 +8,12 @@ final class DataToDtoPopulator
 {
 
     /**
-     * @var \Closure|string
+     * @var \Closure
      */
     private $dtoInstantiator;
 
     /**
-     * @var array[self]
+     * @var array|self[]
      */
     private $creatorMap = [];
 
@@ -22,7 +22,15 @@ final class DataToDtoPopulator
      */
     public function __construct($dtoInstantiator)
     {
-        $this->dtoInstantiator = $dtoInstantiator;
+        if (is_string($dtoInstantiator)) {
+            $this->dtoInstantiator = function () use ($dtoInstantiator) {
+                return new $dtoInstantiator();
+            };
+        } elseif ($dtoInstantiator instanceof \Closure) {
+            $this->dtoInstantiator = $dtoInstantiator;
+        } else {
+            throw new \InvalidArgumentException('DTO instantiator must be either a closure or a FQCN');
+        }
     }
 
     /**
@@ -39,16 +47,13 @@ final class DataToDtoPopulator
 
     /**
      * @param array $data
+     * @param object|null $dto
      * @return object
      */
-    public function populate(array $data)
+    public function populate(array $data, object $dto = null)
     {
-        if ($this->dtoInstantiator instanceof \Closure) {
+        if (null === $dto) {
             $dto = ($this->dtoInstantiator)();
-        } elseif(is_string($this->dtoInstantiator)) {
-            $dto = new $this->dtoInstantiator();
-        } else {
-            $dto = $this->dtoInstantiator;
         }
 
         foreach (get_object_vars($dto) as $propertyName => $value) {

@@ -4,6 +4,12 @@ namespace Mitra\Dto;
 
 final class UserDto
 {
+
+    /**
+     * @var string|null
+     */
+    public $id;
+
     /**
      * @var string
      */
