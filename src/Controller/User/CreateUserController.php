@@ -6,6 +6,7 @@ namespace Mitra\Controller\User;
 
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\Dto\DataToDtoPopulator;
 use Mitra\Dto\NestedDto;
 use Mitra\Dto\UserDto;
 use Mitra\Entity\User;
@@ -81,14 +82,9 @@ final class CreateUserController
     {
         $userDto = new UserDto();
 
-        $userDto->preferredUsername = $data['preferredUsername'];
-        $userDto->email = $data['email'];
-        $userDto->password = $data['password'];
-
-        $nestedDto = new NestedDto();
-        $nestedDto->something = $data['nested']['something'];
-
-        $userDto->nested = $nestedDto;
+        (new DataToDtoPopulator($userDto))
+            ->map('nested', new DataToDtoPopulator(NestedDto::class))
+            ->populate($data);
 
         return $userDto;
     }
