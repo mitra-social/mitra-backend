@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Mitra;
 
-use Chubbyphp\Config\ConfigProvider;
 use Chubbyphp\Config\ServiceProvider\ConfigServiceProvider;
 use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineOrmServiceProvider;
