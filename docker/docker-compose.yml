@@ -22,6 +22,7 @@ services:
       APP_ENV: dev
       APP_PORT: 1337
       DB_HOST: mariadb
+      DB_NAME: mitra
       DB_USER: root
       DB_PW: ~
     ports:
