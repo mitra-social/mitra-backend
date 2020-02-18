@@ -7,7 +7,7 @@ namespace Mitra\Dto;
 final class ViolationListDto
 {
     /**
-     * @var array
+     * @var array|ViolationDto[]
      */
     public $violations;
 }

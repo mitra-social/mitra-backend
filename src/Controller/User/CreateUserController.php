@@ -8,13 +8,15 @@ use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\DataToDtoManager;
 use Mitra\Dto\UserDto;
+use Mitra\Dto\ViolationDto;
 use Mitra\Dto\ViolationListDto;
 use Mitra\Entity\User;
+use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
+use Mitra\Validator\ViolationInterface;
 use Mitra\Validator\ViolationListInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
@@ -85,7 +87,7 @@ final class CreateUserController
         $this->dataToDtoManager->populate($userDto, $decodedBody);
 
         if (($violationList = $this->validator->validate($userDto))->hasViolations()) {
-            return $this->createResponseFromViolationList($violationList, $mimeType);
+            return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
         }
 
         $user = $this->createEntityFromDto($userDto);
@@ -104,19 +106,5 @@ final class CreateUserController
     private function createEntityFromDto(UserDto $userDto): User
     {
         return new User(Uuid::uuid4()->toString(), $userDto->preferredUsername, $userDto->email);
-    }
-
-    private function createResponseFromViolationList(
-        ViolationListInterface $violationList,
-        string $mimeType
-    ): ResponseInterface {
-        $violationListDto = new ViolationListDto();
-        $violationListDto->violations = $violationList->getViolations();
-
-        $response = $this->responseFactory->createResponse(400)->withHeader('Content-Type', $mimeType);
-
-        $response->getBody()->write($this->encoder->encode($violationListDto, $mimeType));
-
-        return $response;
     }
 }

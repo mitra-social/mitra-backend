@@ -12,6 +12,7 @@ use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
 use Mitra\ServiceProvider\DataToDtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
+use Mitra\ServiceProvider\HttpServiceProvider;
 use Mitra\ServiceProvider\ProxyManagerServiceProvider;
 use Mitra\ServiceProvider\SerializationServiceProvider;
 use Mitra\ServiceProvider\ValidatorServiceProvider;
@@ -45,6 +46,7 @@ final class AppContainer
 
         // Own
         $container
+            ->register(new HttpServiceProvider())
             ->register(new SerializationServiceProvider())
             ->register(new CommandBusServiceProvider())
             ->register(new ValidatorServiceProvider())

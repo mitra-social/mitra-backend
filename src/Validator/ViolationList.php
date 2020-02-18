@@ -4,37 +4,28 @@ declare(strict_types=1);
 
 namespace Mitra\Validator;
 
-use Respect\Validation\Exceptions\ValidationException;
-
-final class ViolationList implements ViolationListInterface
+final class ViolationList extends \ArrayObject implements ViolationListInterface
 {
 
     /**
-     * @var array[]
+     * @param array|ViolationInterface[] $violations
      */
-    private $violations;
-
-    /**
-     * @param array $violations
-     */
-    public function __construct(array $violations)
+    public function __construct(array $violations = [])
     {
-        $this->violations = $violations;
+        parent::__construct($violations);
     }
 
+    /**
+     * @return array|ViolationInterface[]
+     */
     public function getViolations(): array
     {
-        return $this->violations;
+        return $this->getArrayCopy();
     }
 
     /**
-     * @inheritDoc
+     * @return bool
      */
-    public function count()
-    {
-        return count($this->violations);
-    }
-
     public function hasViolations(): bool
     {
         return 0 < $this->count();

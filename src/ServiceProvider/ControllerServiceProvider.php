@@ -8,12 +8,12 @@ use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Dto\DataToDtoManager;
+use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Slim\Psr7\Factory\ResponseFactory;
 
 final class ControllerServiceProvider implements ServiceProviderInterface
 {
@@ -24,12 +24,12 @@ final class ControllerServiceProvider implements ServiceProviderInterface
     public function register(Container $container): void
     {
         $container[PingController::class] = function () use ($container) {
-            return new PingController($container[ResponseFactory::class]);
+            return new PingController($container[ResponseFactoryInterface::class]);
         };
 
         $container[CreateUserController::class] = function () use ($container) {
             return new CreateUserController(
-                $container[ResponseFactory::class],
+                $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[DecoderInterface::class],
                 $container[ValidatorInterface::class],
