@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\System;
 
-use Psr\Http\Message\ResponseFactoryInterface;
+use Mitra\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 
 final class PingController

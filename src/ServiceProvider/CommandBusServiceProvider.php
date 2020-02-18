@@ -6,14 +6,13 @@ namespace Mitra\ServiceProvider;
 
 use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandHandlerMiddleware;
-use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\CommandBus\TacticianCommandBus;
 use Mitra\CommandBus\TacticianMapByStaticClassList;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Pimple\Psr11\Container as PsrContainer;
+use Psr\Container\ContainerInterface;
 
 final class CommandBusServiceProvider implements ServiceProviderInterface
 {
@@ -27,7 +26,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
 
         $container[CommandBusInterface::class] = function () use ($container) {
             $handlerMiddleware = new CommandHandlerMiddleware(
-                $container[PsrContainer::class],
+                $container[ContainerInterface::class],
                 new TacticianMapByStaticClassList($container['mappings']['command_handlers'])
             );
 

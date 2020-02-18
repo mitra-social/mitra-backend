@@ -10,12 +10,15 @@ use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineOrmServiceProvid
 use Mitra\Config\Config;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
+use Mitra\ServiceProvider\DataToDtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
+use Mitra\ServiceProvider\HttpServiceProvider;
 use Mitra\ServiceProvider\ProxyManagerServiceProvider;
 use Mitra\ServiceProvider\SerializationServiceProvider;
 use Mitra\ServiceProvider\ValidatorServiceProvider;
 use Pimple\Container;
 use Pimple\Psr11\Container as PsrContainer;
+use Psr\Container\ContainerInterface;
 
 final class AppContainer
 {
@@ -32,7 +35,7 @@ final class AppContainer
         $container->register(new ConfigServiceProvider(new Config(__DIR__ . '/..')));
 
         // Psr11 container decorator
-        $container[PsrContainer::class] = function () use ($container) {
+        $container[ContainerInterface::class] = function () use ($container) {
             return new PsrContainer($container);
         };
 
@@ -43,11 +46,13 @@ final class AppContainer
 
         // Own
         $container
+            ->register(new HttpServiceProvider())
             ->register(new SerializationServiceProvider())
             ->register(new CommandBusServiceProvider())
             ->register(new ValidatorServiceProvider())
             ->register(new DoctrineServiceProvider())
             ->register(new ProxyManagerServiceProvider())
+            ->register(new DataToDtoServiceProvider())
             ->register(new ControllerServiceProvider())
         ;
 

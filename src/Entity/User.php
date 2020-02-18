@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Mitra\Entity;
 
-use Ramsey\Uuid\Uuid;
-
 final class User
 {
 
@@ -34,6 +32,11 @@ final class User
         $this->id = $id;
         $this->preferredUsername = $preferredUsername;
         $this->email = $email;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
     }
 
     /**

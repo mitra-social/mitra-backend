@@ -38,6 +38,7 @@ class UserDtoValidationMapping implements ValidationMappingInterface
             ])
             ->addPropertyConstraints('nested', [
                 new Type(NestedDto::class),
+                new NotNull(),
                 new Valid(),
             ]);
     }

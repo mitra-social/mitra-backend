@@ -12,7 +12,6 @@ use Slim\App;
 use Slim\CallableResolver;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
-use Pimple\Psr11\Container as PsrContainer;
 
 final class AppFactory
 {
@@ -45,7 +44,7 @@ final class AppFactory
 
         return new App(
             $container[ResponseFactory::class],
-            $container[PsrContainer::class],
+            $container[ContainerInterface::class],
             $container[CallableResolver::class],
             $container[RouteCollector::class]
         );

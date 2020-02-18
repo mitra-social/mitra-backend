@@ -25,7 +25,9 @@ final class SymfonyValidator implements ValidatorInterface
     }
 
     /**
-     * @inheritDoc
+     * @param object $object
+     * @param array|null $groups
+     * @return ViolationListInterface
      */
     public function validate(object $object, array $groups = null): ViolationListInterface
     {
@@ -35,11 +37,7 @@ final class SymfonyValidator implements ValidatorInterface
 
         foreach ($violationList as $violation) {
             /** @var ConstraintViolationInterface $violation */
-            $violations[] = [
-                'path' => $violation->getPropertyPath(),
-                'invalidValue' => $violation->getInvalidValue(),
-                'message' => $violation->getMessage(),
-            ];
+            $violations[] = $violation;
         }
 
         return new ViolationList($violations);

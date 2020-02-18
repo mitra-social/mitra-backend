@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Mitra\Dto;
+
+final class ViolationDto
+{
+    /**
+     * @var string
+     */
+    public $message;
+
+    /**
+     * @var string
+     */
+    public $messageTemplate;
+
+    /**
+     * @var array
+     */
+    public $parameters;
+
+    /**
+     * @var string
+     */
+    public $propertyPath;
+
+    /**
+     * @var mixed
+     */
+    public $invalidValue;
+
+    /**
+     * @var string
+     */
+    public $code;
+}

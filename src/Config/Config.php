@@ -21,22 +21,27 @@ final class Config implements ConfigInterface
     /**
      * @var string
      */
-    protected const ENV_DB_HOST = 'DB_HOST';
+    private const ENV_DB_HOST = 'DB_HOST';
 
     /**
      * @var string
      */
-    protected const ENV_DB_USER = 'DB_USER';
+    private const ENV_DB_USER = 'DB_USER';
 
     /**
      * @var string
      */
-    protected const ENV_DB_PW = 'DB_PW';
+    private const ENV_DB_PW = 'DB_PW';
+
+    /**
+     * string
+     */
+    private const ENV_DB_NAME = 'DB_NAME';
 
     /**
      * @var string
      */
-    public const ENV_APP_ENV = 'APP_ENV';
+    private const ENV_APP_ENV = 'APP_ENV';
 
     /**
      * @var string
@@ -56,23 +61,25 @@ final class Config implements ConfigInterface
      */
     public function getConfig(): array
     {
-        return [
-            'env' => getenv(self::ENV_APP_ENV),
-            'debug' => true,
+        $env = $this->getEnv();
+
+        $config = [
+            'env' => $env,
+            'debug' => false,
             'rootDir' => $this->rootDir,
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
                 'connection' => [
                     'driver' => 'pdo_mysql',
                     'host' => getenv(self::ENV_DB_HOST),
-                    'dbname' => 'mitra',
+                    'dbname' => getenv(self::ENV_DB_NAME),
                     'user' => getenv(self::ENV_DB_USER),
                     'password' => getenv(self::ENV_DB_PW),
                     'charset' => 'utf8mb4',
                 ],
             ],
             'doctrine.orm.em.options' => [
-                'proxies.auto_generate' => AbstractProxyFactory::AUTOGENERATE_EVAL,
+                'proxies.auto_generate' => AbstractProxyFactory::AUTOGENERATE_NEVER,
             ],
             'doctrine.migrations.directory' => $this->rootDir . '/migrations/',
             'doctrine.migrations.namespace' => 'Mitra\Core\Migrations',
@@ -90,6 +97,13 @@ final class Config implements ConfigInterface
                 ],
             ]
         ];
+
+        if ('dev' === $env) {
+            $config['debug'] = true;
+            $config['doctrine.orm.em.options']['proxies.auto_generate'] = AbstractProxyFactory::AUTOGENERATE_EVAL;
+        }
+
+        return $config;
     }
 
     /**
