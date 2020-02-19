@@ -14,6 +14,7 @@ use Mitra\Entity\User;
 use Mitra\Mapping\Orm\UserOrmMapping;
 use Mitra\Mapping\Validation\NestedDtoValidationMapping;
 use Mitra\Mapping\Validation\UserDtoValidationMapping;
+use ProxyManager\Factory\AbstractBaseFactory;
 
 final class Config implements ConfigInterface
 {
@@ -79,7 +80,7 @@ final class Config implements ConfigInterface
                 ],
             ],
             'doctrine.orm.em.options' => [
-                'proxies.auto_generate' => AbstractProxyFactory::AUTOGENERATE_NEVER,
+                'proxies.auto_generate' => false,
             ],
             'doctrine.migrations.directory' => $this->rootDir . '/migrations/',
             'doctrine.migrations.namespace' => 'Mitra\Core\Migrations',
@@ -100,7 +101,7 @@ final class Config implements ConfigInterface
 
         if ('dev' === $env) {
             $config['debug'] = true;
-            $config['doctrine.orm.em.options']['proxies.auto_generate'] = AbstractProxyFactory::AUTOGENERATE_EVAL;
+            $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
         }
 
         return $config;

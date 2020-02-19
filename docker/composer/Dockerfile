@@ -1,6 +1,6 @@
 FROM composer:latest AS composer
 
-FROM php:7.4-cli-alpine
+FROM php:7.3-cli-alpine
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
