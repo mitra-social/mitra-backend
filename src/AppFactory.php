@@ -37,7 +37,7 @@ final class AppFactory
      * @param string $environment
      * @return App
      */
-    protected function createApp(string $environment): App
+    private function createApp(string $environment): App
     {
         $container = AppContainer::init($environment);
         $container->register(new SlimServiceProvider());
