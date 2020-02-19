@@ -1,6 +1,3 @@
 extensions:
   LeanPHP\PhpSpec\CodeCoverage\CodeCoverageExtension:
-    output:
-      php: /tmp/coverage/phpspec.cov
-    format:
-      - php
+    output: ./build/logs/coverage
