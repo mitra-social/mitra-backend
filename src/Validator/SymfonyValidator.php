@@ -16,7 +16,6 @@ final class SymfonyValidator implements ValidatorInterface
     private $validator;
 
     /**
-     * SymfonyValidator constructor.
      * @param SymfonyValidatorInterface $validator
      */
     public function __construct(SymfonyValidatorInterface $validator)
@@ -26,7 +25,7 @@ final class SymfonyValidator implements ValidatorInterface
 
     /**
      * @param object $object
-     * @param array|null $groups
+     * @param array<string>|null $groups
      * @return ViolationListInterface
      */
     public function validate(object $object, array $groups = null): ViolationListInterface

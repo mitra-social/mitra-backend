@@ -46,7 +46,7 @@ final class DataToDtoPopulator
     }
 
     /**
-     * @param array $data
+     * @param array<mixed> $data
      * @param object|null $dto
      * @return object
      */
@@ -56,7 +56,7 @@ final class DataToDtoPopulator
             $dto = ($this->dtoInstantiator)();
         }
 
-        foreach (get_object_vars($dto) as $propertyName => $value) {
+        foreach ($data as $propertyName => $value) {
             if (!isset($data[$propertyName])) {
                 $dto->$propertyName = null;
                 continue;

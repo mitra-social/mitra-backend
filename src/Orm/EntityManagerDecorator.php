@@ -40,7 +40,7 @@ class EntityManagerDecorator extends DoctrineEntityManagerDecorator
      */
     private function ping(Connection $connection): bool
     {
-        set_error_handler(function (int $errNo, string $errStr) {
+        set_error_handler(function (int $errNo, string $errStr): bool {
             if (0 < ($errNo & (E_WARNING | E_NOTICE))) {
                 return true;
             }

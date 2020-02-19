@@ -9,6 +9,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\Migrations\Configuration\Configuration;
 use Doctrine\ORM\Configuration as DoctrineConfiguration;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Mitra\Mapping\Orm\UserOrmMapping;
 use Mitra\Entity\User;
 use Mitra\Orm\EntityManagerDecorator;
@@ -22,10 +23,14 @@ class DoctrineServiceProvider implements ServiceProviderInterface
      * @param Container $container A container instance
      * @return void
      */
-    public function register(Container $container)
+    public function register(Container $container): void
     {
         $container['doctrine.orm.em.factory'] = $container->protect(
-            function (Connection $connection, DoctrineConfiguration $config, EventManager $eventManager) {
+            function (
+                Connection $connection,
+                DoctrineConfiguration $config,
+                EventManager $eventManager
+            ): EntityManagerInterface {
                 return new EntityManagerDecorator(EntityManager::create($connection, $config, $eventManager));
             }
         );
@@ -41,7 +46,7 @@ class DoctrineServiceProvider implements ServiceProviderInterface
         ];
 
         // Doctrine migrations configuration
-        $container[Configuration::class] = function ($container) {
+        $container[Configuration::class] = function ($container): Configuration {
             $configuration = new Configuration($container['doctrine.orm.em']->getConnection());
             $configuration->setMigrationsTableName($container['doctrine.migrations.table']);
             $configuration->setMigrationsDirectory($container['doctrine.migrations.directory']);

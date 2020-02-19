@@ -7,8 +7,11 @@ namespace Mitra\ServiceProvider;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Slim\CallableResolver;
 use Slim\Handlers\Strategies\RequestHandler;
+use Slim\Interfaces\AdvancedCallableResolverInterface;
+use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
 
@@ -20,15 +23,15 @@ final class SlimServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[CallableResolver::class] = function () use ($container) {
+        $container[CallableResolver::class] = function () use ($container): AdvancedCallableResolverInterface {
             return new CallableResolver($container[ContainerInterface::class]);
         };
 
-        $container[ResponseFactory::class] = function () {
+        $container[ResponseFactory::class] = function (): ResponseFactoryInterface {
             return new ResponseFactory();
         };
 
-        $container[RouteCollector::class] = function () use ($container) {
+        $container[RouteCollector::class] = function () use ($container): RouteCollectorInterface {
             return new RouteCollector(
                 $container[ResponseFactory::class],
                 $container[CallableResolver::class],

@@ -33,18 +33,13 @@ final class ConsoleCommandServiceProvider implements ServiceProviderInterface
 {
 
     /**
-     * Registers services on the given container.
-     *
-     * This method should only be used to configure services and parameters.
-     * It should not get services.
-     *
      * @param Container $container A container instance
      * @return void
      */
-    public function register(Container $container)
+    public function register(Container $container): void
     {
         // Put your commands here
-        $container['console.commands'] = function ($container) {
+        $container['console.commands'] = function ($container): array {
             $ormManagerRegistry = $container['proxymanager.doctrine.orm.manager_registry'];
             $dbalConnectionRegistry = $container['proxymanager.doctrine.dbal.connection_registry'];
 

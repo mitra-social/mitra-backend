@@ -9,7 +9,7 @@ interface DecoderInterface
     /**
      * @param string $data
      * @param string $mimeType
-     * @return array
+     * @return array<mixed>
      * @throw UnsupportedMimeTypeException
      */
     public function decode(string $data, string $mimeType): array;

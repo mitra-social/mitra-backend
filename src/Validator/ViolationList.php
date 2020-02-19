@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Mitra\Validator;
 
+/**
+ * @extends \ArrayObject<int, ViolationInterface>
+ */
 final class ViolationList extends \ArrayObject implements ViolationListInterface
 {
 
     /**
-     * @param array|ViolationInterface[] $violations
+     * @param array<ViolationInterface> $violations
      */
     public function __construct(array $violations = [])
     {
@@ -16,7 +19,7 @@ final class ViolationList extends \ArrayObject implements ViolationListInterface
     }
 
     /**
-     * @return array|ViolationInterface[]
+     * @return array<int, ViolationInterface>
      */
     public function getViolations(): array
     {

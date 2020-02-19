@@ -60,7 +60,7 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
         foreach ($violationList as $violation) {
             /** @var ViolationInterface $violation */
             $violationDto = new ViolationDto();
-            $violationDto->message = $violation->getMessage();
+            $violationDto->message = (string) $violation->getMessage();
             $violationDto->messageTemplate = $violation->getMessageTemplate();
             $violationDto->propertyPath = $violation->getPropertyPath();
             $violationDto->invalidValue = $violation->getInvalidValue();

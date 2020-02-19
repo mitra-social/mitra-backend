@@ -18,18 +18,18 @@ final class DataToDtoServiceProvider implements ServiceProviderInterface
     /**
      * @inheritDoc
      */
-    public function register(Container $container)
+    public function register(Container $container): void
     {
-        $container[DataToDtoPopulator::class . NestedDto::class] = function () {
+        $container[DataToDtoPopulator::class . NestedDto::class] = function (): DataToDtoPopulator {
             return new DataToDtoPopulator(NestedDto::class);
         };
 
-        $container[DataToDtoPopulator::class . UserDto::class] = function () use ($container) {
+        $container[DataToDtoPopulator::class . UserDto::class] = function () use ($container): DataToDtoPopulator {
             return (new DataToDtoPopulator(UserDto::class))
                 ->map('nested', $container[DataToDtoPopulator::class . NestedDto::class]);
         };
 
-        $container[DataToDtoManager::class] = function () use ($container) {
+        $container[DataToDtoManager::class] = function () use ($container): DataToDtoManager {
             return new DataToDtoManager($container[ContainerInterface::class], [
                 UserDto::class => DataToDtoPopulator::class . UserDto::class,
                 NestedDto::class => DataToDtoPopulator::class . NestedDto::class,

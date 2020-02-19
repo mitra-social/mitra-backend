@@ -20,7 +20,7 @@ interface ViolationInterface
 
     /**
      * Returns the parameters to be inserted into the raw violation message.
-     * @return array
+     * @return array<mixed>
      */
     public function getParameters();
 

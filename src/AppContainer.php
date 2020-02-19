@@ -35,7 +35,7 @@ final class AppContainer
         $container->register(new ConfigServiceProvider(new Config(__DIR__ . '/..')));
 
         // Psr11 container decorator
-        $container[ContainerInterface::class] = function () use ($container) {
+        $container[ContainerInterface::class] = function () use ($container): PsrContainer {
             return new PsrContainer($container);
         };
 

@@ -20,7 +20,7 @@ final class ValidatorServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[ValidatorInterface::class] = function ($container) {
+        $container[ValidatorInterface::class] = function ($container): ValidatorInterface {
             $metadataFactory = new LazyLoadingMetadataFactory(
                 new ClassMapLoader($container['mappings']['validation'])
             );

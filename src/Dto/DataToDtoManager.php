@@ -10,7 +10,7 @@ final class DataToDtoManager
 {
 
     /**
-     * @var array|string[]
+     * @var array<string>
      */
     private $populatorMap = [];
 
@@ -21,7 +21,7 @@ final class DataToDtoManager
 
     /**
      * @param ContainerInterface $container
-     * @param array $populatorMap
+     * @param array<string> $populatorMap
      */
     public function __construct(ContainerInterface $container, array $populatorMap = [])
     {
@@ -32,8 +32,14 @@ final class DataToDtoManager
     public function register(string $dtoClassName, string $populatorClassName): self
     {
         $this->populatorMap[$dtoClassName] = $populatorClassName;
+        return $this;
     }
 
+    /**
+     * @param object|string $dto
+     * @param array<mixed> $data
+     * @return object
+     */
     public function populate($dto, array $data): object
     {
         if (is_object($dto)) {

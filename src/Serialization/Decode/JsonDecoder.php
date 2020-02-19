@@ -12,7 +12,7 @@ final class JsonDecoder implements DecoderInterface
     /**
      * @param string $data
      * @param string $mimeType
-     * @return array
+     * @return array<mixed>
      * @throws UnsupportedMimeTypeException
      */
     public function decode(string $data, string $mimeType): array

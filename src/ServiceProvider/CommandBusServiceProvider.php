@@ -24,7 +24,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
     {
         $this->registerHandlers($container);
 
-        $container[CommandBusInterface::class] = function () use ($container) {
+        $container[CommandBusInterface::class] = function () use ($container): CommandBusInterface {
             $handlerMiddleware = new CommandHandlerMiddleware(
                 $container[ContainerInterface::class],
                 new TacticianMapByStaticClassList($container['mappings']['command_handlers'])
@@ -36,7 +36,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
 
     private function registerHandlers(Container $container): void
     {
-        $container[CreateUserCommandHandler::class] = function () use ($container) {
+        $container[CreateUserCommandHandler::class] = function () use ($container): CreateUserCommandHandler {
             return new CreateUserCommandHandler($container['doctrine.orm.em']);
         };
     }

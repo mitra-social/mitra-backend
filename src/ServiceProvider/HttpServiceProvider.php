@@ -19,7 +19,7 @@ final class HttpServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[ResponseFactoryInterface::class] = function () use ($container) {
+        $container[ResponseFactoryInterface::class] = function () use ($container): ResponseFactoryInterface {
             return new ResponseFactory($container[PsrResponseFactory::class], $container[EncoderInterface::class]);
         };
     }

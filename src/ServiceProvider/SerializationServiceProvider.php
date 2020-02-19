@@ -21,7 +21,7 @@ final class SerializationServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[EncoderInterface::class] = function () {
+        $container[EncoderInterface::class] = function (): EncoderInterface {
             $encoder = new DelegateEncoder();
             $encoder->addEncoder('application/json', new JsonEncoder(
                 JSON_PRETTY_PRINT | JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
@@ -30,7 +30,7 @@ final class SerializationServiceProvider implements ServiceProviderInterface
             return $encoder;
         };
 
-        $container[DecoderInterface::class] = function () {
+        $container[DecoderInterface::class] = function (): DecoderInterface {
             $decoder = new DelegateDecoder();
             $decoder->addDecoder('application/json', new JsonDecoder());
 

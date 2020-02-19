@@ -23,11 +23,11 @@ final class ControllerServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[PingController::class] = function () use ($container) {
+        $container[PingController::class] = function () use ($container): PingController {
             return new PingController($container[ResponseFactoryInterface::class]);
         };
 
-        $container[CreateUserController::class] = function () use ($container) {
+        $container[CreateUserController::class] = function () use ($container): CreateUserController {
             return new CreateUserController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],

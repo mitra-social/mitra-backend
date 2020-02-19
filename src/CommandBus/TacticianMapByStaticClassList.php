@@ -19,10 +19,13 @@ use League\Tactician\Handler\Mapping\FailedToMapCommand;
 final class TacticianMapByStaticClassList implements CommandToHandlerMapping
 {
     /**
-     * @var array<string, string>
+     * @var array<string,string>
      */
     private $mapping;
 
+    /**
+     * @param array<string,string> $mapping
+     */
     public function __construct(array $mapping)
     {
         $this->mapping = $mapping;

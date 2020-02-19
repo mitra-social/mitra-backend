@@ -17,7 +17,7 @@ final class ViolationDto
     public $messageTemplate;
 
     /**
-     * @var array
+     * @var array<mixed>
      */
     public $parameters;
 

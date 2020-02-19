@@ -23,7 +23,7 @@ final class CreateUserCommandHandler
         $this->entityManager = $entityManager;
     }
 
-    public function __invoke(CreateUserCommand $command)
+    public function __invoke(CreateUserCommand $command): void
     {
         $this->entityManager->persist($command->getUser());
         $this->entityManager->flush();

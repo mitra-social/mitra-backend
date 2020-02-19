@@ -1,4 +1,10 @@
+includes:
+  - vendor/phpstan/phpstan-strict-rules/rules.neon
+
 parameters:
   level: 7
   paths:
     - src
+  treatPhpDocTypesAsCertain: false
+  ignoreErrors:
+    - '#Variable property access on mixed.#'
