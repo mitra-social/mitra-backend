@@ -4,8 +4,7 @@
 PHPUNIT = APP_ENV=test APP_DEBUG=false ./vendor/bin/phpunit -c ./phpunit.xml --no-coverage
 PHPSPEC = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpspec run  -c ./phpspec.yml --no-coverage \
           --format dot -vvv --no-interaction
-PHPUNIT_COV = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpunit -c ./phpunit.xml
-PHPSPEC_COV = APP_ENV=test APP_DEBUG=false phpdbg -qrr ./vendor/bin/phpspec run -c ./phpspec.yml \
+PHPSPEC_COV = APP_ENV=test APP_DEBUG=false php -dpcov.enabled=1 -dpcov.directory=./src ./vendor/bin/phpspec run -c ./phpspec.yml \
               --format dot -vvv --no-interaction
 PHPSTAN = ./vendor/bin/phpstan
 PHPCS = ./vendor/bin/phpcs
@@ -20,9 +19,6 @@ code-style:
 
 coverage:
 	${PHPSPEC_COV}
-	${PHPUNIT_COV}
-	phpdbg -qrr ./vendor/bin/phpcov merge --clover build/logs/phpunit/junit.xml --html build/logs/phpunit/coverage \
-	--text --ansi /tmp/coverage
 
 test:
 	${PHPSPEC}
@@ -39,10 +35,10 @@ static-analysis:
 	${PHPSTAN} analyse
 
 xdebug-enable:
-	sudo php-ext-enable xdebug
+	php-ext-enable xdebug
 
 xdebug-disable:
-	sudo php-ext-disable xdebug
+	php-ext-disable xdebug
 
 help:
 	# Usage:
