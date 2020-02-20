@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Serialization\Decode;
+namespace Mitra\Serialization;
 
 final class UnsupportedMimeTypeException extends \Exception
 {

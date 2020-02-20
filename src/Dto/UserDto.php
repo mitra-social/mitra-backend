@@ -1,9 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mitra\Dto;
 
 final class UserDto
 {
+
+    /**
+     * @var string|null
+     */
+    public $id;
+
     /**
      * @var string
      */

@@ -1,4 +1,8 @@
-FROM composer:latest
+FROM composer:latest AS composer
+
+FROM php:7.3-cli-alpine
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 ARG HOST_USER_ID
 ARG HOST_USER
@@ -31,4 +35,9 @@ RUN mkdir -p /var/log/php && \
 
 USER $HOST_USER
 
+# COMPOSER: add prestissimo for composer parallelism
+RUN composer global require hirak/prestissimo
+
 WORKDIR /app
+
+ENTRYPOINT ["composer"]

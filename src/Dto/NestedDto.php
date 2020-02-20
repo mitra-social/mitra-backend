@@ -6,5 +6,8 @@ namespace Mitra\Dto;
 
 final class NestedDto
 {
+    /**
+     * @var string|null
+     */
     public $something;
 }
