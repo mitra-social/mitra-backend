@@ -3,12 +3,17 @@
 declare(strict_types=1);
 
 namespace Mitra\Tests\Integration;
-;
+
+use Cache\Adapter\Void\VoidCachePool;
 use Mitra\AppFactory;
+use Mitra\Env\Env;
+use Mitra\Env\Reader\GetenvReader;
+use Mitra\Env\Writer\NullWriter;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr6NullCache\Adapter\NullCacheItemPool;
 use Slim\App;
 use Slim\Psr7\Factory\ServerRequestFactory;
 
@@ -29,7 +34,9 @@ abstract class IntegrationTestCase extends TestCase
     {
         parent::setUpBeforeClass();
 
-        self::$app = (new AppFactory())->create('test');
+        $env = Env::mutable(new GetenvReader(), new NullWriter(), new VoidCachePool());
+
+        self::$app = (new AppFactory())->create($env);
         self::$requestFactory = new ServerRequestFactory();
     }
 

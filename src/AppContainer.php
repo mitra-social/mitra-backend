@@ -8,6 +8,7 @@ use Chubbyphp\Config\ServiceProvider\ConfigServiceProvider;
 use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineOrmServiceProvider;
 use Mitra\Config\Config;
+use Mitra\Env\Env;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
 use Mitra\ServiceProvider\DataToDtoServiceProvider;
@@ -24,15 +25,15 @@ final class AppContainer
 {
 
     /**
-     * @param string $env
+     * @param Env $env
      * @return Container
      */
-    public static function init(string $env): Container
+    public static function init(Env $env): Container
     {
-        $container = new Container(['env' => $env]);
+        $container = new Container();
 
         // Config
-        $container->register(new ConfigServiceProvider(new Config(__DIR__ . '/..')));
+        $container->register(new ConfigServiceProvider(new Config(__DIR__ . '/..', $env)));
 
         // Psr11 container decorator
         $container[ContainerInterface::class] = function () use ($container): PsrContainer {

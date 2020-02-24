@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace Mitra\Config;
 
 use Chubbyphp\Config\ConfigInterface;
-use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\Dto\NestedDto;
 use Mitra\Dto\UserDto;
 use Mitra\Entity\User;
+use Mitra\Env\Env;
 use Mitra\Mapping\Orm\UserOrmMapping;
 use Mitra\Mapping\Validation\NestedDtoValidationMapping;
 use Mitra\Mapping\Validation\UserDtoValidationMapping;
-use ProxyManager\Factory\AbstractBaseFactory;
 
 final class Config implements ConfigInterface
 {
@@ -50,11 +49,18 @@ final class Config implements ConfigInterface
     private $rootDir;
 
     /**
-     * @param string $rootDir
+     * @var Env
      */
-    public function __construct(string $rootDir)
+    private $env;
+
+    /**
+     * @param string $rootDir
+     * @param Env $env
+     */
+    public function __construct(string $rootDir, Env $env)
     {
         $this->rootDir = $rootDir;
+        $this->env = $env;
     }
 
     /**
@@ -62,20 +68,20 @@ final class Config implements ConfigInterface
      */
     public function getConfig(): array
     {
-        $env = $this->getEnv();
+        $appEnv = $this->getEnv();
 
         $config = [
-            'env' => $env,
+            'env' => $appEnv,
             'debug' => false,
             'rootDir' => $this->rootDir,
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
                 'connection' => [
                     'driver' => 'pdo_mysql',
-                    'host' => getenv(self::ENV_DB_HOST),
-                    'dbname' => getenv(self::ENV_DB_NAME),
-                    'user' => getenv(self::ENV_DB_USER),
-                    'password' => getenv(self::ENV_DB_PW),
+                    'host' => $this->env->get(self::ENV_DB_HOST),
+                    'dbname' => $this->env->get(self::ENV_DB_NAME),
+                    'user' => $this->env->get(self::ENV_DB_USER),
+                    'password' => $this->env->get(self::ENV_DB_PW),
                     'charset' => 'utf8mb4',
                 ],
             ],
@@ -99,7 +105,7 @@ final class Config implements ConfigInterface
             ]
         ];
 
-        if ('dev' === $env) {
+        if ('dev' === $appEnv) {
             $config['debug'] = true;
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
         }
@@ -112,20 +118,16 @@ final class Config implements ConfigInterface
      */
     public function getDirectories(): array
     {
-        $environment = $this->getEnv();
+        $appEnv = $this->getEnv();
 
         return [
-            'cache' => $this->rootDir . '/var/cache/' . $environment,
-            'logs' => $this->rootDir . '/var/logs/' . $environment,
+            'cache' => $this->rootDir . '/var/cache/' . $appEnv,
+            'logs' => $this->rootDir . '/var/logs/' . $appEnv,
         ];
     }
 
     public function getEnv(): string
     {
-        if (false === ($env = getenv(self::ENV_APP_ENV))) {
-            throw new \InvalidArgumentException(sprintf('Environment variable `%s` is not set.', self::ENV_APP_ENV));
-        }
-
-        return $env;
+        return $this->env->get(self::ENV_APP_ENV);
     }
 }

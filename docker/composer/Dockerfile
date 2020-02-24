@@ -9,7 +9,7 @@ ARG HOST_USER
 
 # SYS: Install required packages
 RUN apk --no-cache upgrade && \
-    apk add bash
+    apk add bash git
 
 COPY php/prod/files/bin/ /usr/local/bin/
 

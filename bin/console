@@ -5,9 +5,15 @@ declare(strict_types=1);
 
 namespace Mitra;
 
+use Cache\Adapter\PHPArray\ArrayCachePool;
 use Doctrine\Migrations\Configuration\Configuration;
 use Doctrine\Migrations\Tools\Console\Helper\ConfigurationHelper;
 use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
+use Mitra\Env\Env;
+use Mitra\Env\Reader\DelegateReader;
+use Mitra\Env\Reader\EnvVarReader;
+use Mitra\Env\Reader\GetenvReader;
+use Mitra\Env\Writer\NullWriter;
 use Mitra\ServiceProvider\ConsoleCommandServiceProvider;
 use Pimple\Container;
 use Symfony\Component\Console\Application;
@@ -18,11 +24,15 @@ use Symfony\Component\Console\Input\InputOption;
 
 set_time_limit(0);
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+$env = Env::immutable(
+    new DelegateReader([new GetenvReader(), new EnvVarReader()]),
+    new NullWriter(),
+    new ArrayCachePool()
+);
 
 $input = new ArgvInput();
-
-$env = $input->getParameterOption(['--env', '-e'], 'dev');
 
 /** @var Container $container */
 $container = AppContainer::init($env);
