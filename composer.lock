@@ -1702,12 +1702,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mitra-social/php-env.git",
-                "reference": "b9fbb50042fd4a2c01367a4d016bf06125b5de1b"
+                "reference": "8c2986f20256c3d06300744baaf52169be5f7b7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mitra-social/php-env/zipball/b9fbb50042fd4a2c01367a4d016bf06125b5de1b",
-                "reference": "b9fbb50042fd4a2c01367a4d016bf06125b5de1b",
+                "url": "https://api.github.com/repos/mitra-social/php-env/zipball/8c2986f20256c3d06300744baaf52169be5f7b7d",
+                "reference": "8c2986f20256c3d06300744baaf52169be5f7b7d",
                 "shasum": ""
             },
             "require": {
@@ -1726,7 +1726,7 @@
             "license": [
                 "MIT"
             ],
-            "time": "2020-02-24T11:01:19+00:00"
+            "time": "2020-02-24T12:34:38+00:00"
         },
         {
             "name": "nikic/fast-route",
