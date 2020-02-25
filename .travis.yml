@@ -13,6 +13,7 @@ before_install:
 
 install:
   - composer global require hirak/prestissimo
+  - rm composer.lock
   - travis_retry composer install --prefer-dist
 
 script:

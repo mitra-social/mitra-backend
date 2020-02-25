@@ -8,7 +8,7 @@ interface ValidatorInterface
 {
     /**
      * @param object $object
-     * @param array|null $groups
+     * @param array<string>|null $groups
      * @return ViolationListInterface
      */
     public function validate(object $object, array $groups = null): ViolationListInterface;

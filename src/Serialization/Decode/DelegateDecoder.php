@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Serialization\Decode;
 
+use Mitra\Serialization\UnsupportedMimeTypeException;
+
 final class DelegateDecoder implements DecoderInterface
 {
 
@@ -14,6 +16,7 @@ final class DelegateDecoder implements DecoderInterface
 
     /**
      * @inheritDoc
+     * @throws UnsupportedMimeTypeException
      */
     public function decode(string $data, string $mimeType): array
     {

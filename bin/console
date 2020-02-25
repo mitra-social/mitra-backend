@@ -1,0 +1,51 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Mitra;
+
+use Doctrine\Migrations\Configuration\Configuration;
+use Doctrine\Migrations\Tools\Console\Helper\ConfigurationHelper;
+use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
+use Mitra\ServiceProvider\ConsoleCommandServiceProvider;
+use Pimple\Container;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputOption;
+
+set_time_limit(0);
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$input = new ArgvInput();
+
+$env = $input->getParameterOption(['--env', '-e'], 'dev');
+
+/** @var Container $container */
+$container = AppContainer::init($env);
+$container->register(new ConsoleCommandServiceProvider());
+
+/** @var Configuration $configuration */
+$configuration = $container[Configuration::class];
+
+$console = new Application('Mitra');
+$console->setHelperSet(new HelperSet([
+    'em' => new EntityManagerHelper($container['doctrine.orm.em']),
+    'question' => new QuestionHelper(),
+    'configuration' => new ConfigurationHelper($configuration->getConnection(), $configuration),
+]));
+
+$inputOptions = [
+    new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', 'dev'),
+];
+
+foreach ($inputOptions as $inputOption) {
+    $console->getDefinition()->addOption($inputOption);
+}
+
+$console->addCommands($container['console.commands']);
+$console->setCatchExceptions(false);
+$console->run($input);

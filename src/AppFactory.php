@@ -12,7 +12,6 @@ use Slim\App;
 use Slim\CallableResolver;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
-use Pimple\Psr11\Container as PsrContainer;
 
 final class AppFactory
 {
@@ -38,14 +37,14 @@ final class AppFactory
      * @param string $environment
      * @return App
      */
-    protected function createApp(string $environment): App
+    private function createApp(string $environment): App
     {
         $container = AppContainer::init($environment);
         $container->register(new SlimServiceProvider());
 
         return new App(
             $container[ResponseFactory::class],
-            $container[PsrContainer::class],
+            $container[ContainerInterface::class],
             $container[CallableResolver::class],
             $container[RouteCollector::class]
         );

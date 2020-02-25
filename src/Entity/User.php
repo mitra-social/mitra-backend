@@ -10,6 +10,11 @@ final class User
     /**
      * @var string
      */
+    private $id;
+
+    /**
+     * @var string
+     */
     private $preferredUsername;
 
     /**
@@ -18,13 +23,20 @@ final class User
     private $email;
 
     /**
+     * @param string $id
      * @param string $preferredUsername
      * @param string $email
      */
-    public function __construct(string $preferredUsername, string $email)
+    public function __construct(string $id, string $preferredUsername, string $email)
     {
+        $this->id = $id;
         $this->preferredUsername = $preferredUsername;
         $this->email = $email;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
     }
 
     /**

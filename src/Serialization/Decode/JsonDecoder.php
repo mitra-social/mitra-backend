@@ -4,9 +4,17 @@ declare(strict_types=1);
 
 namespace Mitra\Serialization\Decode;
 
+use Mitra\Serialization\UnsupportedMimeTypeException;
+
 final class JsonDecoder implements DecoderInterface
 {
 
+    /**
+     * @param string $data
+     * @param string $mimeType
+     * @return array<mixed>
+     * @throws UnsupportedMimeTypeException
+     */
     public function decode(string $data, string $mimeType): array
     {
         if ('application/json' !== $mimeType) {
