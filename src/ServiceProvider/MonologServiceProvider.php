@@ -12,9 +12,9 @@ use Psr\Log\LoggerInterface;
 
 final class MonologServiceProvider implements ServiceProviderInterface
 {
-    public function register(Container $container)
+    public function register(Container $container): void
     {
-        $container[LoggerInterface::class] = function ($container) {
+        $container[LoggerInterface::class] = function ($container): LoggerInterface {
             return new Logger($container['monolog.name'], [
                 (new StreamHandler(
                     $container['monolog.path'],

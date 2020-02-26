@@ -13,7 +13,7 @@ trait TimestampableOrmMappingTrait
      * @param ClassMetadata $metadata
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function configureTimestampableMapping(ClassMetadata $metadata):  void
+    private function configureTimestampableMapping(ClassMetadata $metadata): void
     {
         $metadata->mapField([
             'fieldName' => 'createdAt',

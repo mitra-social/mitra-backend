@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityRepository;
 use Mitra\Entity\User;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class WebfingerController
@@ -44,7 +45,7 @@ final class WebfingerController
         $this->userRepository = $userRepository;
     }
 
-    public function __invoke(ServerRequestInterface $request)
+    public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $resource = $request->getQueryParams()['resource'];
 
@@ -66,11 +67,12 @@ final class WebfingerController
 
         $preferredUsername = $handleParts[0];
 
-        if (null === $user = $this->userRepository->findOneBy(['preferredUsername' => $preferredUsername])) {
+        /** @var User|null $user */
+        $user = $this->userRepository->findOneBy(['preferredUsername' => $preferredUsername]);
+
+        if (null === $user) {
             return $this->responseFactory->createResponse(404);
         }
-
-        /** @var User $user */
 
         $webfinger = new Server\Http\WebFinger(['subject' => $resource, 'aliases' => [], 'links' => [
             [

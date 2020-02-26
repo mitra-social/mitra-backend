@@ -6,7 +6,6 @@ namespace Mitra\Entity;
 
 final class User implements TimestampableInterface
 {
-
     use TimestampableTrait;
 
     /**

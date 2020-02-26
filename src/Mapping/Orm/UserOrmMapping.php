@@ -10,7 +10,6 @@ use Mitra\Repository\UserRepository;
 
 final class UserOrmMapping implements ClassMapMappingInterface
 {
-
     use TimestampableOrmMappingTrait;
 
     /**

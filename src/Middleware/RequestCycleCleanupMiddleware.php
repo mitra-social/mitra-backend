@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mitra\Middleware;
 
 use Doctrine\Common\Persistence\ObjectManager;
@@ -31,14 +33,8 @@ final class RequestCycleCleanupMiddleware
         $this->logger = $logger;
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface      $response
-     * @param callable               $next
-     *
-     * @return ResponseInterface
-     */
-    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
         $response = $handler->handle($request);
 
         $this->objectManager->clear();
