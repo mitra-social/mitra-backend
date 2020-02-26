@@ -7,9 +7,10 @@ namespace Mitra\ServiceProvider;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\User\CreateUserController;
-use Mitra\Dto\DataToDtoManager;
+use Mitra\Controller\Webfinger\WebfingerController;
+use Mitra\Dto\RequestToDtoManager;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Serialization\Decode\DecoderInterface;
+use Mitra\Repository\UserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
@@ -31,10 +32,17 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new CreateUserController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[DecoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[CommandBusInterface::class],
-                $container[DataToDtoManager::class]
+                $container[RequestToDtoManager::class]
+            );
+        };
+
+        $container[WebfingerController::class] = function () use ($container): WebfingerController {
+            return new WebfingerController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[UserRepository::class]
             );
         };
     }

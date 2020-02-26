@@ -6,9 +6,12 @@ namespace Mitra\Mapping\Orm;
 
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Mitra\Repository\UserRepository;
 
 final class UserOrmMapping implements ClassMapMappingInterface
 {
+
+    use TimestampableOrmMappingTrait;
 
     /**
      * @param ClassMetadata $metadata
@@ -18,6 +21,7 @@ final class UserOrmMapping implements ClassMapMappingInterface
     public function configureMapping(ClassMetadata $metadata)
     {
         $metadata->setPrimaryTable(['name' => 'user']);
+        $metadata->setCustomRepositoryClass(UserRepository::class);
 
         $metadata->mapField([
             'fieldName' => 'id',
@@ -44,18 +48,6 @@ final class UserOrmMapping implements ClassMapMappingInterface
             'unique' => true,
         ]);
 
-        /*$metadata->mapField([
-            'fieldName' => 'createdAt',
-            'columnName' => 'created_at',
-            'type' => 'datetime',
-            'nullable' => true,
-        ]);
-
-        $metadata->mapField([
-            'fieldName' => 'updatedAt',
-            'columnName' => 'updated_at',
-            'type' => 'datetime',
-            'nullable' => true,
-        ]);*/
+        $this->configureTimestampableMapping($metadata);
     }
 }

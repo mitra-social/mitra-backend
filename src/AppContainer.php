@@ -9,12 +9,14 @@ use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineDbalServiceProvi
 use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineOrmServiceProvider;
 use Mitra\Config\Config;
 use Mitra\Env\Env;
+use Mitra\ServiceProvider\ActivityPubServiceProvider;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
-use Mitra\ServiceProvider\ControllerServiceProvider;
 use Mitra\ServiceProvider\DataToDtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
 use Mitra\ServiceProvider\HttpServiceProvider;
+use Mitra\ServiceProvider\MonologServiceProvider;
 use Mitra\ServiceProvider\ProxyManagerServiceProvider;
+use Mitra\ServiceProvider\RepositoryServiceProvider;
 use Mitra\ServiceProvider\SerializationServiceProvider;
 use Mitra\ServiceProvider\ValidatorServiceProvider;
 use Pimple\Container;
@@ -50,11 +52,13 @@ final class AppContainer
             ->register(new HttpServiceProvider())
             ->register(new SerializationServiceProvider())
             ->register(new CommandBusServiceProvider())
+            ->register(new ActivityPubServiceProvider())
             ->register(new ValidatorServiceProvider())
             ->register(new DoctrineServiceProvider())
             ->register(new ProxyManagerServiceProvider())
             ->register(new DataToDtoServiceProvider())
-            ->register(new ControllerServiceProvider())
+            ->register(new RepositoryServiceProvider())
+            ->register(new MonologServiceProvider())
         ;
 
         return $container;

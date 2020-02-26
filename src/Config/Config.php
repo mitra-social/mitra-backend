@@ -14,6 +14,7 @@ use Mitra\Env\Env;
 use Mitra\Mapping\Orm\UserOrmMapping;
 use Mitra\Mapping\Validation\NestedDtoValidationMapping;
 use Mitra\Mapping\Validation\UserDtoValidationMapping;
+use Monolog\Logger;
 
 final class Config implements ConfigInterface
 {
@@ -43,6 +44,8 @@ final class Config implements ConfigInterface
      */
     private const ENV_APP_ENV = 'APP_ENV';
 
+    private const ENV_APP_DEBUG = 'APP_DEBUG';
+
     /**
      * @var string
      */
@@ -69,10 +72,11 @@ final class Config implements ConfigInterface
     public function getConfig(): array
     {
         $appEnv = $this->getEnv();
+        $dirs = $this->getDirectories();
 
         $config = [
             'env' => $appEnv,
-            'debug' => false,
+            'debug' => (bool) $this->env->get(self::ENV_APP_DEBUG),
             'rootDir' => $this->rootDir,
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
@@ -102,12 +106,16 @@ final class Config implements ConfigInterface
                 'command_handlers' => [
                     CreateUserCommand::class => CreateUserCommandHandler::class
                 ],
-            ]
+            ],
+            'monolog.name' => 'default',
+            'monolog.path' => $dirs['logs'] . '/application.log',
+            'monolog.level' => Logger::NOTICE,
         ];
 
         if ('dev' === $appEnv) {
             $config['debug'] = true;
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
+            $config['monolog.level'] = Logger::DEBUG;
         }
 
         return $config;

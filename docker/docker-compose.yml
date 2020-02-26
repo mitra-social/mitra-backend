@@ -19,6 +19,7 @@ services:
     container_name: mitra-backend-php
     environment:
       APP_ENV: dev
+      APP_DEBUG: 1
       APP_PORT: 1337
       DB_HOST: mariadb
       DB_NAME: mitra
