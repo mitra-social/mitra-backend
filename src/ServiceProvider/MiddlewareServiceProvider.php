@@ -33,9 +33,10 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
 
         $container[JwtAuthentication::class] = static function () use ($container): JwtAuthentication {
             return new JwtAuthentication([
-                "path" => '/',
-                "ignore" => [],
-                "secret" => $container['jwt.secret']
+                'path' => '/',
+                'ignore' => [],
+                'secret' => $container['jwt.secret'],
+                'logger' => $container[LoggerInterface::class],
             ]);
         };
     }
