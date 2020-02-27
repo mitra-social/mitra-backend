@@ -25,7 +25,8 @@
     "slim/http": "^1.0",
     "slim/psr7": "^1.0",
     "slim/slim": "^4.4.0",
-    "symfony/validator": "^5.0.4"
+    "symfony/validator": "^5.0.4",
+    "tuupola/slim-jwt-auth": "^3.4"
   },
   "require-dev": {
     "ergebnis/phpstan-rules": "^0.14.3",

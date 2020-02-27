@@ -14,6 +14,7 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Log\LoggerInterface;
+use Tuupola\Middleware\JwtAuthentication;
 
 final class MiddlewareServiceProvider implements ServiceProviderInterface
 {
@@ -28,6 +29,14 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
                 $container['doctrine.orm.em'],
                 $container[LoggerInterface::class]
             );
+        };
+
+        $container[JwtAuthentication::class] = static function () use ($container): JwtAuthentication {
+            return new JwtAuthentication([
+                "path" => '/',
+                "ignore" => [],
+                "secret" => $container['jwt.secret']
+            ]);
         };
     }
 }

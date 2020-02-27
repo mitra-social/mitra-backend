@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Mitra;
 
-use Chubbyphp\Lazy\LazyMiddleware;
-use Mitra\Controller\System\PingController;
-use Mitra\Controller\User\CreateUserController;
-use Mitra\Controller\Webfinger\WebfingerController;
 use Mitra\Env\Env;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
+use Mitra\Routes\PrivateRouteProvider;
+use Mitra\Routes\PublicRouterProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
 use Mitra\ServiceProvider\MiddlewareServiceProvider;
 use Mitra\ServiceProvider\SlimServiceProvider;
@@ -18,6 +16,7 @@ use Slim\App;
 use Slim\CallableResolver;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
+use Tuupola\Middleware\JwtAuthentication;
 
 final class AppFactory
 {
@@ -37,9 +36,8 @@ final class AppFactory
         // Needs to be last middleware to handle all the errors
         $app->addErrorMiddleware($container->get('debug'), true, true);
 
-        $app->get('/ping', PingController::class)->setName('ping');
-        $app->post('/user', CreateUserController::class)->setName('user-create');
-        $app->get('/.well-known/webfinger', WebfingerController::class)->setName('webfinger');
+        $app->group('', new PublicRouterProvider());
+        $app->group('', new PrivateRouteProvider())->add(JwtAuthentication::class);
 
         return $app;
     }

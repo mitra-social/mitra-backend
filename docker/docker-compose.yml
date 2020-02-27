@@ -25,6 +25,7 @@ services:
       DB_NAME: mitra
       DB_USER: root
       DB_PW: ~
+      JWT_SECRET: s3kr3T!
     ports:
       - 1337:1337
     volumes:

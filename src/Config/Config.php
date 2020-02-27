@@ -44,7 +44,15 @@ final class Config implements ConfigInterface
      */
     private const ENV_APP_ENV = 'APP_ENV';
 
+    /**
+     * @var string
+     */
     private const ENV_APP_DEBUG = 'APP_DEBUG';
+
+    /**
+     * @var string
+     */
+    private const ENV_JWT_SECRET = 'JWT_SECRET';
 
     /**
      * @var string
@@ -110,6 +118,7 @@ final class Config implements ConfigInterface
             'monolog.name' => 'default',
             'monolog.path' => $dirs['logs'] . '/application.log',
             'monolog.level' => Logger::NOTICE,
+            'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
 
         if ('dev' === $appEnv) {

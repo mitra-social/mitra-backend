@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\ServiceProvider;
 
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\Webfinger\WebfingerController;
@@ -24,6 +25,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
+        // Public
         $container[PingController::class] = function () use ($container): PingController {
             return new PingController($container[ResponseFactoryInterface::class]);
         };
@@ -44,6 +46,11 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[UserRepository::class]
             );
+        };
+
+        // Private
+        $container[ProfileController::class] = function () use ($container): ProfileController {
+            return new ProfileController($container[ResponseFactoryInterface::class]);
         };
     }
 }

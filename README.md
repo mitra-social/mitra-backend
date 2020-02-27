@@ -40,3 +40,17 @@ Once the Mitra backend is up and running it is reachable over:
 ```
 http://localhost:1337
 ```
+
+### Authentication
+
+To authenticate against the API you can use a JWT token with the following payload:
+
+```
+{
+    "userId": "your uuid"
+    "iat": "current unix timestamp"
+}
+```
+
+and sign it with the `HS256` algorithm by using the development secret `s3kr3T!`. You can use [jwt.io](https://jwt.io/)
+to generate such a development JWT token.

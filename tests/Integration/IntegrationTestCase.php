@@ -33,7 +33,11 @@ abstract class IntegrationTestCase extends TestCase
     {
         parent::setUpBeforeClass();
 
-        $env = Env::mutable(new ArrayReader(['APP_ENV' => 'test']), new NullWriter(), new VoidCachePool());
+        $env = Env::mutable(
+            new ArrayReader(['APP_ENV' => 'test', 'APP_DEBUG' => '1']),
+            new NullWriter(),
+            new VoidCachePool()
+        );
 
         self::$app = (new AppFactory())->create($env);
         self::$requestFactory = new ServerRequestFactory();
@@ -47,8 +51,10 @@ abstract class IntegrationTestCase extends TestCase
     ): ServerRequestInterface {
         $request = self::$requestFactory->createServerRequest($method, $path);
 
+        $request = $request->withHeader('Content-Type', 'application/json')->withHeader('Accept', 'application/json');
+
         foreach ($headers as $name => $value) {
-            $request = $request->withAddedHeader($name, $value);
+            $request = $request->withHeader($name, $value);
         }
 
         $request->getBody()->write($content);
