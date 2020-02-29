@@ -8,9 +8,7 @@ services:
   - postgresql
 
 env:
-  - DB_NAME=mitra-test
-  - DB_USER=postgres
-  - DB_PW=''
+  - DB_NAME=mitra-test DB_USER=postgres DB_PW=''
 
 cache:
   directories:
