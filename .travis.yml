@@ -11,7 +11,7 @@ addons:
   postgresql: "12.2"
 
 env:
-  - APP_ENV=dev APP_DEBUG=1 APP_PORT=1337 DB_HOST=localhost DB_PORT=5432 DB_NAME=mitra-test DB_USER=postgres DB_PW='' JWT_SECRET=s3kr3T!
+  - APP_ENV=dev APP_DEBUG=1 APP_PORT=1337 DB_HOST=127.0.0.1 DB_PORT=5432 DB_NAME=mitra-test DB_USER=postgres DB_PW='' JWT_SECRET=s3kr3T!
 
 cache:
   directories:
