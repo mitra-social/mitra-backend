@@ -31,7 +31,7 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
     /**
      * @var static|LinkInterface|null
      */
-    public $context = 'https://www.w3.org/ns/activitystreams';
+    public $context;
 
     /**
      * @var string|array<string, string>|null
@@ -89,7 +89,7 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
     public $summary;
 
     /**
-     * @var static|LinkInterface|array<static|LinkInterface>|null
+     * @var array<static|LinkInterface>|null
      */
     public $tag;
 
@@ -129,7 +129,7 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
     public $mediaType;
 
     /**
-     * @var \DatePeriod|null
+     * @var \DateInterval|null
      */
     public $duration;
 
@@ -137,6 +137,14 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
      * @var static|LinkInterface|null
      */
     public $preview;
+
+    public function __construct()
+    {
+        $contextLink = new Link();
+        $contextLink->href = 'https://www.w3.org/ns/activitystreams';
+
+        $this->context = $contextLink;
+    }
 
     /**
      * @return array<static|LinkInterface>|null
@@ -275,7 +283,7 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<static|LinkInterface>|null
      */
     public function getTag()
     {
@@ -341,24 +349,24 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
     /**
      * @inheritDoc
      */
-    public function getDuration(): ?\DatePeriod
+    public function getDuration(): ?\DateInterval
     {
         return $this->duration;
     }
 
     /**
-     * @inheritDoc
+     * @return array<int|string,mixed>
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $jsonData = [
-            '@context' => $this->context,
+            '@context' => $this->context instanceof LinkInterface ? (string) $this->context : $this->content,
             'type' => static::getType(),
             'attachment' => $this->attachment,
             'audience' => $this->audience,
             'content' => $this->content,
             'name' => $this->name,
-            'endTime' => $this->endTime ? $this->endTime->format('c') : null,
+            'endTime' => null !== $this->endTime ? $this->endTime->format('c') : null,
             'generator' => $this->generator,
             'icon' => $this->icon,
             'image' => $this->image,
@@ -366,10 +374,10 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
             'location' => $this->location,
             'published' => $this->published,
             'replies' => $this->replies,
-            'startTime' => $this->startTime ? $this->startTime->format('c') : null,
+            'startTime' => null !== $this->startTime ? $this->startTime->format('c') : null,
             'summary' => $this->summary,
             'tag' => $this->tag,
-            'updated' => $this->updated ? $this->updated->format('c') : null,
+            'updated' => null !== $this->updated ? $this->updated->format('c') : null,
             'url' => $this->url,
             'to' => $this->to,
             'bto' => $this->bto,
@@ -379,7 +387,7 @@ abstract class AbstractObject implements ObjectInterface, \JsonSerializable
             'duration' => $this->duration,
         ];
 
-        return array_filter($jsonData, function ($value) {
+        return array_filter($jsonData, static function ($value): bool {
             return $value !== null;
         });
     }

@@ -14,7 +14,7 @@ final class Link implements LinkInterface, \JsonSerializable
     public $href;
 
     /**
-     * @var string|array<string>|null
+     * @var array<string>|null
      */
     public $rel;
 
@@ -121,9 +121,9 @@ final class Link implements LinkInterface, \JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<int|string,mixed>
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $jsonData = [
             'href' => $this->href,
@@ -136,8 +136,16 @@ final class Link implements LinkInterface, \JsonSerializable
             'preview' => $this->preview,
         ];
 
-        return array_filter($jsonData, function ($value) {
+        return array_filter($jsonData, static function ($value): bool {
             return $value !== null;
         });
+    }
+
+    /**
+     * @return string|null
+     */
+    public function __toString()
+    {
+        return $this->href;
     }
 }
