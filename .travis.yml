@@ -4,6 +4,14 @@ php:
   - 7.3
   - 7.4
 
+services:
+  - postgresql
+
+env:
+  - DB_NAME=mitra-test
+  - DB_USER=postgres
+  - DB_PW=''
+
 cache:
   directories:
     - $HOME/.composer
