@@ -7,6 +7,7 @@ namespace Mitra\Controller\User;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\DataToDtoManager;
+use Mitra\Dto\RequestToDtoManager;
 use Mitra\Dto\UserDto;
 use Mitra\Dto\ViolationDto;
 use Mitra\Dto\ViolationListDto;
@@ -35,11 +36,6 @@ final class CreateUserController
     private $encoder;
 
     /**
-     * @var DecoderInterface
-     */
-    private $decoder;
-
-    /**
      * @var ValidatorInterface
      */
     private $validator;
@@ -50,41 +46,39 @@ final class CreateUserController
     private $responseFactory;
 
     /**
-     * @var DataToDtoManager
+     * @var RequestToDtoManager
      */
-    private $dataToDtoManager;
+    private $requestToDtoManager;
 
     /**
      * @param ResponseFactoryInterface $responseFactory
      * @param EncoderInterface $encoder
-     * @param DecoderInterface $decoder
      * @param ValidatorInterface $validator
      * @param CommandBusInterface $commandBus
-     * @param DataToDtoManager $dataToDtoManager
+     * @param RequestToDtoManager $dataToDtoManager
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        DecoderInterface $decoder,
         ValidatorInterface $validator,
         CommandBusInterface $commandBus,
-        DataToDtoManager $dataToDtoManager
+        RequestToDtoManager $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
-        $this->decoder = $decoder;
         $this->validator = $validator;
         $this->commandBus = $commandBus;
-        $this->dataToDtoManager = $dataToDtoManager;
+        $this->requestToDtoManager = $dataToDtoManager;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        $mimeType = 'application/json';
-        $decodedBody = $this->decoder->decode((string) $request->getBody(), $mimeType);
+        if ('' === $mimeType = $request->getHeaderLine('Accept')) {
+            $mimeType = 'application/json';
+        }
 
         $userDto = new UserDto();
-        $this->dataToDtoManager->populate($userDto, $decodedBody);
+        $this->requestToDtoManager->populate($userDto, $request);
 
         if (($violationList = $this->validator->validate($userDto))->hasViolations()) {
             return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
@@ -105,6 +99,10 @@ final class CreateUserController
 
     private function createEntityFromDto(UserDto $userDto): User
     {
-        return new User(Uuid::uuid4()->toString(), $userDto->preferredUsername, $userDto->email);
+        $user = new User(Uuid::uuid4()->toString(), $userDto->preferredUsername, $userDto->email);
+
+        $user->setCreatedAt(new \DateTime());
+
+        return $user;
     }
 }

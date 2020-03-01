@@ -7,7 +7,9 @@ namespace Mitra\ServiceProvider;
 use Mitra\Dto\DataToDtoManager;
 use Mitra\Dto\DataToDtoPopulator;
 use Mitra\Dto\NestedDto;
+use Mitra\Dto\RequestToDtoManager;
 use Mitra\Dto\UserDto;
+use Mitra\Serialization\Decode\DecoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -34,6 +36,10 @@ final class DataToDtoServiceProvider implements ServiceProviderInterface
                 UserDto::class => DataToDtoPopulator::class . UserDto::class,
                 NestedDto::class => DataToDtoPopulator::class . NestedDto::class,
             ]);
+        };
+
+        $container[RequestToDtoManager::class] = function () use ($container): RequestToDtoManager {
+            return new RequestToDtoManager($container[DataToDtoManager::class], $container[DecoderInterface::class]);
         };
     }
 }

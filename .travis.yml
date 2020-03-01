@@ -4,6 +4,12 @@ php:
   - 7.3
   - 7.4
 
+services:
+  - postgresql
+
+env:
+  - APP_ENV=dev APP_DEBUG=1 APP_PORT=1337 DATABASE_URL_TEST=postgres://postgres@127.0.0.1:5432/mitra-test JWT_SECRET=s3kr3T!
+
 cache:
   directories:
     - $HOME/.composer
@@ -15,6 +21,17 @@ install:
   - composer global require hirak/prestissimo
   - rm composer.lock
   - travis_retry composer install --prefer-dist
+
+before_script:
+  - |
+    echo "Preparing Postgres 11"
+
+    sudo service postgresql stop || true
+
+    sudo docker run -d --name postgres11 -p 5432:5432 postgres:11.1
+    sudo docker exec -i postgres11 bash <<< 'until pg_isready -U postgres > /dev/null 2>&1 ; do sleep 1; done'
+
+    echo "Postgres 11 ready"
 
 script:
   - make test

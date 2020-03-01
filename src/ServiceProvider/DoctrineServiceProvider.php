@@ -10,13 +10,11 @@ use Doctrine\Migrations\Configuration\Configuration;
 use Doctrine\ORM\Configuration as DoctrineConfiguration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Mitra\Mapping\Orm\UserOrmMapping;
-use Mitra\Entity\User;
 use Mitra\Orm\EntityManagerDecorator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
-class DoctrineServiceProvider implements ServiceProviderInterface
+final class DoctrineServiceProvider implements ServiceProviderInterface
 {
 
     /**
