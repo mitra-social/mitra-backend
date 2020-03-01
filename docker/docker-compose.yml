@@ -23,6 +23,7 @@ services:
       APP_DEBUG: 1
       APP_PORT: 1337
       DATABASE_URL: postgres://mitra:mitra@postgresql:5432/mitra
+      DATABASE_URL_TEST: postgres://mitra:mitra@postgresql:5432/mitra-test
       JWT_SECRET: s3kr3T!
     ports:
       - 1337:1337
