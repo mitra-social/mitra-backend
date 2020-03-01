@@ -92,19 +92,7 @@ final class Config implements ConfigInterface
     {
         $appEnv = $this->getEnv();
         $dirs = $this->getDirectories();
-
-        if (false === $dbConf = parse_url($this->env->get(self::ENV_DATABASE_URL))) {
-            $dbConf = [];
-        }
-
-        $dbConf += [
-            'host' => 'localhost',
-            'path' => 'mitra',
-            'port' => 5432,
-            'user' => 'root',
-            'pass' => '',
-        ];
-
+        $dbConf = $this->getDbConf();
 
         $config = [
             'env' => $appEnv,
@@ -113,12 +101,12 @@ final class Config implements ConfigInterface
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
                 'connection' => [
-                    'driver' => 'pdo_pgsql',
-                    'host' => $this->env->get(self::ENV_DB_HOST) ?? $dbConf['host'],
-                    'dbname' => $this->env->get(self::ENV_DB_NAME) ?? ltrim($dbConf['path'], '/'),
-                    'port' => $this->env->get(self::ENV_DB_PORT) ?? $dbConf['port'],
-                    'user' => $this->env->get(self::ENV_DB_USER) ?? $dbConf['user'],
-                    'password' => $this->env->get(self::ENV_DB_PW) ?? $dbConf['pass'],
+                    'driver' => $dbConf['scheme'],
+                    'host' => $dbConf['host'],
+                    'dbname' => $dbConf['path'],
+                    'port' => $dbConf['port'],
+                    'user' => $dbConf['user'],
+                    'password' => $dbConf['pass'],
                     'charset' => 'utf8',
                 ],
             ],
@@ -170,5 +158,30 @@ final class Config implements ConfigInterface
     public function getEnv(): string
     {
         return $this->env->get(self::ENV_APP_ENV);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getDbConf(): array
+    {
+        $dbUrl = $this->env->get(self::ENV_DATABASE_URL);
+
+        if (null === $dbUrl || false === $dbConf = parse_url($dbUrl)) {
+            $dbConf = [];
+        }
+
+        $dbConf += [
+            'scheme' => 'pdo_pgsql',
+            'host' => $this->env->get(self::ENV_DB_HOST) ?? 'localhost',
+            'path' => $this->env->get(self::ENV_DB_NAME) ?? 'mitra',
+            'port' => (int) $this->env->get(self::ENV_DB_PORT) ?? 5432,
+            'user' => $this->env->get(self::ENV_DB_USER) ?? 'root',
+            'pass' => $this->env->get(self::ENV_DB_PW) ?? '',
+        ];
+
+        $dbConf['path'] = ltrim($dbConf['path'], '/');
+
+        return $dbConf;
     }
 }
