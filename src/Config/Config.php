@@ -20,29 +20,9 @@ final class Config implements ConfigInterface
 {
 
     /**
-     * @var string
-     */
-    private const ENV_DB_HOST = 'DB_HOST';
-
-    /**
-     * @var string
-     */
-    private const ENV_DB_USER = 'DB_USER';
-
-    /**
-     * @var string
-     */
-    private const ENV_DB_PW = 'DB_PW';
-
-    /**
      * string
      */
     private const ENV_DB_NAME = 'DB_NAME';
-
-    /**
-     * string
-     */
-    private const ENV_DB_PORT = 'DB_PORT';
 
 
     /**
@@ -92,7 +72,6 @@ final class Config implements ConfigInterface
     {
         $appEnv = $this->getEnv();
         $dirs = $this->getDirectories();
-        $dbConf = $this->getDbConf();
 
         $config = [
             'env' => $appEnv,
@@ -101,13 +80,8 @@ final class Config implements ConfigInterface
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
                 'connection' => [
-                    'driver' => $dbConf['scheme'],
-                    'host' => $dbConf['host'],
-                    'dbname' => $dbConf['path'],
-                    'port' => $dbConf['port'],
-                    'user' => $dbConf['user'],
-                    'password' => $dbConf['pass'],
-                    'charset' => 'utf8',
+                    'url' => $this->env->get(self::ENV_DATABASE_URL),
+                    'charset' => 'utf8'
                 ],
             ],
             'doctrine.orm.em.options' => [
@@ -158,30 +132,5 @@ final class Config implements ConfigInterface
     public function getEnv(): string
     {
         return $this->env->get(self::ENV_APP_ENV);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getDbConf(): array
-    {
-        $dbUrl = $this->env->get(self::ENV_DATABASE_URL);
-
-        if (null === $dbUrl || false === $dbConf = parse_url($dbUrl)) {
-            $dbConf = [];
-        }
-
-        $dbConf += [
-            'scheme' => 'pdo_pgsql',
-            'host' => $this->env->get(self::ENV_DB_HOST) ?? 'localhost',
-            'path' => $this->env->get(self::ENV_DB_NAME) ?? 'mitra',
-            'port' => (int) $this->env->get(self::ENV_DB_PORT) ?? 5432,
-            'user' => $this->env->get(self::ENV_DB_USER) ?? 'root',
-            'pass' => $this->env->get(self::ENV_DB_PW) ?? '',
-        ];
-
-        $dbConf['path'] = ltrim($dbConf['path'], '/');
-
-        return $dbConf;
     }
 }
