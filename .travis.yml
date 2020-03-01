@@ -28,7 +28,7 @@ before_script:
 
     sudo service postgresql stop || true
 
-    sudo docker run -d --name postgres12 -p 5432:5432 postgres:12
+    sudo docker run -d --name postgres12 -p 5432:5432 postgres:12-alpine
     sudo docker exec -i postgres12 bash <<< 'until pg_isready -U postgres > /dev/null 2>&1 ; do sleep 1; done'
 
     echo "Postgres 12 ready"
