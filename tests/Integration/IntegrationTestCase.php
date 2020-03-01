@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
-use Cache\Adapter\Void\VoidCachePool;
 use Mitra\AppFactory;
 use Mitra\Env\Env;
-use Mitra\Env\Reader\ArrayReader;
 use Mitra\Env\Reader\DelegateReader;
 use Mitra\Env\Reader\EnvVarReader;
 use Mitra\Env\Reader\GetenvReader;
