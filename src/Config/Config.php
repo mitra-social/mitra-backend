@@ -94,14 +94,17 @@ final class Config implements ConfigInterface
         $dirs = $this->getDirectories();
 
         if (false === $dbConf = parse_url($this->env->get(self::ENV_DATABASE_URL))) {
-            $dbConf = [
-                'host' => 'localhost',
-                'path' => 'mitra',
-                'port' => 5432,
-                'user' => 'root',
-                'pass' => '',
-            ];
+            $dbConf = [];
         }
+
+        $dbConf += [
+            'host' => 'localhost',
+            'path' => 'mitra',
+            'port' => 5432,
+            'user' => 'root',
+            'pass' => '',
+        ];
+
 
         $config = [
             'env' => $appEnv,
