@@ -40,6 +40,11 @@ final class Config implements ConfigInterface
     private const ENV_DB_NAME = 'DB_NAME';
 
     /**
+     * string
+     */
+    private const ENV_DB_PORT = 'DB_PORT';
+
+    /**
      * @var string
      */
     private const ENV_APP_ENV = 'APP_ENV';
@@ -89,12 +94,13 @@ final class Config implements ConfigInterface
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
                 'connection' => [
-                    'driver' => 'pdo_mysql',
+                    'driver' => 'pdo_pgsql',
                     'host' => $this->env->get(self::ENV_DB_HOST),
                     'dbname' => $this->env->get(self::ENV_DB_NAME),
+                    'port' => $this->env->get(self::ENV_DB_PORT),
                     'user' => $this->env->get(self::ENV_DB_USER),
                     'password' => $this->env->get(self::ENV_DB_PW),
-                    'charset' => 'utf8mb4',
+                    'charset' => 'utf8',
                 ],
             ],
             'doctrine.orm.em.options' => [
@@ -122,7 +128,6 @@ final class Config implements ConfigInterface
         ];
 
         if ('dev' === $appEnv) {
-            $config['debug'] = true;
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
             $config['monolog.level'] = Logger::DEBUG;
         }

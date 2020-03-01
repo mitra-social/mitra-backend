@@ -19,7 +19,7 @@ final class UserOrmMapping implements ClassMapMappingInterface
      */
     public function configureMapping(ClassMetadata $metadata)
     {
-        $metadata->setPrimaryTable(['name' => 'user']);
+        $metadata->setPrimaryTable(['name' => '`user`']);
         $metadata->setCustomRepositoryClass(UserRepository::class);
 
         $metadata->mapField([

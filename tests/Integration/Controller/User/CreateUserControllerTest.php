@@ -11,11 +11,28 @@ use Mitra\Tests\Integration\IntegrationTestCase;
  */
 final class CreateUserControllerTest extends IntegrationTestCase
 {
-    public function testSomething(): void
+    public function testCreatingUserFailsWithWrongData(): void
     {
         $request = $this->createRequest('POST', '/user', '{}');
         $response = $this->executeRequest($request);
 
         self::assertStatusCode(400, $response);
+    }
+
+
+    public function testUserGetsCreatedSuccessfully(): void
+    {
+        $userData = [
+            'preferredUsername' => 'john.doe',
+            'email' => 'john.doe@example.com',
+            'nested' => [
+                'something' => 'hello world',
+            ],
+        ];
+
+        $request = $this->createRequest('POST', '/user', json_encode($userData));
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(201, $response);
     }
 }

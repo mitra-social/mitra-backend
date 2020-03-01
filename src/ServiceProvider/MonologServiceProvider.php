@@ -14,13 +14,18 @@ final class MonologServiceProvider implements ServiceProviderInterface
 {
     public function register(Container $container): void
     {
-        $container[LoggerInterface::class] = function ($container): LoggerInterface {
+        $container[LoggerInterface::class] = static function () use ($container): LoggerInterface {
             return new Logger($container['monolog.name'], [
                 (new StreamHandler(
                     $container['monolog.path'],
                     $container['monolog.level']
                 ))
             ]);
+        };
+
+        // Register an alias as some 3rd-party service providers look for a `logger` key in the container
+        $container['logger'] = static function () use ($container): LoggerInterface {
+            return $container[LoggerInterface::class];
         };
     }
 }

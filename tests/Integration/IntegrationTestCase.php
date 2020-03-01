@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration;
 
+use Cache\Adapter\PHPArray\ArrayCachePool;
 use Cache\Adapter\Void\VoidCachePool;
 use Mitra\AppFactory;
 use Mitra\Env\Env;
 use Mitra\Env\Reader\ArrayReader;
+use Mitra\Env\Reader\DelegateReader;
+use Mitra\Env\Reader\EnvVarReader;
+use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use PHPUnit\Framework\TestCase;
@@ -33,10 +37,10 @@ abstract class IntegrationTestCase extends TestCase
     {
         parent::setUpBeforeClass();
 
-        $env = Env::mutable(
-            new ArrayReader(['APP_ENV' => 'test', 'APP_DEBUG' => '1']),
+        $env = Env::immutable(
+            new DelegateReader([new GetenvReader(), new EnvVarReader()]),
             new NullWriter(),
-            new VoidCachePool()
+            new ArrayCachePool()
         );
 
         self::$app = (new AppFactory())->create($env);
