@@ -1,1 +1,1 @@
-web: ./public/index.php
+web: APP_PORT=$PORT php ./public/index.php
