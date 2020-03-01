@@ -22,11 +22,7 @@ services:
       APP_ENV: dev
       APP_DEBUG: 1
       APP_PORT: 1337
-      DB_HOST: postgresql
-      DB_PORT: 5432
-      DB_NAME: mitra
-      DB_USER: mitra
-      DB_PW: mitra
+      DATABASE_URL: pgsql://mitra:mitra@postgresql:5432/mitra
       JWT_SECRET: s3kr3T!
     ports:
       - 1337:1337

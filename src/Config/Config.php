@@ -44,6 +44,12 @@ final class Config implements ConfigInterface
      */
     private const ENV_DB_PORT = 'DB_PORT';
 
+
+    /**
+     * string
+     */
+    private const ENV_DATABASE_URL = 'DATABASE_URL';
+
     /**
      * @var string
      */
@@ -87,6 +93,18 @@ final class Config implements ConfigInterface
         $appEnv = $this->getEnv();
         $dirs = $this->getDirectories();
 
+        if (null !== $databaseUrl = $this->env->get(self::ENV_DATABASE_URL)) {
+            $dbConf = parse_url($databaseUrl);
+        } else {
+            $dbConf = [
+                'host' => 'localhost',
+                'dbname' => 'mitra',
+                'port' => 5432,
+                'user' => 'root',
+                'password' => '',
+            ];
+        }
+
         $config = [
             'env' => $appEnv,
             'debug' => (bool) $this->env->get(self::ENV_APP_DEBUG),
@@ -95,11 +113,11 @@ final class Config implements ConfigInterface
             'doctrine.dbal.db.options' => [
                 'connection' => [
                     'driver' => 'pdo_pgsql',
-                    'host' => $this->env->get(self::ENV_DB_HOST),
-                    'dbname' => $this->env->get(self::ENV_DB_NAME),
-                    'port' => $this->env->get(self::ENV_DB_PORT),
-                    'user' => $this->env->get(self::ENV_DB_USER),
-                    'password' => $this->env->get(self::ENV_DB_PW),
+                    'host' => $this->env->get(self::ENV_DB_HOST) ?? $dbConf['host'],
+                    'dbname' => $this->env->get(self::ENV_DB_NAME) ?? ltrim($dbConf['path'], '/'),
+                    'port' => $this->env->get(self::ENV_DB_PORT) ?? $dbConf['port'],
+                    'user' => $this->env->get(self::ENV_DB_USER) ?? $dbConf['user'],
+                    'password' => $this->env->get(self::ENV_DB_PW) ?? $dbConf['pass'],
                     'charset' => 'utf8',
                 ],
             ],
