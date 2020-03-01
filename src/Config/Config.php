@@ -20,29 +20,15 @@ final class Config implements ConfigInterface
 {
 
     /**
-     * @var string
-     */
-    private const ENV_DB_HOST = 'DB_HOST';
-
-    /**
-     * @var string
-     */
-    private const ENV_DB_USER = 'DB_USER';
-
-    /**
-     * @var string
-     */
-    private const ENV_DB_PW = 'DB_PW';
-
-    /**
      * string
      */
     private const ENV_DB_NAME = 'DB_NAME';
 
+
     /**
      * string
      */
-    private const ENV_DB_PORT = 'DB_PORT';
+    private const ENV_DATABASE_URL = 'DATABASE_URL';
 
     /**
      * @var string
@@ -94,13 +80,8 @@ final class Config implements ConfigInterface
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
                 'connection' => [
-                    'driver' => 'pdo_pgsql',
-                    'host' => $this->env->get(self::ENV_DB_HOST),
-                    'dbname' => $this->env->get(self::ENV_DB_NAME),
-                    'port' => $this->env->get(self::ENV_DB_PORT),
-                    'user' => $this->env->get(self::ENV_DB_USER),
-                    'password' => $this->env->get(self::ENV_DB_PW),
-                    'charset' => 'utf8',
+                    'url' => $this->env->get(self::ENV_DATABASE_URL),
+                    'charset' => 'utf8'
                 ],
             ],
             'doctrine.orm.em.options' => [

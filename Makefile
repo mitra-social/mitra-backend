@@ -1,7 +1,7 @@
 .PHONY: clean code-style coverage help test test-unit test-integration static-analysis install-dependencies xdebug-enable xdebug-disable
 .DEFAULT_GOAL := test
 
-PHPUNIT = DB_NAME=mitra-test ./vendor/bin/phpunit -c ./phpunit.xml --no-coverage
+PHPUNIT = DATABASE_URL=${DATABASE_URL_TEST} ./vendor/bin/phpunit -c ./phpunit.xml --no-coverage
 PHPSPEC = phpdbg -qrr ./vendor/bin/phpspec run  -c ./phpspec.yml --no-coverage \
           --format dot -vvv --no-interaction
 PHPSPEC_COV = APP_ENV=test APP_DEBUG=false php -dpcov.enabled=1 -dpcov.directory=./src ./vendor/bin/phpspec run -c ./phpspec.yml \
