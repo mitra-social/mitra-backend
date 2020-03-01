@@ -2,6 +2,12 @@
 
 namespace Mitra;
 
+use Cache\Adapter\PHPArray\ArrayCachePool;
+use Mitra\Env\Env;
+use Mitra\Env\Reader\DelegateReader;
+use Mitra\Env\Reader\EnvVarReader;
+use Mitra\Env\Reader\GetenvReader;
+use Mitra\Env\Writer\NullWriter;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Response as ReactResponse;
 use React\Http\Server as ReactHttpServer;
@@ -10,8 +16,14 @@ use React\EventLoop\Factory as ReactEventLoopFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$env = getenv('APP_ENV') ?: 'dev';
-$port = getenv('APP_PORT') ?: 8080;
+$env = Env::immutable(
+    new DelegateReader([new GetenvReader(), new EnvVarReader()]),
+    new NullWriter(),
+    new ArrayCachePool()
+);
+
+$appEnv = $env->get('APP_ENV') ?? 'prod';
+$port = $env->get('APP_PORT') ?? 8080;
 
 $app = (new AppFactory())->create($env);
 
@@ -30,6 +42,6 @@ $server = new ReactHttpServer(function (ServerRequestInterface $request) use ($a
 $socket = new ReactSocketServer(sprintf('0.0.0.0:%s', $port), $loop);
 $server->listen($socket);
 
-echo sprintf("Server running at http://0.0.0.0:%s\n", $port);
+echo sprintf("Server (%s) running at http://0.0.0.0:%s\n", $appEnv, $port);
 
 $loop->run();

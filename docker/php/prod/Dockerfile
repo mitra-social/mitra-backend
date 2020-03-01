@@ -5,7 +5,7 @@ ARG HOST_USER
 
 # SYS: Install required packages
 RUN apk --no-cache upgrade && \
-    apk add bash make nodejs npm
+    apk add bash make nodejs npm postgresql-dev
 
 # NODE: install nodemon
 RUN npm install -g nodemon --no-optional
@@ -13,8 +13,8 @@ RUN npm install -g nodemon --no-optional
 COPY prod/files/bin/ /usr/local/bin/
 
 # PHP: Install php extensions
-RUN docker-php-ext-install pdo_mysql opcache > /dev/null 2>&1 && \
-    docker-php-ext-enable pdo_mysql opcache > /dev/null 2>&1
+RUN docker-php-ext-install pdo_pgsql opcache > /dev/null 2>&1 && \
+    docker-php-ext-enable pdo_pgsql opcache > /dev/null 2>&1
 
 RUN adduser -u $HOST_USER_ID -D -H $HOST_USER
 

@@ -1,14 +1,15 @@
 version: '3.7'
 
 services:
-  mariadb:
-    image: mariadb:10
-    hostname: mitra-backend-mariadb
-    container_name: mitra-backend-mariadb
+  postgresql:
+    image: postgres:12-alpine
+    hostname: mitra-backend-postgresql
+    container_name: mitra-backend-postgresql
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      POSTGRES_USER: mitra
+      POSTGRES_PASSWORD: mitra
     ports:
-      - 3307:3306
+      - 5432:5432
   php:
     build:
       context: ./php
@@ -19,11 +20,11 @@ services:
     container_name: mitra-backend-php
     environment:
       APP_ENV: dev
+      APP_DEBUG: 1
       APP_PORT: 1337
-      DB_HOST: mariadb
-      DB_NAME: mitra
-      DB_USER: root
-      DB_PW: ~
+      DATABASE_URL: postgres://mitra:mitra@postgresql:5432/mitra
+      DATABASE_URL_TEST: postgres://mitra:mitra@postgresql:5432/mitra-test
+      JWT_SECRET: s3kr3T!
     ports:
       - 1337:1337
     volumes:
