@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Dto\Request;
+namespace Mitra\Dto\Response;
 
-final class CreateUserRequestDto
+final class UserResponseDto
 {
+    /**
+     * @var string
+     */
+    public $id;
 
     /**
      * @var string
@@ -20,5 +24,5 @@ final class CreateUserRequestDto
     /**
      * @var string
      */
-    public $password;
+    public $registeredAt;
 }

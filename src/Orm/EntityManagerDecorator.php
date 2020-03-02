@@ -8,12 +8,9 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Decorator\EntityManagerDecorator as DoctrineEntityManagerDecorator;
 use Doctrine\ORM\EntityManager;
 
-class EntityManagerDecorator extends DoctrineEntityManagerDecorator
+final class EntityManagerDecorator extends DoctrineEntityManagerDecorator
 {
 
-    /**
-     * @return void
-     */
     public function restoreIfClosed(): void
     {
         if (false === $this->isOpen()) {
@@ -21,9 +18,6 @@ class EntityManagerDecorator extends DoctrineEntityManagerDecorator
         }
     }
 
-    /**
-     * @return void
-     */
     public function reconnectIfNotPinged(): void
     {
         $connection = $this->getConnection();

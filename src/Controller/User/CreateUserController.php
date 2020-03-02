@@ -8,6 +8,7 @@ use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -82,11 +83,9 @@ final class CreateUserController
 
         $this->commandBus->handle(new CreateUserCommand($user));
 
-        $createUserRequestDto->id = $user->getId();
-
         $response = $this->responseFactory->createResponse(201);
 
-        $response->getBody()->write($this->encoder->encode($createUserRequestDto, $mimeType));
+        $response->getBody()->write($this->encoder->encode($this->createDtoFromEntity($user), $mimeType));
 
         return $response;
     }
@@ -98,5 +97,17 @@ final class CreateUserController
         $user->setPlaintextPassword($userDto->password);
 
         return $user;
+    }
+
+    private function createDtoFromEntity(User $user): UserResponseDto
+    {
+        $userResponseDto = new UserResponseDto();
+
+        $userResponseDto->id = $user->getId();
+        $userResponseDto->preferredUsername = $user->getPreferredUsername();
+        $userResponseDto->email = $user->getEmail();
+        $userResponseDto->registeredAt = $user->getCreatedAt()->format('c');
+
+        return $userResponseDto;
     }
 }
