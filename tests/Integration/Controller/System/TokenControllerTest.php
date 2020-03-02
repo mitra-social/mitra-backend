@@ -23,17 +23,11 @@ final class TokenControllerTest extends IntegrationTestCase
      */
     private $commandBus;
 
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->container = self::$app->getContainer();
-        $this->commandBus = $this->container->get(CommandBusInterface::class);
+        $this->commandBus = $this->getContainer()->get(CommandBusInterface::class);
     }
 
     public function testIssuingTokenFailsBecauseOfMissingData(): void
@@ -83,7 +77,7 @@ final class TokenControllerTest extends IntegrationTestCase
 
         self::assertArrayHasKey('token', $decodedPayload);
 
-        $decodedToken = JWT::decode($decodedPayload['token'], $this->container->get('jwt.secret'), ['HS256']);
+        $decodedToken = JWT::decode($decodedPayload['token'], $this->getContainer()->get('jwt.secret'), ['HS256']);
 
         self::assertEquals($userId, $decodedToken->userId);
     }

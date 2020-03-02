@@ -13,6 +13,7 @@ use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
@@ -31,6 +32,11 @@ abstract class IntegrationTestCase extends TestCase
      */
     protected static $requestFactory;
 
+    /**
+     * @var ContainerInterface
+     */
+    protected static $container;
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
@@ -42,6 +48,7 @@ abstract class IntegrationTestCase extends TestCase
         );
 
         self::$app = (new AppFactory())->create($env);
+        self::$container = self::$app->getContainer();
         self::$requestFactory = new ServerRequestFactory();
     }
 
@@ -75,8 +82,13 @@ abstract class IntegrationTestCase extends TestCase
      * @param ResponseInterface $response
      * @return void
      */
-    public static function assertStatusCode(int $expectedStatusCode, ResponseInterface $response): void
+    protected static function assertStatusCode(int $expectedStatusCode, ResponseInterface $response): void
     {
         self::assertThat($response, new ResponseStatusCodeConstraint($expectedStatusCode));
+    }
+
+    protected function getContainer(): ContainerInterface
+    {
+        return self::$container;
     }
 }
