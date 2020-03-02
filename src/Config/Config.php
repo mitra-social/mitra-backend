@@ -7,23 +7,17 @@ namespace Mitra\Config;
 use Chubbyphp\Config\ConfigInterface;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
-use Mitra\Dto\NestedDto;
-use Mitra\Dto\UserDto;
+use Mitra\Dto\Request\CreateUserRequestDto;
+use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Entity\User;
 use Mitra\Env\Env;
 use Mitra\Mapping\Orm\UserOrmMapping;
-use Mitra\Mapping\Validation\NestedDtoValidationMapping;
-use Mitra\Mapping\Validation\UserDtoValidationMapping;
+use Mitra\Mapping\Validation\TokenRequestDtoValidationMapping;
+use Mitra\Mapping\Validation\CreateUserRequestDtoValidationMapping;
 use Monolog\Logger;
 
 final class Config implements ConfigInterface
 {
-
-    /**
-     * string
-     */
-    private const ENV_DB_NAME = 'DB_NAME';
-
 
     /**
      * string
@@ -95,8 +89,8 @@ final class Config implements ConfigInterface
                     User::class => UserOrmMapping::class,
                 ],
                 'validation' => [
-                    UserDto::class => new UserDtoValidationMapping(),
-                    NestedDto::class => new NestedDtoValidationMapping(),
+                    CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,
+                    TokenRequestDto::class => TokenRequestDtoValidationMapping::class ,
                 ],
                 'command_handlers' => [
                     CreateUserCommand::class => CreateUserCommandHandler::class

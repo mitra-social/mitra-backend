@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Dto;
+namespace Mitra\Dto\Response;
 
 final class ViolationDto
 {

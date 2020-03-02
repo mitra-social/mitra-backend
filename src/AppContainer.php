@@ -10,6 +10,7 @@ use Chubbyphp\DoctrineDbServiceProvider\ServiceProvider\DoctrineOrmServiceProvid
 use Mitra\Config\Config;
 use Mitra\Env\Env;
 use Mitra\ServiceProvider\ActivityPubServiceProvider;
+use Mitra\ServiceProvider\AuthenticationServiceProvider;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\DataToDtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
@@ -59,6 +60,7 @@ final class AppContainer
             ->register(new DataToDtoServiceProvider())
             ->register(new RepositoryServiceProvider())
             ->register(new MonologServiceProvider())
+            ->register(new AuthenticationServiceProvider())
         ;
 
         return $container;

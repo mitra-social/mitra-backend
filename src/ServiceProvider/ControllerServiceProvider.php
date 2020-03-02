@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
+use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Mitra\Dto\RequestToDtoManager;
@@ -28,6 +30,16 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         // Public
         $container[PingController::class] = function () use ($container): PingController {
             return new PingController($container[ResponseFactoryInterface::class]);
+        };
+
+        $container[TokenController::class] = function () use ($container): TokenController {
+            return new TokenController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[TokenProvider::class],
+                $container[RequestToDtoManager::class]
+            );
         };
 
         $container[CreateUserController::class] = function () use ($container): CreateUserController {

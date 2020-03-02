@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Dto;
+namespace Mitra\Dto\Request;
 
-final class UserDto
+final class CreateUserRequestDto
 {
 
     /**

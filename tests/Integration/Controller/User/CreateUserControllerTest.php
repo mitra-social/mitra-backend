@@ -25,9 +25,7 @@ final class CreateUserControllerTest extends IntegrationTestCase
         $userData = [
             'preferredUsername' => 'john.doe',
             'email' => 'john.doe@example.com',
-            'nested' => [
-                'something' => 'hello world',
-            ],
+            'password' => 'foobar08',
         ];
 
         $request = $this->createRequest('POST', '/user', json_encode($userData));

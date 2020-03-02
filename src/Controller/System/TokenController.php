@@ -2,27 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Controller\User;
+namespace Mitra\Controller\System;
 
-use Mitra\CommandBus\Command\CreateUserCommand;
-use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Dto\Request\CreateUserRequestDto;
+use Mitra\Authentication\TokenProvider;
+use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoManager;
-use Mitra\Entity\User;
+use Mitra\Dto\Response\TokenResponseDto;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Ramsey\Uuid\Uuid;
 
-final class CreateUserController
+final class TokenController
 {
 
     /**
-     * @var CommandBusInterface
+     * @var TokenProvider
      */
-    private $commandBus;
+    private $tokenProvider;
 
     /**
      * @var EncoderInterface
@@ -48,20 +46,20 @@ final class CreateUserController
      * @param ResponseFactoryInterface $responseFactory
      * @param EncoderInterface $encoder
      * @param ValidatorInterface $validator
-     * @param CommandBusInterface $commandBus
+     * @param TokenProvider $tokenProvider
      * @param RequestToDtoManager $dataToDtoManager
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
-        CommandBusInterface $commandBus,
+        TokenProvider $tokenProvider,
         RequestToDtoManager $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->validator = $validator;
-        $this->commandBus = $commandBus;
+        $this->tokenProvider = $tokenProvider;
         $this->requestToDtoManager = $dataToDtoManager;
     }
 
@@ -71,33 +69,22 @@ final class CreateUserController
             $mimeType = 'application/json';
         }
 
-        $createUserRequestDto = new CreateUserRequestDto();
-        $this->requestToDtoManager->populate($createUserRequestDto, $request);
+        $tokenRequestDto = new TokenRequestDto();
+        $this->requestToDtoManager->populate($tokenRequestDto, $request);
 
-        if (($violationList = $this->validator->validate($createUserRequestDto))->hasViolations()) {
+        if (($violationList = $this->validator->validate($tokenRequestDto))->hasViolations()) {
             return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
         }
 
-        $user = $this->createEntityFromDto($createUserRequestDto);
+        $token = $this->tokenProvider->generate($tokenRequestDto->username, $tokenRequestDto->password);
 
-        $this->commandBus->handle(new CreateUserCommand($user));
-
-        $createUserRequestDto->id = $user->getId();
+        $tokenResponseDto = new TokenResponseDto();
+        $tokenResponseDto->token = $token;
 
         $response = $this->responseFactory->createResponse(201);
 
-        $response->getBody()->write($this->encoder->encode($createUserRequestDto, $mimeType));
+        $response->getBody()->write($this->encoder->encode($tokenResponseDto, $mimeType));
 
         return $response;
-    }
-
-    private function createEntityFromDto(CreateUserRequestDto $userDto): User
-    {
-        $user = new User(Uuid::uuid4()->toString(), $userDto->preferredUsername, $userDto->email);
-
-        $user->setCreatedAt(new \DateTime());
-        $user->setPlaintextPassword($userDto->password);
-
-        return $user;
     }
 }

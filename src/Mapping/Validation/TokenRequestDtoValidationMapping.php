@@ -6,12 +6,11 @@ namespace Mitra\Mapping\Validation;
 
 use Mitra\Validator\Symfony\Constraint\NotBlank;
 use Mitra\Validator\Symfony\ValidationMappingInterface;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
-class NestedDtoValidationMapping implements ValidationMappingInterface
+final class TokenRequestDtoValidationMapping implements ValidationMappingInterface
 {
 
     /**
@@ -21,11 +20,16 @@ class NestedDtoValidationMapping implements ValidationMappingInterface
     public function configureMapping(ClassMetadata $metadata)
     {
         $metadata
-            ->addPropertyConstraints('something', [
+            ->addPropertyConstraints('username', [
                 new Type('string'),
                 new NotNull(),
                 new NotBlank(),
-                new Length(['min' => 3]),
-            ]);
+            ])
+            ->addPropertyConstraints('password', [
+                new Type('string'),
+                new NotNull(),
+                new NotBlank(),
+            ])
+        ;
     }
 }

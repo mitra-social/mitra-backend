@@ -25,7 +25,12 @@ final class CreateUserCommandHandler
 
     public function __invoke(CreateUserCommand $command): void
     {
-        $this->entityManager->persist($command->getUser());
+        $user = $command->getUser();
+
+        $user->setHashedPassword(password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT));
+        $user->setPlaintextPassword(null);
+
+        $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
 }
