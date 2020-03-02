@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\Me;
 
+use Mitra\Dto\EntityToDtoManager;
 use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -30,14 +31,21 @@ final class ProfileController
      */
     private $userRepository;
 
+    /**
+     * @var EntityToDtoManager
+     */
+    private $entityToDtoManager;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        EntityToDtoManager $entityToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->userRepository = $userRepository;
+        $this->entityToDtoManager = $entityToDtoManager;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -65,11 +73,7 @@ final class ProfileController
     private function createDtoFromEntity(User $user): UserResponseDto
     {
         $userResponseDto = new UserResponseDto();
-
-        $userResponseDto->id = $user->getId();
-        $userResponseDto->preferredUsername = $user->getPreferredUsername();
-        $userResponseDto->email = $user->getEmail();
-        $userResponseDto->registeredAt = $user->getCreatedAt()->format('c');
+        $this->entityToDtoManager->populate($userResponseDto, $user);
 
         return $userResponseDto;
     }

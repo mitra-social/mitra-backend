@@ -12,7 +12,7 @@ use Mitra\Env\Env;
 use Mitra\ServiceProvider\ActivityPubServiceProvider;
 use Mitra\ServiceProvider\AuthenticationServiceProvider;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
-use Mitra\ServiceProvider\DataToDtoServiceProvider;
+use Mitra\ServiceProvider\DtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
 use Mitra\ServiceProvider\HttpServiceProvider;
 use Mitra\ServiceProvider\MonologServiceProvider;
@@ -57,7 +57,7 @@ final class AppContainer
             ->register(new ValidatorServiceProvider())
             ->register(new DoctrineServiceProvider())
             ->register(new ProxyManagerServiceProvider())
-            ->register(new DataToDtoServiceProvider())
+            ->register(new DtoServiceProvider())
             ->register(new RepositoryServiceProvider())
             ->register(new MonologServiceProvider())
             ->register(new AuthenticationServiceProvider())

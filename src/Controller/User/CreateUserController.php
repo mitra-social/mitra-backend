@@ -6,6 +6,7 @@ namespace Mitra\Controller\User;
 
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\Dto\EntityToDtoManager;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoManager;
 use Mitra\Dto\Response\UserResponseDto;
@@ -46,24 +47,32 @@ final class CreateUserController
     private $requestToDtoManager;
 
     /**
+     * @var EntityToDtoManager
+     */
+    private $entityToDtoManager;
+
+    /**
      * @param ResponseFactoryInterface $responseFactory
      * @param EncoderInterface $encoder
      * @param ValidatorInterface $validator
      * @param CommandBusInterface $commandBus
      * @param RequestToDtoManager $dataToDtoManager
+     * @param EntityToDtoManager $entityToDtoManager
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
         CommandBusInterface $commandBus,
-        RequestToDtoManager $dataToDtoManager
+        RequestToDtoManager $dataToDtoManager,
+        EntityToDtoManager $entityToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->validator = $validator;
         $this->commandBus = $commandBus;
         $this->requestToDtoManager = $dataToDtoManager;
+        $this->entityToDtoManager = $entityToDtoManager;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -102,11 +111,7 @@ final class CreateUserController
     private function createDtoFromEntity(User $user): UserResponseDto
     {
         $userResponseDto = new UserResponseDto();
-
-        $userResponseDto->id = $user->getId();
-        $userResponseDto->preferredUsername = $user->getPreferredUsername();
-        $userResponseDto->email = $user->getEmail();
-        $userResponseDto->registeredAt = $user->getCreatedAt()->format('c');
+        $this->entityToDtoManager->populate($userResponseDto, $user);
 
         return $userResponseDto;
     }

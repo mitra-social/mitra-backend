@@ -50,7 +50,7 @@ final class DataToDtoPopulator
      * @param object|null $dto
      * @return object
      */
-    public function populate(array $data, object $dto = null)
+    public function populate(array $data, object $dto = null): object
     {
         if (null === $dto) {
             $dto = ($this->dtoInstantiator)();
