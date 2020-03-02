@@ -62,7 +62,11 @@ final class ControllerServiceProvider implements ServiceProviderInterface
 
         // Private
         $container[ProfileController::class] = function () use ($container): ProfileController {
-            return new ProfileController($container[ResponseFactoryInterface::class]);
+            return new ProfileController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[UserRepository::class]
+            );
         };
     }
 }
