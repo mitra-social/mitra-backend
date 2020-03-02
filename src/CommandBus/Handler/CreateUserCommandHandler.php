@@ -26,6 +26,7 @@ final class CreateUserCommandHandler
     public function __invoke(CreateUserCommand $command): void
     {
         $user = $command->getUser();
+        $user->setCreatedAt(new \DateTime());
 
         $hashedPassword = password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT);
 

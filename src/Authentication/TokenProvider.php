@@ -28,16 +28,22 @@ final class TokenProvider
         $this->secretKey = $secretKey;
     }
 
+    /**
+     * @param string $username
+     * @param string $plaintextPassword
+     * @return string
+     * @throws TokenIssueException
+     */
     public function generate(string $username, string $plaintextPassword): string
     {
         $user = $this->userRepository->findOneByPreferredUsername($username);
 
         if (null === $user) {
-            throw new \RuntimeException(sprintf('Could not find user with preferredUsername `%s`', $username));
+            throw new TokenIssueException(sprintf('Could not find user with preferredUsername `%s`', $username));
         }
 
         if (false === password_verify($plaintextPassword, $user->getHashedPassword())) {
-            throw new \RuntimeException('The provided password is invalid');
+            throw new TokenIssueException('The provided password is invalid');
         }
 
         $payload = ['userId' => $user->getId()];

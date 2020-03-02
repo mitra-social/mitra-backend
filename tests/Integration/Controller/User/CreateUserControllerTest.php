@@ -19,7 +19,6 @@ final class CreateUserControllerTest extends IntegrationTestCase
         self::assertStatusCode(400, $response);
     }
 
-
     public function testUserGetsCreatedSuccessfully(): void
     {
         $userData = [

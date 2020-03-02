@@ -95,7 +95,6 @@ final class CreateUserController
     {
         $user = new User(Uuid::uuid4()->toString(), $userDto->preferredUsername, $userDto->email);
 
-        $user->setCreatedAt(new \DateTime());
         $user->setPlaintextPassword($userDto->password);
 
         return $user;

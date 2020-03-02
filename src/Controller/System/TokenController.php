@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\System;
 
+use Mitra\Authentication\TokenIssueException;
 use Mitra\Authentication\TokenProvider;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoManager;
@@ -76,14 +77,18 @@ final class TokenController
             return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
         }
 
-        $token = $this->tokenProvider->generate($tokenRequestDto->username, $tokenRequestDto->password);
+        try {
+            $token = $this->tokenProvider->generate($tokenRequestDto->username, $tokenRequestDto->password);
 
-        $tokenResponseDto = new TokenResponseDto();
-        $tokenResponseDto->token = $token;
+            $tokenResponseDto = new TokenResponseDto();
+            $tokenResponseDto->token = $token;
 
-        $response = $this->responseFactory->createResponse(201);
+            $response = $this->responseFactory->createResponse(201);
 
-        $response->getBody()->write($this->encoder->encode($tokenResponseDto, $mimeType));
+            $response->getBody()->write($this->encoder->encode($tokenResponseDto, $mimeType));
+        } catch (TokenIssueException $e) {
+            $response = $this->responseFactory->createResponse(401);
+        }
 
         return $response;
     }
