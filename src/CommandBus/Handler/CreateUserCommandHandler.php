@@ -31,7 +31,7 @@ final class CreateUserCommandHandler
         $hashedPassword = password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT);
 
         if (false === $hashedPassword) {
-            throw new \RuntimeException('Hash the password failed');
+            throw new \RuntimeException('Hashing the password failed');
         }
 
         $user->setHashedPassword($hashedPassword);
