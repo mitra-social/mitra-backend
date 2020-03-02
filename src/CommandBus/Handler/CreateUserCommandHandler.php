@@ -31,8 +31,6 @@ final class CreateUserCommandHandler
 
         if (false === $hashedPassword) {
             throw new \RuntimeException('Hash the password failed');
-        } elseif (null === $hashedPassword) {
-            throw new \RuntimeException('The password hashing algorithm is invalid');
         }
 
         $user->setHashedPassword($hashedPassword);

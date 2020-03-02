@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Mapping\Validation;
 
-use Mitra\Dto\NestedDto;
 use Mitra\Validator\Symfony\Constraint\NotBlank;
-use Mitra\Validator\Symfony\Constraint\Valid;
 use Mitra\Validator\Symfony\ValidationMappingInterface;
-use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotNull;
