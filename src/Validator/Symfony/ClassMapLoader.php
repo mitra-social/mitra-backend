@@ -12,7 +12,7 @@ final class ClassMapLoader implements LoaderInterface
 {
 
     /**
-     * @var array<string,ValidationMappingInterface>
+     * @var array<string,string>
      */
     private $classMap = [];
 
@@ -23,7 +23,7 @@ final class ClassMapLoader implements LoaderInterface
 
     /**
      * @param ContainerInterface $container
-     * @param array<string,ValidationMappingInterface> $classMap
+     * @param array<string,string> $classMap
      */
     public function __construct(ContainerInterface $container, array $classMap)
     {

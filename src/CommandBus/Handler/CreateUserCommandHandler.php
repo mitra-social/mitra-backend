@@ -27,7 +27,15 @@ final class CreateUserCommandHandler
     {
         $user = $command->getUser();
 
-        $user->setHashedPassword(password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT));
+        $hashedPassword = password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT);
+
+        if (false === $hashedPassword) {
+            throw new \RuntimeException('Hash the password failed');
+        } elseif (null === $hashedPassword) {
+            throw new \RuntimeException('The password hashing algorithm is invalid');
+        }
+
+        $user->setHashedPassword($hashedPassword);
         $user->setPlaintextPassword(null);
 
         $this->entityManager->persist($user);

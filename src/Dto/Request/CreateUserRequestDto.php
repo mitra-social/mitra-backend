@@ -26,9 +26,4 @@ final class CreateUserRequestDto
      * @var string
      */
     public $password;
-
-    /**
-     * @var NestedDto;
-     */
-    public $nested;
 }

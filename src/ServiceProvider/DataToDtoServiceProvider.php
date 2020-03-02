@@ -22,11 +22,11 @@ final class DataToDtoServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[DataToDtoPopulator::class . CreateUserRequestDto::class] = function () use ($container): DataToDtoPopulator {
+        $container[DataToDtoPopulator::class . CreateUserRequestDto::class] = function (): DataToDtoPopulator {
             return new DataToDtoPopulator(CreateUserRequestDto::class);
         };
 
-        $container[DataToDtoPopulator::class . TokenRequestDto::class] = function () use ($container): DataToDtoPopulator {
+        $container[DataToDtoPopulator::class . TokenRequestDto::class] = function (): DataToDtoPopulator {
             return new DataToDtoPopulator(TokenRequestDto::class);
         };
 
