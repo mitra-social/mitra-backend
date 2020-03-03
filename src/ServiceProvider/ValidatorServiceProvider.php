@@ -9,6 +9,7 @@ use Mitra\Validator\SymfonyValidator;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Validator\Mapping\Factory\LazyLoadingMetadataFactory;
 use Symfony\Component\Validator\ValidatorBuilder;
 
@@ -22,7 +23,7 @@ final class ValidatorServiceProvider implements ServiceProviderInterface
     {
         $container[ValidatorInterface::class] = function ($container): ValidatorInterface {
             $metadataFactory = new LazyLoadingMetadataFactory(
-                new ClassMapLoader($container['mappings']['validation'])
+                new ClassMapLoader($container[ContainerInterface::class], $container['mappings']['validation'])
             );
 
             $symfonyValidator = (new ValidatorBuilder())->setMetadataFactory($metadataFactory)->getValidator();

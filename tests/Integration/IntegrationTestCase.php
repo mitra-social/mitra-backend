@@ -13,10 +13,12 @@ use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
 use Slim\Psr7\Factory\ServerRequestFactory;
+use Slim\Psr7\Factory\UriFactory;
 
 abstract class IntegrationTestCase extends TestCase
 {
@@ -31,6 +33,16 @@ abstract class IntegrationTestCase extends TestCase
      */
     protected static $requestFactory;
 
+    /**
+     * @var ContainerInterface
+     */
+    protected static $container;
+
+    /**
+     * @var UriFactory
+     */
+    protected static $uriFactory;
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
@@ -42,16 +54,19 @@ abstract class IntegrationTestCase extends TestCase
         );
 
         self::$app = (new AppFactory())->create($env);
-        self::$requestFactory = new ServerRequestFactory();
+        self::$container = self::$app->getContainer();
+        self::$uriFactory = new UriFactory();
+        self::$requestFactory = new ServerRequestFactory(null, self::$uriFactory);
     }
 
     protected function createRequest(
         string $method,
         string $path,
-        string $content,
+        string $content = null,
         array $headers = []
     ): ServerRequestInterface {
-        $request = self::$requestFactory->createServerRequest($method, $path);
+        $uri = self::$uriFactory->createUri($path)->withScheme('http')->withHost('localhost');
+        $request = self::$requestFactory->createServerRequest($method, $uri);
 
         $request = $request->withHeader('Content-Type', 'application/json')->withHeader('Accept', 'application/json');
 
@@ -59,7 +74,9 @@ abstract class IntegrationTestCase extends TestCase
             $request = $request->withHeader($name, $value);
         }
 
-        $request->getBody()->write($content);
+        if (null !== $content) {
+            $request->getBody()->write($content);
+        }
 
         return $request;
     }
@@ -75,8 +92,13 @@ abstract class IntegrationTestCase extends TestCase
      * @param ResponseInterface $response
      * @return void
      */
-    public static function assertStatusCode(int $expectedStatusCode, ResponseInterface $response): void
+    protected static function assertStatusCode(int $expectedStatusCode, ResponseInterface $response): void
     {
         self::assertThat($response, new ResponseStatusCodeConstraint($expectedStatusCode));
+    }
+
+    protected function getContainer(): ContainerInterface
+    {
+        return self::$container;
     }
 }

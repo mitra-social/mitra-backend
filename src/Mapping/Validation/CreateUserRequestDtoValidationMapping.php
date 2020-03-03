@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Mitra\Mapping\Validation;
 
-use Mitra\Dto\NestedDto;
 use Mitra\Validator\Symfony\Constraint\NotBlank;
-use Mitra\Validator\Symfony\Constraint\Valid;
 use Mitra\Validator\Symfony\ValidationMappingInterface;
-use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
-class UserDtoValidationMapping implements ValidationMappingInterface
+final class CreateUserRequestDtoValidationMapping implements ValidationMappingInterface
 {
 
     /**
@@ -34,12 +31,14 @@ class UserDtoValidationMapping implements ValidationMappingInterface
             ->addPropertyConstraints('email', [
                 new Type('string'),
                 new Email(),
+                new NotNull(),
                 new NotBlank(),
             ])
-            ->addPropertyConstraints('nested', [
-                new Type(NestedDto::class),
+            ->addPropertyConstraints('password', [
+                new Type('string'),
                 new NotNull(),
-                new Valid(),
-            ]);
+                new Length(['min' => 8])
+            ])
+        ;
     }
 }

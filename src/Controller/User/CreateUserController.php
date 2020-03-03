@@ -6,18 +6,13 @@ namespace Mitra\Controller\User;
 
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Dto\DataToDtoManager;
+use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoManager;
-use Mitra\Dto\UserDto;
-use Mitra\Dto\ViolationDto;
-use Mitra\Dto\ViolationListDto;
+use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
-use Mitra\Validator\ViolationInterface;
-use Mitra\Validator\ViolationListInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
@@ -77,32 +72,42 @@ final class CreateUserController
             $mimeType = 'application/json';
         }
 
-        $userDto = new UserDto();
-        $this->requestToDtoManager->populate($userDto, $request);
+        $createUserRequestDto = new CreateUserRequestDto();
+        $this->requestToDtoManager->populate($createUserRequestDto, $request);
 
-        if (($violationList = $this->validator->validate($userDto))->hasViolations()) {
+        if (($violationList = $this->validator->validate($createUserRequestDto))->hasViolations()) {
             return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
         }
 
-        $user = $this->createEntityFromDto($userDto);
+        $user = $this->createEntityFromDto($createUserRequestDto);
 
         $this->commandBus->handle(new CreateUserCommand($user));
 
-        $userDto->id = $user->getId();
-
         $response = $this->responseFactory->createResponse(201);
 
-        $response->getBody()->write($this->encoder->encode($userDto, $mimeType));
+        $response->getBody()->write($this->encoder->encode($this->createDtoFromEntity($user), $mimeType));
 
         return $response;
     }
 
-    private function createEntityFromDto(UserDto $userDto): User
+    private function createEntityFromDto(CreateUserRequestDto $userDto): User
     {
         $user = new User(Uuid::uuid4()->toString(), $userDto->preferredUsername, $userDto->email);
 
-        $user->setCreatedAt(new \DateTime());
+        $user->setPlaintextPassword($userDto->password);
 
         return $user;
+    }
+
+    private function createDtoFromEntity(User $user): UserResponseDto
+    {
+        $userResponseDto = new UserResponseDto();
+
+        $userResponseDto->id = $user->getId();
+        $userResponseDto->preferredUsername = $user->getPreferredUsername();
+        $userResponseDto->email = $user->getEmail();
+        $userResponseDto->registeredAt = $user->getCreatedAt()->format('c');
+
+        return $userResponseDto;
     }
 }

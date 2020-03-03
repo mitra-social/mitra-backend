@@ -19,15 +19,12 @@ final class CreateUserControllerTest extends IntegrationTestCase
         self::assertStatusCode(400, $response);
     }
 
-
     public function testUserGetsCreatedSuccessfully(): void
     {
         $userData = [
             'preferredUsername' => 'john.doe',
             'email' => 'john.doe@example.com',
-            'nested' => [
-                'something' => 'hello world',
-            ],
+            'password' => 'foobar08',
         ];
 
         $request = $this->createRequest('POST', '/user', json_encode($userData));

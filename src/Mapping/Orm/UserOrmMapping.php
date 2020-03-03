@@ -47,6 +47,13 @@ final class UserOrmMapping implements ClassMapMappingInterface
             'unique' => true,
         ]);
 
+        $metadata->mapField([
+            'fieldName' => 'hashedPassword',
+            'columnName' => 'password',
+            'type' => 'string',
+            'nullable' => false,
+        ]);
+
         $this->configureTimestampableMapping($metadata);
     }
 }

@@ -2,15 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Dto;
+namespace Mitra\Dto\Request;
 
-final class UserDto
+final class CreateUserRequestDto
 {
-
-    /**
-     * @var string|null
-     */
-    public $id;
 
     /**
      * @var string
@@ -26,9 +21,4 @@ final class UserDto
      * @var string
      */
     public $password;
-
-    /**
-     * @var NestedDto;
-     */
-    public $nested;
 }

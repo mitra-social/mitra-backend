@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Middleware;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Mitra\Orm\EntityManagerDecorator;
 use Monolog\Logger;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,30 +15,29 @@ final class RequestCycleCleanupMiddleware
 {
 
     /**
-     * @var ObjectManager
+     * @var EntityManagerDecorator
      */
-    private $objectManager;
+    private $entityManager;
 
     /**
      * @var Logger
      */
     private $logger;
 
-    /**
-     * @param ObjectManager $objectManager
-     * @param Logger        $logger
-     */
-    public function __construct(ObjectManager $objectManager, Logger $logger)
+    public function __construct(EntityManagerDecorator $entityManager, Logger $logger)
     {
-        $this->objectManager = $objectManager;
+        $this->entityManager = $entityManager;
         $this->logger = $logger;
     }
 
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $this->entityManager->restoreIfClosed();
+        $this->entityManager->reconnectIfNotPinged();
+
         $response = $handler->handle($request);
 
-        $this->objectManager->clear();
+        $this->entityManager->clear();
         $this->logger->reset();
 
         return $response;

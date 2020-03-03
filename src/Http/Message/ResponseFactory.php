@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Http\Message;
 
-use Mitra\Dto\ViolationDto;
-use Mitra\Dto\ViolationListDto;
+use Mitra\Dto\Response\ViolationDto;
+use Mitra\Dto\Response\ViolationListDto;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ViolationInterface;
 use Mitra\Validator\ViolationListInterface;
