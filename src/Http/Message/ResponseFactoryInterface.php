@@ -15,4 +15,6 @@ interface ResponseFactoryInterface
         ViolationListInterface $violationList,
         string $mimeType
     ): ResponseInterface;
+
+    public function createResponseFromEntity(object $entity, string $dtoClass, string $mimeType, int $code = 200);
 }

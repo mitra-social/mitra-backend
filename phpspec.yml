@@ -1,3 +1,8 @@
 extensions:
   LeanPHP\PhpSpec\CodeCoverage\CodeCoverageExtension:
-    output: ./build/logs/coverage
+    format:
+      - clover
+      - html
+    output:
+      html: ./build/logs/phpspec/coverage
+      clover: ./build/logs/phpspec/coverage/coverage.xml

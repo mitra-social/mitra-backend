@@ -6,7 +6,6 @@ namespace Mitra\Controller\User;
 
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Dto\EntityToDtoManager;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoManager;
 use Mitra\Dto\Response\UserResponseDto;
@@ -47,32 +46,24 @@ final class CreateUserController
     private $requestToDtoManager;
 
     /**
-     * @var EntityToDtoManager
-     */
-    private $entityToDtoManager;
-
-    /**
      * @param ResponseFactoryInterface $responseFactory
      * @param EncoderInterface $encoder
      * @param ValidatorInterface $validator
      * @param CommandBusInterface $commandBus
      * @param RequestToDtoManager $dataToDtoManager
-     * @param EntityToDtoManager $entityToDtoManager
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
         CommandBusInterface $commandBus,
-        RequestToDtoManager $dataToDtoManager,
-        EntityToDtoManager $entityToDtoManager
+        RequestToDtoManager $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->validator = $validator;
         $this->commandBus = $commandBus;
         $this->requestToDtoManager = $dataToDtoManager;
-        $this->entityToDtoManager = $entityToDtoManager;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -92,11 +83,7 @@ final class CreateUserController
 
         $this->commandBus->handle(new CreateUserCommand($user));
 
-        $response = $this->responseFactory->createResponse(201);
-
-        $response->getBody()->write($this->encoder->encode($this->createDtoFromEntity($user), $mimeType));
-
-        return $response;
+        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $mimeType, 201);
     }
 
     private function createEntityFromDto(CreateUserRequestDto $userDto): User
@@ -106,13 +93,5 @@ final class CreateUserController
         $user->setPlaintextPassword($userDto->password);
 
         return $user;
-    }
-
-    private function createDtoFromEntity(User $user): UserResponseDto
-    {
-        $userResponseDto = new UserResponseDto();
-        $this->entityToDtoManager->populate($userResponseDto, $user);
-
-        return $userResponseDto;
     }
 }
