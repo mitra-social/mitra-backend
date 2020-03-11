@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Mitra\Http\Message;
 
 use Mitra\Dto\EntityToDtoManager;
-use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Dto\Response\ViolationDto;
 use Mitra\Dto\Response\ViolationListDto;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -88,8 +87,12 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
         return $response;
     }
 
-    public function createResponseFromEntity(object $entity, string $dtoClass, string $mimeType, int $code = 200)
-    {
+    public function createResponseFromEntity(
+        object $entity,
+        string $dtoClass,
+        string $mimeType,
+        int $code = 200
+    ): ResponseInterface {
         $dto = $this->entityToDtoManager->populate($dtoClass, $entity);
         $response = $this->responseFactory->createResponse($code);
 

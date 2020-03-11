@@ -16,5 +16,10 @@ interface ResponseFactoryInterface
         string $mimeType
     ): ResponseInterface;
 
-    public function createResponseFromEntity(object $entity, string $dtoClass, string $mimeType, int $code = 200);
+    public function createResponseFromEntity(
+        object $entity,
+        string $dtoClass,
+        string $mimeType,
+        int $code = 200
+    ): ResponseInterface;
 }

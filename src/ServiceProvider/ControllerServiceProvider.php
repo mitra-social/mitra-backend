@@ -49,8 +49,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[CommandBusInterface::class],
-                $container[RequestToDtoManager::class],
-                $container[EntityToDtoManager::class]
+                $container[RequestToDtoManager::class]
             );
         };
 
@@ -67,8 +66,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new ProfileController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[UserRepository::class],
-                $container[EntityToDtoManager::class]
+                $container[UserRepository::class]
             );
         };
     }
