@@ -70,8 +70,8 @@ final class TokenController
             $mimeType = 'application/json';
         }
 
-        $tokenRequestDto = new TokenRequestDto();
-        $this->requestToDtoManager->populate($tokenRequestDto, $request);
+        /** @var TokenRequestDto $tokenRequestDto */
+        $tokenRequestDto = $this->requestToDtoManager->fromRequest($request, TokenRequestDto::class);
 
         if (($violationList = $this->validator->validate($tokenRequestDto))->hasViolations()) {
             return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);

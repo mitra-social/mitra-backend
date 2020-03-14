@@ -6,12 +6,15 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Dto\DataToDtoManager;
 use Mitra\Dto\DataToDtoPopulator;
-use Mitra\Dto\EntityToDtoManager;
-use Mitra\Dto\EntityToDtoPopulator;
+use Mitra\Dto\DtoToEntityMapper;
+use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoManager;
-use Mitra\Dto\Response\UserResponseDto;
+use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
+use Mitra\Mapping\Dto\Response\UserResponseDtoMapping;
+use Mitra\Mapping\Dto\Response\ViolationListDtoMapping;
+use Mitra\Mapping\Dto\Response\ViolationDtoMapping;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -19,13 +22,25 @@ use Psr\Container\ContainerInterface;
 
 final class DtoServiceProvider implements ServiceProviderInterface
 {
-
-    /**
-     * @inheritDoc
-     */
     public function register(Container $container): void
     {
         $this->registerDataToDtoPopulators($container);
+        $this->registerDtoToEntityMappings($container);
+        $this->registerEntityToDtoMappings($container);
+
+        $container[DtoToEntityMapper::class] = function () use ($container) {
+            return new DtoToEntityMapper($container[ContainerInterface::class], [
+                CreateUserRequestDtoMapping::class,
+            ]);
+        };
+
+        $container[EntityToDtoMapper::class] = function () use ($container) {
+            return new EntityToDtoMapper($container[ContainerInterface::class], [
+                UserResponseDtoMapping::class,
+                ViolationListDtoMapping::class,
+                ViolationDtoMapping::class,
+            ]);
+        };
 
         $container[DataToDtoManager::class] = function () use ($container): DataToDtoManager {
             return new DataToDtoManager($container[ContainerInterface::class], [
@@ -36,14 +51,6 @@ final class DtoServiceProvider implements ServiceProviderInterface
 
         $container[RequestToDtoManager::class] = function () use ($container): RequestToDtoManager {
             return new RequestToDtoManager($container[DataToDtoManager::class], $container[DecoderInterface::class]);
-        };
-
-        $this->registerEntityToDtoPopulators($container);
-
-        $container[EntityToDtoManager::class] = function () use ($container): EntityToDtoManager {
-            return new EntityToDtoManager($container[ContainerInterface::class], [
-                UserResponseDto::class => EntityToDtoPopulator::class . UserResponseDto::class,
-            ]);
         };
     }
 
@@ -58,12 +65,25 @@ final class DtoServiceProvider implements ServiceProviderInterface
         };
     }
 
-    private function registerEntityToDtoPopulators(Container $container): void
+    private function registerDtoToEntityMappings(Container $container): void
     {
-        $container[EntityToDtoPopulator::class . UserResponseDto::class] = function (): EntityToDtoPopulator {
-            return (new EntityToDtoPopulator(UserResponseDto::class))
-                ->mapProperty('registeredAt', 'createdAt')
-            ;
+        $container[CreateUserRequestDtoMapping::class] = function (): CreateUserRequestDtoMapping {
+            return new CreateUserRequestDtoMapping();
+        };
+    }
+
+    private function registerEntityToDtoMappings(Container $container): void
+    {
+        $container[ViolationDtoMapping::class] = function (): ViolationDtoMapping {
+            return new ViolationDtoMapping();
+        };
+
+        $container[ViolationListDtoMapping::class] = function () use ($container): ViolationListDtoMapping {
+            return new ViolationListDtoMapping($container[ViolationDtoMapping::class]);
+        };
+
+        $container[UserResponseDtoMapping::class] = function () use ($container): UserResponseDtoMapping {
+            return new UserResponseDtoMapping();
         };
     }
 }

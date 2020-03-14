@@ -11,7 +11,7 @@ use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\Webfinger\WebfingerController;
-use Mitra\Dto\EntityToDtoManager;
+use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\RequestToDtoManager;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\UserRepository;
@@ -49,7 +49,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[CommandBusInterface::class],
-                $container[RequestToDtoManager::class]
+                $container[RequestToDtoManager::class],
+                $container[DtoToEntityMapper::class]
             );
         };
 

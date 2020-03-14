@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
-use Mitra\Dto\EntityToDtoManager;
+use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Http\Message\ResponseFactory;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -24,7 +24,7 @@ final class HttpServiceProvider implements ServiceProviderInterface
             return new ResponseFactory(
                 $container[PsrResponseFactory::class],
                 $container[EncoderInterface::class],
-                $container[EntityToDtoManager::class]
+                $container[EntityToDtoMapper::class]
             );
         };
     }
