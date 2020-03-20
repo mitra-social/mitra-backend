@@ -7,7 +7,21 @@ $ cd docker && docker-compose run composer install
 ```
 
 ## Run
+
 ### Environment
+
+#### Prerequisites
+Add user id to your shell init file
+
+Add the following to your .bashrc (or to the respective dot file if you don't use bash)
+
+```
+export USER_ID=$(id -u)
+```
+
+⚠️ Be sure to source your .bashrc or open a new console
+
+#### Start up docker
 ```
 $ cd docker && docker-compose up
 ```
