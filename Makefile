@@ -2,10 +2,7 @@
 .DEFAULT_GOAL := test
 
 PHPUNIT = DATABASE_URL=${DATABASE_URL_TEST} ./vendor/bin/phpunit -c ./phpunit.xml --no-coverage
-PHPSPEC = phpdbg -qrr ./vendor/bin/phpspec run  -c ./phpspec.yml --no-coverage \
-          --format dot -vvv --no-interaction
-PHPSPEC_COV = APP_ENV=test APP_DEBUG=false php -dpcov.enabled=1 -dpcov.directory=./src ./vendor/bin/phpspec run -c ./phpspec.yml \
-              --format dot -vvv --no-interaction
+PHPSPEC = ./vendor/bin/phpspec run  -c ./phpspec.yml --format dot -vvv --no-interaction
 PHPSTAN = ./vendor/bin/phpstan
 PHPCS = ./vendor/bin/phpcs
 CONSOLE = ./bin/console
@@ -18,10 +15,11 @@ code-style:
 	${PHPCS}
 
 coverage:
-	${PHPSPEC_COV}
+	php -dpcov.enabled=1 -dpcov.directory=./src ${PHPSPEC}
+	./vendor/bin/coverage-check build/logs/phpspec/coverage/coverage.xml --only-percentage
 
 test:
-	${PHPSPEC}
+	${PHPSPEC} --no-coverage
 	${PHPUNIT}
 
 test-unit:

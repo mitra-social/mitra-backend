@@ -45,7 +45,7 @@ final class DataToDtoManager
         if (is_object($dto)) {
             $dtoClassName = get_class($dto);
             $dtoInstance = $dto;
-        } elseif (is_string($dto) && class_exists($dto, false)) {
+        } elseif (is_string($dto) && class_exists($dto)) {
             $dtoClassName = $dto;
             $dtoInstance = null;
         } else {

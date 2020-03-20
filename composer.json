@@ -39,7 +39,8 @@
     "phpunit/phpunit": "^8.5.2",
     "squizlabs/php_codesniffer": "^3.5.4",
     "friends-of-phpspec/phpspec-code-coverage": "^4.3",
-    "cache/void-adapter": "^1.0"
+    "cache/void-adapter": "^1.0",
+    "rregeer/phpunit-coverage-check": "^0.3.1"
   },
   "autoload": {
     "psr-4": {

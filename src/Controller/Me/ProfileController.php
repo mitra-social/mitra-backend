@@ -55,22 +55,6 @@ final class ProfileController
             return $this->responseFactory->createResponse(404);
         }
 
-        $response = $this->responseFactory->createResponse(200);
-
-        $response->getBody()->write($this->encoder->encode($this->createDtoFromEntity($user), $mimeType));
-
-        return $response;
-    }
-
-    private function createDtoFromEntity(User $user): UserResponseDto
-    {
-        $userResponseDto = new UserResponseDto();
-
-        $userResponseDto->id = $user->getId();
-        $userResponseDto->preferredUsername = $user->getPreferredUsername();
-        $userResponseDto->email = $user->getEmail();
-        $userResponseDto->registeredAt = $user->getCreatedAt()->format('c');
-
-        return $userResponseDto;
+        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $mimeType);
     }
 }
