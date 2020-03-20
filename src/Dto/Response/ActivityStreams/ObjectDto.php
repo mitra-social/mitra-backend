@@ -70,7 +70,7 @@ abstract class ObjectDto implements ArrayNormalizable
         ];
 
         $data += array_filter(get_object_vars($this), static function ($value, $key): bool {
-            return null !== $value && 'context' !== $key && 'type' !== $key;
+            return !(null === $value || 'context' === $key || 'type' === $key);
         }, ARRAY_FILTER_USE_BOTH);
 
         return $data;
