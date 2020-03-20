@@ -7,6 +7,7 @@ namespace Mitra\Mapping\Dto\Response;
 use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
+use Mitra\Mapping\Dto\InvalidEntityException;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 {
@@ -24,9 +25,14 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
     /**
      * @param object|User $entity
      * @return object|UserResponseDto
+     * @throws InvalidEntityException
      */
     public function toDto(object $entity): object
     {
+        if (!$entity instanceof User) {
+            throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
+        }
+
         $userResponseDto = new UserResponseDto();
 
         $userResponseDto->id = $entity->getId();

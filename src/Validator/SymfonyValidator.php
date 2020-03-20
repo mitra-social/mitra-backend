@@ -36,7 +36,14 @@ final class SymfonyValidator implements ValidatorInterface
 
         foreach ($violationList as $violation) {
             /** @var ConstraintViolationInterface $violation */
-            $violations[] = $violation;
+            $violations[] = new Violation(
+                $violation->getMessage(),
+                $violation->getMessageTemplate(),
+                $violation->getParameters(),
+                $violation->getRoot(),
+                $violation->getPropertyPath(),
+                $violation->getInvalidValue()
+            );
         }
 
         return new ViolationList($violations);

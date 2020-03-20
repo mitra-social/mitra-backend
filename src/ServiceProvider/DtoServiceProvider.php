@@ -28,13 +28,13 @@ final class DtoServiceProvider implements ServiceProviderInterface
         $this->registerDtoToEntityMappings($container);
         $this->registerEntityToDtoMappings($container);
 
-        $container[DtoToEntityMapper::class] = function () use ($container) {
+        $container[DtoToEntityMapper::class] = static function () use ($container): DtoToEntityMapper {
             return new DtoToEntityMapper($container[ContainerInterface::class], [
                 CreateUserRequestDtoMapping::class,
             ]);
         };
 
-        $container[EntityToDtoMapper::class] = function () use ($container) {
+        $container[EntityToDtoMapper::class] = static function () use ($container): EntityToDtoMapper {
             return new EntityToDtoMapper($container[ContainerInterface::class], [
                 UserResponseDtoMapping::class,
                 ViolationListDtoMapping::class,
@@ -42,47 +42,47 @@ final class DtoServiceProvider implements ServiceProviderInterface
             ]);
         };
 
-        $container[DataToDtoManager::class] = function () use ($container): DataToDtoManager {
+        $container[DataToDtoManager::class] = static function () use ($container): DataToDtoManager {
             return new DataToDtoManager($container[ContainerInterface::class], [
                 CreateUserRequestDto::class => DataToDtoPopulator::class . CreateUserRequestDto::class,
                 TokenRequestDto::class => DataToDtoPopulator::class . TokenRequestDto::class,
             ]);
         };
 
-        $container[RequestToDtoManager::class] = function () use ($container): RequestToDtoManager {
+        $container[RequestToDtoManager::class] = static function () use ($container): RequestToDtoManager {
             return new RequestToDtoManager($container[DataToDtoManager::class], $container[DecoderInterface::class]);
         };
     }
 
     private function registerDataToDtoPopulators(Container $container): void
     {
-        $container[DataToDtoPopulator::class . CreateUserRequestDto::class] = function (): DataToDtoPopulator {
+        $container[DataToDtoPopulator::class . CreateUserRequestDto::class] = static function (): DataToDtoPopulator {
             return new DataToDtoPopulator(CreateUserRequestDto::class);
         };
 
-        $container[DataToDtoPopulator::class . TokenRequestDto::class] = function (): DataToDtoPopulator {
+        $container[DataToDtoPopulator::class . TokenRequestDto::class] = static function (): DataToDtoPopulator {
             return new DataToDtoPopulator(TokenRequestDto::class);
         };
     }
 
     private function registerDtoToEntityMappings(Container $container): void
     {
-        $container[CreateUserRequestDtoMapping::class] = function (): CreateUserRequestDtoMapping {
+        $container[CreateUserRequestDtoMapping::class] = static function (): CreateUserRequestDtoMapping {
             return new CreateUserRequestDtoMapping();
         };
     }
 
     private function registerEntityToDtoMappings(Container $container): void
     {
-        $container[ViolationDtoMapping::class] = function (): ViolationDtoMapping {
+        $container[ViolationDtoMapping::class] = static function (): ViolationDtoMapping {
             return new ViolationDtoMapping();
         };
 
-        $container[ViolationListDtoMapping::class] = function () use ($container): ViolationListDtoMapping {
+        $container[ViolationListDtoMapping::class] = static function () use ($container): ViolationListDtoMapping {
             return new ViolationListDtoMapping($container[ViolationDtoMapping::class]);
         };
 
-        $container[UserResponseDtoMapping::class] = function () use ($container): UserResponseDtoMapping {
+        $container[UserResponseDtoMapping::class] = static function (): UserResponseDtoMapping {
             return new UserResponseDtoMapping();
         };
     }
