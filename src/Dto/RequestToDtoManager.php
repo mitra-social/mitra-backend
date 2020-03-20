@@ -28,11 +28,7 @@ final class RequestToDtoManager
 
     public function fromRequest(ServerRequestInterface $request, string $dtoClass): object
     {
-        if ('' === $mimeType = $request->getHeaderLine('Content-Type')) {
-            throw new \RuntimeException('Missing `Content-Type` header');
-        }
-
-        $decodedBody = $this->decoder->decode((string) $request->getBody(), $mimeType);
+        $decodedBody = $this->decoder->decode((string) $request->getBody(), $request->getAttribute('contentType'));
 
         return $this->dataToDtoManager->populate($dtoClass, $decodedBody);
     }

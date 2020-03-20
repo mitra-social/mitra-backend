@@ -23,7 +23,7 @@ test:
 	${PHPUNIT}
 
 test-unit:
-	${PHPSPEC}
+	${PHPSPEC} --no-coverage
 	${PHPUNIT} --group=Unit
 
 test-integration:

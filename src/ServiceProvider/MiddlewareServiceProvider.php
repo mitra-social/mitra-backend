@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\Http\Message\ResponseFactoryInterface;
+use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -18,14 +20,24 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[RequestCycleCleanupMiddleware::class] = function () use ($container): RequestCycleCleanupMiddleware {
+        $container[RequestCycleCleanupMiddleware::class] = static function (
+            Container $container
+        ): RequestCycleCleanupMiddleware {
             return new RequestCycleCleanupMiddleware(
                 $container['doctrine.orm.em'],
                 $container[LoggerInterface::class]
             );
         };
 
-        $container[JwtAuthentication::class] = static function () use ($container): JwtAuthentication {
+        $container[AcceptAndContentTypeMiddleware::class] = static function (
+            Container $container
+        ): AcceptAndContentTypeMiddleware {
+            return new AcceptAndContentTypeMiddleware($container[ResponseFactoryInterface::class]);
+        };
+
+        $container[JwtAuthentication::class] = static function (
+            Container $container
+        ): JwtAuthentication {
             return new JwtAuthentication([
                 'path' => '/',
                 'ignore' => [],

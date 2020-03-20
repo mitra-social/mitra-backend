@@ -6,6 +6,7 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\Controller\ActivityPub\InboxController;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
@@ -51,6 +52,14 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[CommandBusInterface::class],
                 $container[RequestToDtoManager::class],
                 $container[DtoToEntityMapper::class]
+            );
+        };
+
+        $container[InboxController::class] = static function (Container $container): InboxController {
+            return new InboxController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[UserRepository::class]
             );
         };
 

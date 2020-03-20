@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra;
 
 use Mitra\Env\Env;
+use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Routes\PrivateRouteProvider;
 use Mitra\Routes\PublicRouterProvider;
@@ -31,6 +32,7 @@ final class AppFactory
         /** @var ContainerInterface $container */
         $container = $app->getContainer();
 
+        $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
 
         // Needs to be last middleware to handle all the errors

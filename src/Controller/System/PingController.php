@@ -26,6 +26,7 @@ final class PingController
             ->withHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->withHeader('Pragma', 'no-cache')
             ->withHeader('Expires', '0')
+            ->withHeader('Content-Type', 'text/plain')
         ;
 
         $response->getBody()->write(date('Y-m-d\TH:i:sT'));

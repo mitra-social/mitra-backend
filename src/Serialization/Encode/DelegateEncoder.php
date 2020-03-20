@@ -12,25 +12,29 @@ final class DelegateEncoder implements EncoderInterface
     /**
      * @var array|EncoderInterface[]
      */
-    private $decoders = [];
+    private $encoders = [];
 
     /**
      * @param mixed $data
      * @param string $mimeType
      * @return string
      * @throws UnsupportedMimeTypeException
+     * @throws EncoderException
      */
     public function encode($data, string $mimeType): string
     {
-        if (!isset($this->decoders[$mimeType])) {
+        if (!isset($this->encoders[$mimeType])) {
             throw new UnsupportedMimeTypeException($mimeType);
         }
 
-        return $this->decoders[$mimeType]->encode($data, $mimeType);
+        return $this->encoders[$mimeType]->encode(
+            $data instanceof ArrayNormalizable ? $data->toArray() : $data,
+            $mimeType
+        );
     }
 
-    public function addEncoder(string $mimeType, EncoderInterface $decoder): void
+    public function addEncoder(string $mimeType, EncoderInterface $encoder): void
     {
-        $this->decoders[$mimeType] = $decoder;
+        $this->encoders[$mimeType] = $encoder;
     }
 }

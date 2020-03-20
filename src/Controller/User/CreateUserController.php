@@ -77,15 +77,13 @@ final class CreateUserController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        if ('' === $mimeType = $request->getHeaderLine('Accept')) {
-            $mimeType = 'application/json';
-        }
+        $accept = $request->getAttribute('accept');
 
         /** @var CreateUserRequestDto $createUserRequestDto */
         $createUserRequestDto = $this->requestToDtoManager->fromRequest($request, CreateUserRequestDto::class);
 
         if (($violationList = $this->validator->validate($createUserRequestDto))->hasViolations()) {
-            return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
+            return $this->responseFactory->createResponseFromViolationList($violationList, $accept);
         }
 
         /** @var User $user */
@@ -93,6 +91,6 @@ final class CreateUserController
 
         $this->commandBus->handle(new CreateUserCommand($user));
 
-        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $mimeType, 201);
+        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $accept, 201);
     }
 }

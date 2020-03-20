@@ -66,15 +66,13 @@ final class TokenController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        if ('' === $mimeType = $request->getHeaderLine('Accept')) {
-            $mimeType = 'application/json';
-        }
+        $accept = $request->getAttribute('accept');
 
         /** @var TokenRequestDto $tokenRequestDto */
         $tokenRequestDto = $this->requestToDtoManager->fromRequest($request, TokenRequestDto::class);
 
         if (($violationList = $this->validator->validate($tokenRequestDto))->hasViolations()) {
-            return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
+            return $this->responseFactory->createResponseFromViolationList($violationList, $accept);
         }
 
         try {
@@ -85,7 +83,7 @@ final class TokenController
 
             $response = $this->responseFactory->createResponse(201);
 
-            $response->getBody()->write($this->encoder->encode($tokenResponseDto, $mimeType));
+            $response->getBody()->write($this->encoder->encode($tokenResponseDto, $accept));
         } catch (TokenIssueException $e) {
             $response = $this->responseFactory->createResponse(401);
         }
