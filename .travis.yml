@@ -23,6 +23,8 @@ install:
   - travis_retry composer install --prefer-dist
 
 before_script:
+
+script:
   - |
     echo "Preparing Postgres 11"
 
@@ -32,8 +34,6 @@ before_script:
     sudo docker exec -i postgres11 bash <<< 'until pg_isready -U postgres > /dev/null 2>&1 ; do sleep 1; done'
 
     echo "Postgres 11 ready"
-
-script:
   - make test
 
 jobs:
