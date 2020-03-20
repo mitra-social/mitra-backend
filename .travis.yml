@@ -22,8 +22,6 @@ install:
   - rm composer.lock
   - travis_retry composer install --prefer-dist
 
-before_script:
-
 script:
   - |
     echo "Preparing Postgres 11"
