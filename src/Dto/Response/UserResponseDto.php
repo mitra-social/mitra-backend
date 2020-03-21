@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response;
 
-final class UserResponseDto
+use Mitra\Dto\Response\ActivityPub\Actor\Person;
+
+final class UserResponseDto extends Person
 {
     /**
      * @var string
      */
-    public $id;
-
-    /**
-     * @var string
-     */
-    public $preferredUsername;
+    public $userId;
 
     /**
      * @var string

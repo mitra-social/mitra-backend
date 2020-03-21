@@ -19,6 +19,7 @@ use Mitra\Serialization\Decode\DecoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
+use Slim\Routing\RouteCollector;
 
 final class DtoServiceProvider implements ServiceProviderInterface
 {
@@ -28,13 +29,13 @@ final class DtoServiceProvider implements ServiceProviderInterface
         $this->registerDtoToEntityMappings($container);
         $this->registerEntityToDtoMappings($container);
 
-        $container[DtoToEntityMapper::class] = static function () use ($container): DtoToEntityMapper {
+        $container[DtoToEntityMapper::class] = static function (Container $container): DtoToEntityMapper {
             return new DtoToEntityMapper($container[ContainerInterface::class], [
                 CreateUserRequestDtoMapping::class,
             ]);
         };
 
-        $container[EntityToDtoMapper::class] = static function () use ($container): EntityToDtoMapper {
+        $container[EntityToDtoMapper::class] = static function (Container $container): EntityToDtoMapper {
             return new EntityToDtoMapper($container[ContainerInterface::class], [
                 UserResponseDtoMapping::class,
                 ViolationListDtoMapping::class,
@@ -42,14 +43,14 @@ final class DtoServiceProvider implements ServiceProviderInterface
             ]);
         };
 
-        $container[DataToDtoManager::class] = static function () use ($container): DataToDtoManager {
+        $container[DataToDtoManager::class] = static function (Container $container): DataToDtoManager {
             return new DataToDtoManager($container[ContainerInterface::class], [
                 CreateUserRequestDto::class => DataToDtoPopulator::class . CreateUserRequestDto::class,
                 TokenRequestDto::class => DataToDtoPopulator::class . TokenRequestDto::class,
             ]);
         };
 
-        $container[RequestToDtoManager::class] = static function () use ($container): RequestToDtoManager {
+        $container[RequestToDtoManager::class] = static function (Container $container): RequestToDtoManager {
             return new RequestToDtoManager($container[DataToDtoManager::class], $container[DecoderInterface::class]);
         };
     }
@@ -78,12 +79,12 @@ final class DtoServiceProvider implements ServiceProviderInterface
             return new ViolationDtoMapping();
         };
 
-        $container[ViolationListDtoMapping::class] = static function () use ($container): ViolationListDtoMapping {
+        $container[ViolationListDtoMapping::class] = static function (Container $container): ViolationListDtoMapping {
             return new ViolationListDtoMapping($container[ViolationDtoMapping::class]);
         };
 
-        $container[UserResponseDtoMapping::class] = static function (): UserResponseDtoMapping {
-            return new UserResponseDtoMapping();
+        $container[UserResponseDtoMapping::class] = static function (Container $container): UserResponseDtoMapping {
+            return new UserResponseDtoMapping($container[RouteCollector::class]);
         };
     }
 }

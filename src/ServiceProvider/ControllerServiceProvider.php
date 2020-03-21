@@ -6,11 +6,12 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Controller\ActivityPub\InboxController;
+use Mitra\Controller\User\InboxController;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
+use Mitra\Controller\User\ReadUserController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\RequestToDtoManager;
@@ -31,11 +32,11 @@ final class ControllerServiceProvider implements ServiceProviderInterface
     public function register(Container $container): void
     {
         // Public
-        $container[PingController::class] = function () use ($container): PingController {
+        $container[PingController::class] = static function (Container $container): PingController {
             return new PingController($container[ResponseFactoryInterface::class]);
         };
 
-        $container[TokenController::class] = function () use ($container): TokenController {
+        $container[TokenController::class] = static function (Container $container): TokenController {
             return new TokenController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
@@ -45,7 +46,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[CreateUserController::class] = function () use ($container): CreateUserController {
+        $container[CreateUserController::class] = static function (Container $container): CreateUserController {
             return new CreateUserController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
@@ -53,6 +54,14 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[CommandBusInterface::class],
                 $container[RequestToDtoManager::class],
                 $container[DtoToEntityMapper::class]
+            );
+        };
+
+        $container[ReadUserController::class] = static function (Container $container): ReadUserController {
+            return new ReadUserController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[UserRepository::class]
             );
         };
 
@@ -65,7 +74,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[WebfingerController::class] = function () use ($container): WebfingerController {
+        $container[WebfingerController::class] = static function (Container $container): WebfingerController {
             return new WebfingerController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
@@ -74,7 +83,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         };
 
         // Private
-        $container[ProfileController::class] = function () use ($container): ProfileController {
+        $container[ProfileController::class] = static function (Container $container): ProfileController {
             return new ProfileController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],

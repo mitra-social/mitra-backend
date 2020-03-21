@@ -8,9 +8,20 @@ use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Interfaces\RouteCollectorInterface;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 {
+    /**
+     * @var RouteCollectorInterface
+     */
+    private $routeCollector;
+
+    public function __construct(RouteCollectorInterface $routeCollector)
+    {
+        $this->routeCollector = $routeCollector;
+    }
 
     public static function getDtoClass(): string
     {
@@ -24,10 +35,11 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|User $entity
+     * @param ServerRequestInterface $request
      * @return object|UserResponseDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity): object
+    public function toDto(object $entity, ServerRequestInterface $request): object
     {
         if (!$entity instanceof User) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -35,10 +47,17 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
         $userResponseDto = new UserResponseDto();
 
-        $userResponseDto->id = $entity->getId();
+        $userResponseDto->userId = $entity->getId();
         $userResponseDto->email = $entity->getEmail();
-        $userResponseDto->preferredUsername = $entity->getPreferredUsername();
         $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
+
+        // ActivityPub
+        $userResponseDto->preferredUsername = $entity->getPreferredUsername();
+        $userResponseDto->inbox = $this->routeCollector->getRouteParser()->fullUrlFor(
+            $request->getUri(),
+            'user-inbox',
+            ['preferredUsername' => $entity->getPreferredUsername()]
+        );
 
         return $userResponseDto;
     }

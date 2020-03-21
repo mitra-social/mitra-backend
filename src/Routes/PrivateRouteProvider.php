@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Routes;
 
-use Mitra\Controller\ActivityPub\InboxController;
+use Mitra\Controller\User\InboxController;
 use Mitra\Controller\Me\ProfileController;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 

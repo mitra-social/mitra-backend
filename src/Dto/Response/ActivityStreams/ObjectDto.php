@@ -8,6 +8,8 @@ use Mitra\Serialization\Encode\ArrayNormalizable;
 
 abstract class ObjectDto implements ArrayNormalizable
 {
+    public $id;
+
     public $context = 'https://www.w3.org/ns/activitystreams';
 
     public $type = 'Object';

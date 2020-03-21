@@ -83,7 +83,7 @@ final class CreateUserController
         $createUserRequestDto = $this->requestToDtoManager->fromRequest($request, CreateUserRequestDto::class);
 
         if (($violationList = $this->validator->validate($createUserRequestDto))->hasViolations()) {
-            return $this->responseFactory->createResponseFromViolationList($violationList, $accept);
+            return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
         /** @var User $user */
@@ -91,6 +91,6 @@ final class CreateUserController
 
         $this->commandBus->handle(new CreateUserCommand($user));
 
-        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $accept, 201);
+        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $request, $accept, 201);
     }
 }

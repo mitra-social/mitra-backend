@@ -72,7 +72,7 @@ final class TokenController
         $tokenRequestDto = $this->requestToDtoManager->fromRequest($request, TokenRequestDto::class);
 
         if (($violationList = $this->validator->validate($tokenRequestDto))->hasViolations()) {
-            return $this->responseFactory->createResponseFromViolationList($violationList, $accept);
+            return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
         try {

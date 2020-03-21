@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Controller\ActivityPub;
+namespace Mitra\Controller\User;
 
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;

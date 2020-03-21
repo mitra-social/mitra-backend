@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Controller\Me;
+namespace Mitra\Controller\User;
 
 use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User;
@@ -12,9 +12,8 @@ use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class ProfileController
+final class ReadUserController
 {
-
     /**
      * @var ResponseFactoryInterface
      */
@@ -43,13 +42,9 @@ final class ProfileController
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
+        $preferredUsername = $request->getAttribute('preferredUsername');
 
-        $userId = $request->getAttribute('token')['userId'];
-
-        /** @var User|null $user */
-        $user = $this->userRepository->find($userId);
-
-        if (null === $user) {
+        if (null === $user = $this->userRepository->findOneByPreferredUsername($preferredUsername)) {
             return $this->responseFactory->createResponse(404);
         }
 

@@ -8,6 +8,7 @@ use Mitra\Dto\Response\ViolationDto;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 use Mitra\Validator\Violation;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class ViolationDtoMapping implements EntityToDtoMappingInterface
 {
@@ -24,10 +25,11 @@ final class ViolationDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|Violation $entity
+     * @param ServerRequestInterface $request
      * @return object|ViolationDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity): object
+    public function toDto(object $entity, ServerRequestInterface $request): object
     {
         if (!$entity instanceof Violation) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
