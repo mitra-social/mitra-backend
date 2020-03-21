@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Mitra\Controller\ActivityPub;
 
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
 use Mitra\Entity\User;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\UserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\Interfaces\RouteCollectorInterface;
 
 final class InboxController
 {
@@ -30,14 +32,21 @@ final class InboxController
      */
     private $encoder;
 
+    /**
+     * @var RouteCollectorInterface
+     */
+    private $routeCollector;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        RouteCollectorInterface $routeCollector
     ) {
         $this->responseFactory = $responseFactory;
         $this->userRepository = $userRepository;
         $this->encoder = $encoder;
+        $this->routeCollector = $routeCollector;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -45,6 +54,7 @@ final class InboxController
         $accept = $request->getAttribute('accept');
         $username = $request->getAttribute('preferredUsername');
         $authenticatedUserId = $request->getAttribute('token')['userId'];
+        $pageNo = $request->getQueryParams()['page'] ?? null;
 
         /** @var User|null $authenticatedUser */
         $authenticatedUser = $this->userRepository->find($authenticatedUserId);
@@ -57,7 +67,17 @@ final class InboxController
             return $this->responseFactory->createResponse(404);
         }
 
-        $orderedCollectionDto = new OrderedCollectionDto();
+        if (null !== $pageNo) {
+            $inboxUrl = $this->routeCollector->getRouteParser()->urlFor(
+                'user-inbox',
+                ['preferredUsername' => $inboxUser->getPreferredUsername()]
+            );
+
+            $orderedCollectionDto = new OrderedCollectionPageDto();
+            $orderedCollectionDto->partOf = $inboxUrl;
+        } else {
+            $orderedCollectionDto = new OrderedCollectionDto();
+        }
 
         $response = $this->responseFactory->createResponse();
 

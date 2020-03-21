@@ -20,6 +20,7 @@ use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Slim\Routing\RouteCollector;
 
 final class ControllerServiceProvider implements ServiceProviderInterface
 {
@@ -59,7 +60,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new InboxController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[UserRepository::class]
+                $container[UserRepository::class],
+                $container[RouteCollector::class]
             );
         };
 

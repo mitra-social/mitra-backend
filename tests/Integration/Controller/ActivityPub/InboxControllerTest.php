@@ -50,7 +50,7 @@ final class InboxControllerTest extends IntegrationTestCase
         self::assertStatusCode(404, $response);
     }
 
-    public function testReturnsUserInformationIfAuthorized(): void
+    public function testReturnsInboxAsOrderedCollection(): void
     {
         $user = $this->createUser();
         $token = $this->createTokenForUser($user);
@@ -68,6 +68,30 @@ final class InboxControllerTest extends IntegrationTestCase
             'type' => 'OrderedCollection',
             'totalItems' => 0,
             'orderedItems' => [],
+        ];
+
+        self::assertEquals($expectedPayload, $actualPayload);
+    }
+
+    public function testReturnsInboxAsOrderedCollectionPageWithParameterPage(): void
+    {
+        $user = $this->createUser();
+        $token = $this->createTokenForUser($user);
+
+        $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=1', $user->getPreferredUsername()), null, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(200, $response);
+
+        $actualPayload = json_decode((string) $response->getBody(), true);
+        $expectedPayload = [
+            '@context' => 'https://www.w3.org/ns/activitystreams',
+            'type' => 'OrderedCollectionPage',
+            'totalItems' => 0,
+            'orderedItems' => [],
+            'partOf' => sprintf('/user/%s/inbox', $user->getPreferredUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);
