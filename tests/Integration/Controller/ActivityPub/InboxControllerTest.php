@@ -91,7 +91,7 @@ final class InboxControllerTest extends IntegrationTestCase
             'type' => 'OrderedCollectionPage',
             'totalItems' => 0,
             'orderedItems' => [],
-            'partOf' => sprintf('/user/%s/inbox', $user->getPreferredUsername()),
+            'partOf' => sprintf('http://localhost/user/%s/inbox', $user->getPreferredUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);

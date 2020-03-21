@@ -68,7 +68,8 @@ final class InboxController
         }
 
         if (null !== $pageNo) {
-            $inboxUrl = $this->routeCollector->getRouteParser()->urlFor(
+            $inboxUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
+                $request->getUri(),
                 'user-inbox',
                 ['preferredUsername' => $inboxUser->getPreferredUsername()]
             );
