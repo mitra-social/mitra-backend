@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response;
 
-use Mitra\Dto\Response\ActivityPub\Actor\Person;
+use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 
-final class UserResponseDto extends Person
+final class UserResponseDto extends PersonDto
 {
     /**
      * @var string

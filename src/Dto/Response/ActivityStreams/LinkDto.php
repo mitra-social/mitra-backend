@@ -4,63 +4,31 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityStreams;
 
-abstract class ObjectDto implements TypeInterface
+use Mitra\Serialization\Encode\ArrayNormalizable;
+
+class LinkDto implements TypeInterface
 {
     public $id;
 
     public $context;
 
-    public $type = 'Object';
+    public $type = 'Link';
 
-    public $attachment;
+    public $href;
 
-    public $attributedTo;
-
-    public $audience;
-
-    public $content;
-
-    public $name;
-
-    public $endTime;
-
-    public $generator;
-
-    public $icon;
-
-    public $image;
-
-    public $inReplyTo;
-
-    public $location;
-
-    public $preview;
-
-    public $published;
-
-    public $replies;
-
-    public $startTime;
-
-    public $summary;
-
-    public $tag;
-
-    public $updated;
-
-    public $url;
-
-    public $to;
-
-    public $bto;
-
-    public $cc;
-
-    public $bcc;
+    public $rel;
 
     public $mediaType;
 
-    public $duration;
+    public $name;
+
+    public $hreflang;
+
+    public $height;
+
+    public $width;
+
+    public $preview;
 
     public function toArray(): array
     {

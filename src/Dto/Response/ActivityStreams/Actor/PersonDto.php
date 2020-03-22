@@ -6,7 +6,7 @@ namespace Mitra\Dto\Response\ActivityStreams\Actor;
 
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 
-class Person extends ObjectDto
+class PersonDto extends ObjectDto
 {
     public $type = 'Person';
 }
