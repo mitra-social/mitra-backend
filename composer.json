@@ -18,7 +18,6 @@
     "landrok/activitypub": "dev-improvements-destatized@dev",
     "league/tactician": "2.0-rc1",
     "mitra-social/php-env": "dev-master@dev",
-    "mitra-social/activity-streams": "dev-master@dev",
     "monolog/monolog": "^2.0.2",
     "pimple/pimple": "^3.2.3",
     "ramsey/uuid": "^3.9.2",
