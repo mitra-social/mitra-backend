@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use ActivityPhp\Type\Extended\Object\Article;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\ImageDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
-use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\PageDto;
