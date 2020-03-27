@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200229222659 extends AbstractMigration
+final class Version20200327130356 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,9 +22,7 @@ final class Version20200229222659 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('CREATE TABLE "user" (id VARCHAR(36) NOT NULL, preferredUsername VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649DF93AF83 ON "user" (preferredUsername)');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649E7927C74 ON "user" (email)');
+        $this->addSql('CREATE TABLE activity_stream_content (id VARCHAR(36) NOT NULL, type VARCHAR(36) NOT NULL, published TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, updated TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, startDate TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, endDate TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, object JSON NOT NULL, PRIMARY KEY(id))');
     }
 
     public function down(Schema $schema) : void
@@ -33,6 +31,6 @@ final class Version20200229222659 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
         $this->addSql('CREATE SCHEMA public');
-        $this->addSql('DROP TABLE "user"');
+        $this->addSql('DROP TABLE activity_stream_content');
     }
 }

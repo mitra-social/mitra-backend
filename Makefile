@@ -1,4 +1,4 @@
-.PHONY: clean code-style coverage help test test-unit test-integration static-analysis install-dependencies xdebug-enable xdebug-disable
+.PHONY: clean code-style coverage help test test-unit test-integration static-analysis install-dependencies xdebug-enable xdebug-disable fixtures-load
 .DEFAULT_GOAL := test
 
 PHPUNIT = DATABASE_URL=${DATABASE_URL_TEST} ./vendor/bin/phpunit -c ./phpunit.xml --no-coverage
@@ -37,6 +37,9 @@ xdebug-enable:
 
 xdebug-disable:
 	php-ext-disable xdebug
+
+fixtures-load:
+	${CONSOLE} mitra:fixtures:load ./fixtures
 
 help:
 	# Usage:

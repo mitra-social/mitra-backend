@@ -48,14 +48,6 @@ $console->setHelperSet(new HelperSet([
     'configuration' => new ConfigurationHelper($configuration->getConnection(), $configuration),
 ]));
 
-$inputOptions = [
-    new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', 'dev'),
-];
-
-foreach ($inputOptions as $inputOption) {
-    $console->getDefinition()->addOption($inputOption);
-}
-
 $console->addCommands($container['console.commands']);
 $console->setCatchExceptions(false);
 $console->run($input);

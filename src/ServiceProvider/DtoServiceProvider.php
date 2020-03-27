@@ -11,6 +11,13 @@ use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\Response\ActivityStreams\ArticleDto;
+use Mitra\Dto\Response\ActivityStreams\AudioDto;
+use Mitra\Dto\Response\ActivityStreams\DocumentDto;
+use Mitra\Dto\Response\ActivityStreams\EventDto;
+use Mitra\Dto\Response\ActivityStreams\ImageDto;
+use Mitra\Dto\Response\ActivityStreams\NoteDto;
+use Mitra\Dto\Response\ActivityStreams\VideoDto;
 use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
 use Mitra\Mapping\Dto\Response\UserResponseDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationListDtoMapping;
@@ -47,6 +54,14 @@ final class DtoServiceProvider implements ServiceProviderInterface
             return new DataToDtoManager($container[ContainerInterface::class], [
                 CreateUserRequestDto::class => DataToDtoPopulator::class . CreateUserRequestDto::class,
                 TokenRequestDto::class => DataToDtoPopulator::class . TokenRequestDto::class,
+
+                ArticleDto::class => DataToDtoPopulator::class . ArticleDto::class,
+                DocumentDto::class => DataToDtoPopulator::class . DocumentDto::class,
+                AudioDto::class => DataToDtoPopulator::class . AudioDto::class,
+                ImageDto::class => DataToDtoPopulator::class . ImageDto::class,
+                VideoDto::class => DataToDtoPopulator::class . VideoDto::class,
+                NoteDto::class => DataToDtoPopulator::class . NoteDto::class,
+                EventDto::class => DataToDtoPopulator::class . EventDto::class,
             ]);
         };
 
@@ -64,6 +79,23 @@ final class DtoServiceProvider implements ServiceProviderInterface
         $container[DataToDtoPopulator::class . TokenRequestDto::class] = static function (): DataToDtoPopulator {
             return new DataToDtoPopulator(TokenRequestDto::class);
         };
+
+        // ActivityStream
+        $activityStreamDtoClasses = [
+            ArticleDto::class,
+            DocumentDto::class,
+            AudioDto::class,
+            ImageDto::class,
+            VideoDto::class,
+            NoteDto::class,
+            EventDto::class,
+        ];
+
+        foreach ($activityStreamDtoClasses as $activityStreamDtoClass) {
+            $container[DataToDtoPopulator::class . $activityStreamDtoClass] = static function (): DataToDtoPopulator {
+                return new DataToDtoPopulator(ArticleDto::class);
+            };
+        }
     }
 
     private function registerDtoToEntityMappings(Container $container): void

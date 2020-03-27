@@ -13,9 +13,11 @@ use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\ReadUserController;
 use Mitra\Controller\Webfinger\WebfingerController;
+use Mitra\Dto\DataToDtoManager;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\RequestToDtoManager;
 use Mitra\Http\Message\ResponseFactoryInterface;
+use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\UserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
@@ -70,7 +72,9 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[UserRepository::class],
-                $container[RouteCollector::class]
+                $container[ActivityStreamContentAssignmentRepository::class],
+                $container[RouteCollector::class],
+                $container[DataToDtoManager::class]
             );
         };
 

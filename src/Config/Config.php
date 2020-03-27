@@ -9,8 +9,12 @@ use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
+use Mitra\Entity\ActivityStreamContent;
+use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\User;
 use Mitra\Env\Env;
+use Mitra\Mapping\Orm\ActivityStreamContentAssignmentOrmMapping;
+use Mitra\Mapping\Orm\ActivityStreamContentOrmMapping;
 use Mitra\Mapping\Orm\UserOrmMapping;
 use Mitra\Mapping\Validation\TokenRequestDtoValidationMapping;
 use Mitra\Mapping\Validation\CreateUserRequestDtoValidationMapping;
@@ -82,11 +86,13 @@ final class Config implements ConfigInterface
                 'proxies.auto_generate' => false,
             ],
             'doctrine.migrations.directory' => $this->rootDir . '/migrations/',
-            'doctrine.migrations.namespace' => 'Mitra\Core\Migrations',
+            'doctrine.migrations.namespace' => 'Mitra\Migrations',
             'doctrine.migrations.table' => 'doctrine_migration_version',
             'mappings' => [
                 'orm' => [
                     User::class => UserOrmMapping::class,
+                    ActivityStreamContent::class => ActivityStreamContentOrmMapping::class,
+                    ActivityStreamContentAssignment::class => ActivityStreamContentAssignmentOrmMapping::class,
                 ],
                 'validation' => [
                     CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,
