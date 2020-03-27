@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityStreams;
 
-class OrderedCollectionDto extends ObjectDto
+class OrderedCollectionDto extends CollectionDto
 {
     public $type = 'OrderedCollection';
 
     /**
-     * @var int
+     * @var null|array
      */
-    public $totalItems = 0;
-
-    /**
-     * @var array
-     */
-    public $orderedItems = [];
+    public $orderedItems;
 }

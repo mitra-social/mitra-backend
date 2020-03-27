@@ -34,4 +34,15 @@ final class ActivityStreamContentAssignmentRepository extends EntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function getTotalContentForUserId(User $user): int
+    {
+        $qb = $this->createQueryBuilder('ca');
+        $qb
+            ->select($qb->expr()->count('ca'))
+            ->where('ca.user = :user')
+            ->setParameter('user', $user);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
 }

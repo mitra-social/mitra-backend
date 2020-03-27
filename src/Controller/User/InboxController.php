@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use ActivityPhp\Type\Extended\Object\Video;
-use Doctrine\Common\Util\Debug;
 use Mitra\Dto\DataToDtoManager;
-use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
@@ -94,7 +91,7 @@ final class InboxController
         $accept = $request->getAttribute('accept');
         $username = $request->getAttribute('preferredUsername');
         $authenticatedUserId = $request->getAttribute('token')['userId'];
-        $pageNo = (int) $request->getQueryParams()['page'] ?? null;
+        $pageNo = $request->getQueryParams()['page'] ?? null;
 
         /** @var User|null $authenticatedUser */
         $authenticatedUser = $this->userRepository->find($authenticatedUserId);
@@ -107,7 +104,31 @@ final class InboxController
             return $this->responseFactory->createResponse(404);
         }
 
-        if (null !== $pageNo) {
+        $totalItems = $this->activityStreamContentAssignmentRepository->getTotalContentForUserId($inboxUser);
+        $totalPages = ceil($totalItems / self::ITEMS_PER_PAGE_LIMIT);
+        $lastPageNo = $totalPages - 1;
+
+        if (null === $pageNo) {
+            $orderedCollectionDto = new OrderedCollectionDto();
+            $orderedCollectionDto->first = $this->routeCollector->getRouteParser()->fullUrlFor(
+                $request->getUri(),
+                'user-inbox',
+                ['preferredUsername' => $inboxUser->getPreferredUsername()],
+                ['page' => 0]
+            );
+            $orderedCollectionDto->last = $this->routeCollector->getRouteParser()->fullUrlFor(
+                $request->getUri(),
+                'user-inbox',
+                ['preferredUsername' => $inboxUser->getPreferredUsername()],
+                ['page' => $lastPageNo]
+            );
+        } else {
+            $pageNo = (int) $pageNo;
+
+            if ($pageNo > $lastPageNo) {
+                return $this->responseFactory->createResponse(404);
+            }
+
             $inboxUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
                 $request->getUri(),
                 'user-inbox',
@@ -125,13 +146,21 @@ final class InboxController
                     ['page' => $pageNo - 1]
                 );
             }
-        } else {
-            $orderedCollectionDto = new OrderedCollectionDto();
+
+            if ($pageNo < $lastPageNo) {
+                $orderedCollectionDto->next = $this->routeCollector->getRouteParser()->fullUrlFor(
+                    $request->getUri(),
+                    'user-inbox',
+                    ['preferredUsername' => $inboxUser->getPreferredUsername()],
+                    ['page' => $pageNo + 1]
+                );
+            }
+
+            $orderedCollectionDto->orderedItems = $this->getItems($inboxUser, $pageNo);
         }
 
         $orderedCollectionDto->context = TypeInterface::CONTEXT_ACTIVITY_STREAMS;
-        $orderedCollectionDto->orderedItems = $this->getItems($inboxUser, $pageNo);
-        $orderedCollectionDto->totalItems = count($orderedCollectionDto->orderedItems);
+        $orderedCollectionDto->totalItems = $totalItems;
 
         $response = $this->responseFactory->createResponse();
 
