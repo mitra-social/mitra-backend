@@ -9,6 +9,7 @@ use Doctrine\Common\Util\Debug;
 use Mitra\Dto\DataToDtoManager;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
@@ -27,7 +28,6 @@ use Mitra\Dto\Response\ActivityStreams\RelationshipDto;
 use Mitra\Dto\Response\ActivityStreams\TombstoneDto;
 use Mitra\Dto\Response\ActivityStreams\TypeInterface;
 use Mitra\Dto\Response\ActivityStreams\VideoDto;
-use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\User;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -236,6 +236,8 @@ final class InboxController
             'Relationship' => RelationshipDto::class,
             'Tombstone' => TombstoneDto::class,
             'Video' => VideoDto::class,
+
+            'Create' => CreateDto::class,
         ];
 
         if (!array_key_exists($type, $map)) {

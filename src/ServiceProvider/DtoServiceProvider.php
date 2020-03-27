@@ -11,6 +11,7 @@ use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
@@ -62,6 +63,7 @@ final class DtoServiceProvider implements ServiceProviderInterface
                 VideoDto::class => DataToDtoPopulator::class . VideoDto::class,
                 NoteDto::class => DataToDtoPopulator::class . NoteDto::class,
                 EventDto::class => DataToDtoPopulator::class . EventDto::class,
+                CreateDto::class => DataToDtoPopulator::class . CreateDto::class,
             ]);
         };
 
@@ -89,6 +91,7 @@ final class DtoServiceProvider implements ServiceProviderInterface
             VideoDto::class,
             NoteDto::class,
             EventDto::class,
+            CreateDto::class,
         ];
 
         foreach ($activityStreamDtoClasses as $activityStreamDtoClass) {

@@ -29,6 +29,7 @@ final class ActivityStreamContentAssignmentFixture extends AbstractFixture imple
             'as-note',
             'as-event',
             'as-video',
+            'mastodon-create'
         ];
 
         foreach ($asContent as $referenceName) {
