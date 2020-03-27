@@ -3,5 +3,9 @@
   "type": "Video",
   "name": "Puppy Plays With Ball",
   "url": "http://example.org/video.mkv",
-  "duration": "PT2H"
+  "duration": "PT2H",
+  "attributedTo": {
+    "type": "Person",
+    "name": "Ben"
+  }
 }

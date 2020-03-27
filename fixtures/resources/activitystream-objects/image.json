@@ -13,5 +13,13 @@
       "href": "http://example.org/image.png",
       "mediaType": "image/png"
     }
-  ]
+  ],
+  "attributedTo": {
+    "type": "Person",
+    "nameMap": {
+      "de": "Hans",
+      "en": "John",
+      "fr": "Jean"
+    }
+  }
 }
