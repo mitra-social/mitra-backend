@@ -97,4 +97,17 @@ final class InboxControllerTest extends IntegrationTestCase
 
         self::assertEquals($expectedPayload, $actualPayload);
     }
+
+    public function testReturnsNotFoundOnNotExistingPage(): void
+    {
+        $user = $this->createUser();
+        $token = $this->createTokenForUser($user);
+
+        $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=1', $user->getPreferredUsername()), null, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(404, $response);
+    }
 }
