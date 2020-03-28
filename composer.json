@@ -3,6 +3,7 @@
   "license": "MIT",
   "repositories": [
     {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/php-env.git"},
+    {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/activitypub.git"},
     {"type": "vcs", "no-api": true, "url": "https://github.com/TiMESPLiNTER/phpstan-webmozart-assert.git"}
   ],
   "require": {
@@ -14,6 +15,7 @@
     "doctrine/dbal": "^2.10.1",
     "doctrine/migrations": "^2.1.1",
     "doctrine/orm": "^2.7.1",
+    "landrok/activitypub": "dev-improvements-destatized@dev",
     "league/tactician": "2.0-rc1",
     "mitra-social/php-env": "dev-master@dev",
     "monolog/monolog": "^2.0.2",
