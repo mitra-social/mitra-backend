@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Entity;
 
-final class User implements TimestampableInterface
+class User implements TimestampableInterface
 {
     use TimestampableTrait;
 

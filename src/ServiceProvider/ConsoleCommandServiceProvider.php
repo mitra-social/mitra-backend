@@ -26,6 +26,7 @@ use Doctrine\Migrations\Tools\Console\Command\LatestCommand;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand;
 use Doctrine\Migrations\Tools\Console\Command\StatusCommand;
 use Doctrine\ORM\Tools\Console\Command\GenerateProxiesCommand;
+use Mitra\Command\FixtureLoadCommand;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
@@ -43,7 +44,7 @@ final class ConsoleCommandServiceProvider implements ServiceProviderInterface
             $ormManagerRegistry = $container['proxymanager.doctrine.orm.manager_registry'];
             $dbalConnectionRegistry = $container['proxymanager.doctrine.dbal.connection_registry'];
 
-            return [
+            $commands = [
                 // own
 
                 // doctrine dbal
@@ -72,6 +73,12 @@ final class ConsoleCommandServiceProvider implements ServiceProviderInterface
                 new MigrateCommand(),
                 new StatusCommand(),
             ];
+
+            if ('dev' === $container['env']) {
+                $commands[] = new FixtureLoadCommand($container['doctrine.orm.em']);
+            }
+
+            return $commands;
         };
     }
 }

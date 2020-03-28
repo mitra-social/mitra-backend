@@ -42,9 +42,7 @@ final class ProfileController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        if ('' === $mimeType = $request->getHeaderLine('Accept')) {
-            $mimeType = 'application/json';
-        }
+        $accept = $request->getAttribute('accept');
 
         $userId = $request->getAttribute('token')['userId'];
 
@@ -55,6 +53,6 @@ final class ProfileController
             return $this->responseFactory->createResponse(404);
         }
 
-        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $mimeType);
+        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $request, $accept);
     }
 }

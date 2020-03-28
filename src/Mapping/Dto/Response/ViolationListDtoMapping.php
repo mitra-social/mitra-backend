@@ -9,6 +9,7 @@ use Mitra\Dto\Response\ViolationListDto;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 use Mitra\Validator\ViolationList;
+use Psr\Http\Message\ServerRequestInterface;
 use Webmozart\Assert\Assert;
 
 final class ViolationListDtoMapping implements EntityToDtoMappingInterface
@@ -36,10 +37,11 @@ final class ViolationListDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param ViolationList|object $entity
+     * @param ServerRequestInterface $request
      * @return ViolationListDto|object
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity): object
+    public function toDto(object $entity, ServerRequestInterface $request): object
     {
         if (!$entity instanceof ViolationList) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -49,7 +51,7 @@ final class ViolationListDtoMapping implements EntityToDtoMappingInterface
 
         foreach ($entity->getViolations() as $violation) {
             /** @var ViolationDto $violationDto */
-            $violationDto = $this->violationMapping->toDto($violation);
+            $violationDto = $this->violationMapping->toDto($violation, $request);
             $violationListDto->violations[] = $violationDto;
         }
 
