@@ -6,5 +6,8 @@ namespace Mitra\Dto\Response\ActivityStreams;
 
 final class MentionDto extends LinkDto
 {
+    /**
+     * @var string
+     */
     public $type = 'Mention';
 }

@@ -6,5 +6,8 @@ namespace Mitra\Dto\Response\ActivityStreams;
 
 final class VideoDto extends DocumentDto
 {
+    /**
+     * @var string
+     */
     public $type = 'Video';
 }

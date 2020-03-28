@@ -8,6 +8,9 @@ final class OrderedCollectionPageDto extends OrderedCollectionDto
 {
     use CollectionPageTrait;
 
+    /**
+     * @var string
+     */
     public $type = 'OrderedCollectionPage';
 
     /**

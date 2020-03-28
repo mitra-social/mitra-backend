@@ -37,7 +37,7 @@ class ActivityStreamContent
     private $endDate;
 
     /**
-     * @var array
+     * @var array<mixed>
      */
     private $object;
 
@@ -45,11 +45,11 @@ class ActivityStreamContent
      * ActivityStreamContent constructor.
      * @param string $id
      * @param string $type
+     * @param array<mixed> $object
      * @param \DateTime|null $published
      * @param \DateTime|null $updated
      * @param \DateTime|null $startDate
      * @param \DateTime|null $endDate
-     * @param array $object
      */
     public function __construct(
         string $id,
@@ -118,7 +118,7 @@ class ActivityStreamContent
     }
 
     /**
-     * @return array
+     * @return array<mixed>
      */
     public function getObject(): array
     {

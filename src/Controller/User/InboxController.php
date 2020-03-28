@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\Dto\DataToDtoManager;
+use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
@@ -32,6 +33,7 @@ use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\RouteCollectorInterface;
+use Webmozart\Assert\Assert;
 
 final class InboxController
 {
@@ -103,8 +105,8 @@ final class InboxController
         }
 
         $totalItems = $this->activityStreamContentAssignmentRepository->getTotalContentForUserId($inboxUser);
-        $totalPages = ceil($totalItems / self::ITEMS_PER_PAGE_LIMIT);
-        $lastPageNo = $totalPages - 1;
+        $totalPages = (int) ceil($totalItems / self::ITEMS_PER_PAGE_LIMIT);
+        $lastPageNo = 0 === $totalPages ? 0 : $totalPages - 1;
 
         if (null === $pageNo) {
             $orderedCollectionDto = new OrderedCollectionDto();
@@ -167,6 +169,11 @@ final class InboxController
         return $response;
     }
 
+    /**
+     * @param User $user
+     * @param int|null $page
+     * @return array<ObjectDto|LinkDto>
+     */
     private function getItems(User $user, ?int $page): array
     {
         $offset = null;
@@ -193,6 +200,8 @@ final class InboxController
                 $object
             );
         }
+
+        Assert::allIsInstanceOfAny($dtoItems, [ObjectDto::class, LinkDto::class]);
 
         return $dtoItems;
     }

@@ -6,5 +6,8 @@ namespace Mitra\Serialization\Encode;
 
 interface ArrayNormalizable
 {
+    /**
+     * @return array<mixed>
+     */
     public function toArray(): array;
 }

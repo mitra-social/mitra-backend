@@ -8,5 +8,8 @@ use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 
 class PersonDto extends ObjectDto
 {
+    /**
+     * @var string
+     */
     public $type = 'Person';
 }

@@ -6,5 +6,8 @@ namespace Mitra\Dto\Response\ActivityStreams;
 
 class DocumentDto extends ObjectDto
 {
+    /**
+     * @var string
+     */
     public $type = 'Document';
 }

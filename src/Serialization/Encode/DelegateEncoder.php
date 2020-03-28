@@ -38,9 +38,13 @@ final class DelegateEncoder implements EncoderInterface
         $this->encoders[$mimeType] = $encoder;
     }
 
+    /**
+     * @param mixed $data
+     * @return mixed
+     */
     private function deepNormalization($data)
     {
-        if (is_scalar($data)) {
+        if (null === $data || is_scalar($data)) {
             return $data;
         }
 
@@ -57,7 +61,11 @@ final class DelegateEncoder implements EncoderInterface
         return $normalizedData;
     }
 
-    private function convertToArray($data): array
+    /**
+     * @param object $data
+     * @return array<mixed>
+     */
+    private function convertToArray(object $data): array
     {
         return get_object_vars($data);
     }

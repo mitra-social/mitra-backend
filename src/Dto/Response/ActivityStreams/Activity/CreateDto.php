@@ -6,5 +6,8 @@ namespace Mitra\Dto\Response\ActivityStreams\Activity;
 
 final class CreateDto extends ActivityDto
 {
+    /**
+     * @var string
+     */
     public $type = 'Create';
 }
