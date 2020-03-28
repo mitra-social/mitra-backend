@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\Dto\DataToDtoManager;
-use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
