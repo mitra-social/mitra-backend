@@ -64,9 +64,7 @@ final class ActivityStreamContentFixture extends AbstractFixture
             $content['type'],
             $content,
             $this->parseDate($content['published'] ?? null),
-            $this->parseDate($content['updated'] ?? null),
-            $this->parseDate($content['startDate'] ?? null),
-            $this->parseDate($content['endDate'] ?? null)
+            $this->parseDate($content['updated'] ?? null)
         );
     }
 

@@ -37,35 +37,18 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
 
         $metadata->mapField([
             'fieldName' => 'published',
-            'column_name' => 'published',
             'type' => 'datetime',
             'nullable' => true,
         ]);
 
         $metadata->mapField([
             'fieldName' => 'updated',
-            'column_name' => 'updated',
-            'type' => 'datetime',
-            'nullable' => true,
-        ]);
-
-        $metadata->mapField([
-            'fieldName' => 'startDate',
-            'column_name' => 'start_date',
-            'type' => 'datetime',
-            'nullable' => true,
-        ]);
-
-        $metadata->mapField([
-            'fieldName' => 'endDate',
-            'column_name' => 'end_date',
             'type' => 'datetime',
             'nullable' => true,
         ]);
 
         $metadata->mapField([
             'fieldName' => 'object',
-            'column_name' => 'object',
             'type' => 'json',
             'nullable' => false,
         ]);

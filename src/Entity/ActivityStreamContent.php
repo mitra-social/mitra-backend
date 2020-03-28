@@ -27,16 +27,6 @@ class ActivityStreamContent
     private $updated;
 
     /**
-     * @var null|\DateTime
-     */
-    private $startDate;
-
-    /**
-     * @var null|\DateTime
-     */
-    private $endDate;
-
-    /**
      * @var array<mixed>
      */
     private $object;
@@ -48,24 +38,18 @@ class ActivityStreamContent
      * @param array<mixed> $object
      * @param \DateTime|null $published
      * @param \DateTime|null $updated
-     * @param \DateTime|null $startDate
-     * @param \DateTime|null $endDate
      */
     public function __construct(
         string $id,
         string $type,
         array $object,
         ?\DateTime $published,
-        ?\DateTime $updated,
-        ?\DateTime $startDate,
-        ?\DateTime $endDate
+        ?\DateTime $updated
     ) {
         $this->id = $id;
         $this->type = $type;
         $this->published = $published;
         $this->updated = $updated;
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
         $this->object = $object;
     }
 
@@ -99,22 +83,6 @@ class ActivityStreamContent
     public function getUpdated(): ?\DateTime
     {
         return $this->updated;
-    }
-
-    /**
-     * @return \DateTime|null
-     */
-    public function getStartDate(): ?\DateTime
-    {
-        return $this->startDate;
-    }
-
-    /**
-     * @return \DateTime|null
-     */
-    public function getEndDate(): ?\DateTime
-    {
-        return $this->endDate;
     }
 
     /**
