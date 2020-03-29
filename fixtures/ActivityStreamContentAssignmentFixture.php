@@ -9,7 +9,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
-use Mitra\Entity\User;
+use Mitra\Entity\Actor\Actor;
 use Ramsey\Uuid\Uuid;
 use Webmozart\Assert\Assert;
 
@@ -33,13 +33,17 @@ final class ActivityStreamContentAssignmentFixture extends AbstractFixture imple
         ];
 
         foreach ($asContent as $referenceName) {
-            $user = $this->getReference('user-john.doe');
-            Assert::isInstanceOf($user, User::class);
+            $actor = $this->getReference('actor-john.doe');
+            Assert::isInstanceOf($actor, Actor::class);
+
+            /** @var Actor $actor */
 
             $content = $this->getReference($referenceName);
             Assert::isInstanceOf($content, ActivityStreamContent::class);
 
-            $assignment = new ActivityStreamContentAssignment(Uuid::uuid4()->toString(), $user, $content);
+            /** @var ActivityStreamContent $content */
+
+            $assignment = new ActivityStreamContentAssignment(Uuid::uuid4()->toString(), $actor, $content);
 
             $manager->persist($assignment);
         }

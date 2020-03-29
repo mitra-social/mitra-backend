@@ -6,6 +6,8 @@ namespace Mitra\Mapping\Orm;
 
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\User\AbstractUser;
 
 final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
 {
@@ -51,6 +53,18 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
             'fieldName' => 'object',
             'type' => 'json',
             'nullable' => false,
+        ]);
+
+        $metadata->mapManyToOne([
+            'fieldName' => 'attributedTo',
+            'targetEntity' => Actor::class,
+            'joinColumns' => [
+                [
+                    'name' => 'attributed_to',
+                    'referencedColumnName' => 'id',
+                    'nullable' => true,
+                ],
+            ],
         ]);
     }
 }

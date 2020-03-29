@@ -7,10 +7,14 @@ namespace Mitra\Fixtures;
 use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Persistence\ObjectManager;
 use Mitra\Entity\ActivityStreamContent;
+use Mitra\Entity\Actor\Person;
+use Mitra\Entity\User\ExternalUser;
 use Ramsey\Uuid\Uuid;
 
 final class ActivityStreamContentFixture extends AbstractFixture
 {
+
+    private $actorMap = [];
 
     /**
      * @inheritDoc
@@ -20,6 +24,10 @@ final class ActivityStreamContentFixture extends AbstractFixture
         foreach ($this->getData() as $referenceName => $data) {
             $manager->persist($data);
             $this->addReference($referenceName, $data);
+        }
+
+        foreach ($this->actorMap as $actor) {
+            $manager->persist($actor);
         }
 
         $manager->flush();
@@ -59,10 +67,54 @@ final class ActivityStreamContentFixture extends AbstractFixture
     {
         $content = json_decode(file_get_contents($filePath), true, 512, JSON_THROW_ON_ERROR);
 
+        $attributedTo = $content['attributedTo'] ?? null;
+
+        $attributedToActor = null;
+
+        if (is_string($attributedTo)) {
+            $actorIdHash = hash('sha256', $attributedTo);
+
+            if (!isset($this->actorMap[$actorIdHash])) {
+                $user = new ExternalUser(
+                    Uuid::uuid4()->toString(),
+                    $attributedTo,
+                    $actorIdHash,
+                    null,
+                    $attributedTo . '/inbox',
+                    $attributedTo . '/outbox'
+                );
+
+                $this->actorMap[$actorIdHash] = new Person(Uuid::uuid4()->toString(), $user);
+            }
+
+            $attributedToActor = $this->actorMap[$actorIdHash];
+        } else {
+            $actorIdHash = hash('sha256', json_encode($attributedTo));
+
+            if (!isset($this->actorMap[$actorIdHash])) {
+                $user = new ExternalUser(
+                    Uuid::uuid4()->toString(),
+                    $attributedTo['id'] ?? $actorIdHash,
+                    $actorIdHash,
+                    $attributedTo['preferredUsername'] ?? null,
+                    $attributedTo['inbox'] ?? 'http://nirvana.org/inbox',
+                    $attributedTo['outbox'] ?? 'http://nowhere.org/outbox'
+                );
+
+                $person = new Person(Uuid::uuid4()->toString(), $user);
+                $person->setName($attributedTo['name'] ?? null);
+
+                $this->actorMap[$actorIdHash] = $person;
+            }
+
+            $attributedToActor = $this->actorMap[$actorIdHash];
+        }
+
         return new ActivityStreamContent(
             Uuid::uuid4()->toString(),
             $content['type'],
             $content,
+            $attributedToActor,
             $this->parseDate($content['published'] ?? null),
             $this->parseDate($content['updated'] ?? null)
         );

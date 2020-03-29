@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Mapping\Orm;
+namespace Mitra\Mapping\Orm\User;
 
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Mitra\Mapping\Orm\TimestampableOrmMappingTrait;
 use Mitra\Repository\UserRepository;
 
-final class UserOrmMapping implements ClassMapMappingInterface
+final class InternalUserOrmMapping implements ClassMapMappingInterface
 {
     use TimestampableOrmMappingTrait;
 
@@ -19,21 +20,11 @@ final class UserOrmMapping implements ClassMapMappingInterface
      */
     public function configureMapping(ClassMetadata $metadata)
     {
-        $metadata->setPrimaryTable(['name' => '`user`']);
+        $metadata->setPrimaryTable(['name' => 'user_internal']);
         $metadata->setCustomRepositoryClass(UserRepository::class);
 
         $metadata->mapField([
-            'fieldName' => 'id',
-            'type' => 'string',
-            'length' => 36,
-            'id' => true,
-            'strategy' => 'none',
-            'unique' => true,
-        ]);
-
-        $metadata->mapField([
-            'fieldName' => 'preferredUsername',
-            'column_name' => 'preferred_username',
+            'fieldName' => 'username',
             'type' => 'string',
             'length' => 255,
             'nullable' => false,
