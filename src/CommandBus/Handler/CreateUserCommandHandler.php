@@ -6,6 +6,7 @@ namespace Mitra\CommandBus\Handler;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Webmozart\Assert\Assert;
 
 final class CreateUserCommandHandler
 {
@@ -26,6 +27,9 @@ final class CreateUserCommandHandler
     public function __invoke(CreateUserCommand $command): void
     {
         $user = $command->getUser();
+
+        Assert::notNull($user->getActor());
+
         $user->setCreatedAt(new \DateTime());
 
         $hashedPassword = password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT);
