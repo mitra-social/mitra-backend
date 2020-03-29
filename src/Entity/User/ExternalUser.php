@@ -8,13 +8,13 @@ class ExternalUser extends AbstractUser
 {
 
     /**
-     * The external actor id from the remote server (must be null for internal actors)
+     * The external actor id from the remote server
      * @var string
      */
     private $externalId;
 
     /**
-     * A hash of the external actor id to lookup actor's faster (must be null for internal actors)
+     * A hash of the external actor id to lookup actor's faster
      * @var string
      */
     private $externalIdHash;
@@ -25,25 +25,25 @@ class ExternalUser extends AbstractUser
     private $preferredUsername;
 
     /**
-     * URL to the actor's inbox (must be null for internal actors)
+     * URL to the actor's inbox
      * @var string
      */
     private $inbox;
 
     /**
-     * URL to the actor's outbox (must be null for internal actors)
+     * URL to the actor's outbox
      * @var string
      */
     private $outbox;
 
     /**
-     * URL to a list of who this actor is following (must be null for internal actors)
+     * URL to a list of who this actor is following
      * @var null|string
      */
     private $following;
 
     /**
-     * URL to a list of who follows this actor (must be null for internal actors)
+     * URL to a list of who follows this actor
      * @var null|string
      */
     private $followers;
