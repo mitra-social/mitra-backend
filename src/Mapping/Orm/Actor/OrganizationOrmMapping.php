@@ -13,7 +13,7 @@ final class OrganizationOrmMapping implements ClassMapMappingInterfaceAlias
     /**
      * @inheritDoc
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
     }
 }

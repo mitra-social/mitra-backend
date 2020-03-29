@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Mapping\Dto\Response;
+namespace Mitra\Mapping\Dto\Response\ActivityPub;
 
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\UserResponseDto;
@@ -52,10 +52,10 @@ final class PersonDtoMapping implements EntityToDtoMappingInterface
         $uri = $request->getUri();
 
         $personDto = new PersonDto();
-        $source = $entity->getSource();
+        $user = $entity->getUser();
 
-        if ($source instanceof InternalUser) {
-            $preferredUsername = $source->getUsername();
+        if ($user instanceof InternalUser) {
+            $preferredUsername = $user->getUsername();
             $personDto->id = $routeParser->fullUrlFor($uri, 'user-read', ['preferredUsername' => $preferredUsername]);
             $personDto->preferredUsername = $preferredUsername;
             $personDto->inbox = $routeParser->fullUrlFor($uri, 'user-inbox', [
@@ -64,15 +64,15 @@ final class PersonDtoMapping implements EntityToDtoMappingInterface
             $personDto->outbox = $routeParser->fullUrlFor($uri, 'user-inbox', [
                 'preferredUsername' => $preferredUsername
             ]);
-        } elseif ($source instanceof ExternalUser) {
-            $personDto->id = $source->getExternalId();
-            $personDto->preferredUsername = $source->getPreferredUsername();
-            $personDto->inbox = $source->getInbox();
-            $personDto->outbox = $source->getOutbox();
+        } elseif ($user instanceof ExternalUser) {
+            $personDto->id = $user->getExternalId();
+            $personDto->preferredUsername = $user->getPreferredUsername();
+            $personDto->inbox = $user->getInbox();
+            $personDto->outbox = $user->getOutbox();
         } else {
             throw new \RuntimeException(sprintf(
                 'User `%s` can not be mapped to `%s` dto',
-                get_class($source),
+                get_class($user),
                 PersonDto::class
             ));
         }
