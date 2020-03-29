@@ -62,6 +62,7 @@ final class ActorOrmMapping implements ClassMapMappingInterface
         $metadata->mapOneToOne([
             'fieldName' => 'user',
             'targetEntity' => AbstractUser::class,
+            'inversedBy' => 'actor',
             'cascade' => ['persist', 'remove'],
             'joinColumns' => [
                 [

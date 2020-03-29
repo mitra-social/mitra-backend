@@ -7,7 +7,7 @@ namespace Mitra\Tests\Integration\Controller\Me;
 use Firebase\JWT\JWT;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Ramsey\Uuid\Uuid;
 
@@ -42,7 +42,7 @@ final class ProfileControllerTest extends IntegrationTestCase
         $username = 'foo.bar.2';
         $plaintextPassword = 's0mePässw0rd';
 
-        $user = new User($userId, $username, 'foo.bar.2@example.com');
+        $user = new InternalUser($userId, $username, 'foo.bar.2@example.com');
         $user->setPlaintextPassword($plaintextPassword);
 
         $this->commandBus->handle(new CreateUserCommand($user));

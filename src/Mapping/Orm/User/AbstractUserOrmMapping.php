@@ -6,6 +6,8 @@ namespace Mitra\Mapping\Orm\User;
 
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\User\AbstractUser;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 
@@ -40,6 +42,14 @@ final class AbstractUserOrmMapping implements ClassMapMappingInterface
             'id' => true,
             'strategy' => 'none',
             'unique' => true,
+        ]);
+
+        $metadata->mapOneToOne([
+            'fieldName' => 'actor',
+            'targetEntity' => Actor::class,
+            'mappedBy' => 'user',
+            'cascade' => ['persist', 'remove'],
+
         ]);
     }
 }

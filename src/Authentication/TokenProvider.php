@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Mitra\Authentication;
 
-use Doctrine\ORM\EntityRepository;
 use Firebase\JWT\JWT;
-use Mitra\Entity\User;
-use Mitra\Repository\UserRepository;
+use Mitra\Repository\InternalUserRepository;
 
 final class TokenProvider
 {
 
     /**
-     * @var UserRepository
+     * @var InternalUserRepository
      */
     private $userRepository;
 
@@ -22,7 +20,7 @@ final class TokenProvider
      */
     private $secretKey;
 
-    public function __construct(UserRepository $userRepository, string $secretKey)
+    public function __construct(InternalUserRepository $userRepository, string $secretKey)
     {
         $this->userRepository = $userRepository;
         $this->secretKey = $secretKey;
@@ -36,7 +34,7 @@ final class TokenProvider
      */
     public function generate(string $username, string $plaintextPassword): string
     {
-        $user = $this->userRepository->findOneByPreferredUsername($username);
+        $user = $this->userRepository->findByUsername($username);
 
         if (null === $user) {
             throw new TokenIssueException(sprintf('Could not find user with preferredUsername `%s`', $username));

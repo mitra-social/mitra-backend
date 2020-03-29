@@ -6,8 +6,9 @@ namespace Mitra\Controller\Webfinger;
 
 use ActivityPhp\Server;
 use Doctrine\ORM\EntityRepository;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
+use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -26,19 +27,19 @@ final class WebfingerController
     private $encoder;
 
     /**
-     * @var EntityRepository
+     * @var InternalUserRepository
      */
     private $userRepository;
 
     /**
      * @param ResponseFactoryInterface $responseFactory
      * @param EncoderInterface $encoder
-     * @param EntityRepository $userRepository
+     * @param InternalUserRepository $userRepository
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        EntityRepository $userRepository
+        InternalUserRepository $userRepository
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
@@ -67,8 +68,8 @@ final class WebfingerController
 
         $preferredUsername = $handleParts[0];
 
-        /** @var User|null $user */
-        $user = $this->userRepository->findOneBy(['preferredUsername' => $preferredUsername]);
+        /** @var InternalUser|null $user */
+        $user = $this->userRepository->findByUsername($preferredUsername);
 
         if (null === $user) {
             return $this->responseFactory->createResponse(404);
@@ -78,7 +79,7 @@ final class WebfingerController
             [
                 'rel' => 'self',
                 'type' => 'application/activity+json',
-                'href' => 'http://localhost/users/' . $user->getPreferredUsername()
+                'href' => 'http://localhost/users/' . $user->getUsername()
             ]
         ]]);
 

@@ -7,9 +7,8 @@ namespace Integration\Controller\System;
 use Firebase\JWT\JWT;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Tests\Integration\IntegrationTestCase;
-use Psr\Container\ContainerInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -57,7 +56,7 @@ final class TokenControllerTest extends IntegrationTestCase
         $username = 'foo.bar';
         $plaintextPassword = 's0mePässw0rd';
 
-        $user = new User($userId, $username, 'foo.bar@example.com');
+        $user = new InternalUser($userId, $username, 'foo.bar@example.com');
         $user->setPlaintextPassword($plaintextPassword);
 
         $this->commandBus->handle(new CreateUserCommand($user));

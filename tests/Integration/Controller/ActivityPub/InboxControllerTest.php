@@ -31,7 +31,7 @@ final class InboxControllerTest extends IntegrationTestCase
     {
         $user = $this->createUser();
 
-        $request = $this->createRequest('GET', sprintf('/user/%s/inbox', $user->getPreferredUsername()));
+        $request = $this->createRequest('GET', sprintf('/user/%s/inbox', $user->getUsername()));
         $response = $this->executeRequest($request);
 
         self::assertStatusCode(401, $response);
@@ -55,7 +55,7 @@ final class InboxControllerTest extends IntegrationTestCase
         $user = $this->createUser();
         $token = $this->createTokenForUser($user);
 
-        $request = $this->createRequest('GET', sprintf('/user/%s/inbox', $user->getPreferredUsername()), null, [
+        $request = $this->createRequest('GET', sprintf('/user/%s/inbox', $user->getUsername()), null, [
             'Authorization' => sprintf('Bearer %s', $token)
         ]);
         $response = $this->executeRequest($request);
@@ -67,8 +67,8 @@ final class InboxControllerTest extends IntegrationTestCase
             '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'OrderedCollection',
             'totalItems' => 0,
-            'first' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getPreferredUsername()),
-            'last' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getPreferredUsername()),
+            'first' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getUsername()),
+            'last' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);
@@ -79,7 +79,7 @@ final class InboxControllerTest extends IntegrationTestCase
         $user = $this->createUser();
         $token = $this->createTokenForUser($user);
 
-        $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=0', $user->getPreferredUsername()), null, [
+        $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=0', $user->getUsername()), null, [
             'Authorization' => sprintf('Bearer %s', $token)
         ]);
         $response = $this->executeRequest($request);
@@ -92,7 +92,7 @@ final class InboxControllerTest extends IntegrationTestCase
             'type' => 'OrderedCollectionPage',
             'totalItems' => 0,
             'orderedItems' => [],
-            'partOf' => sprintf('http://localhost/user/%s/inbox', $user->getPreferredUsername()),
+            'partOf' => sprintf('http://localhost/user/%s/inbox', $user->getUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);
@@ -103,7 +103,7 @@ final class InboxControllerTest extends IntegrationTestCase
         $user = $this->createUser();
         $token = $this->createTokenForUser($user);
 
-        $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=1', $user->getPreferredUsername()), null, [
+        $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=1', $user->getUsername()), null, [
             'Authorization' => sprintf('Bearer %s', $token)
         ]);
         $response = $this->executeRequest($request);
