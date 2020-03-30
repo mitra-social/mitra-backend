@@ -24,7 +24,7 @@ trait CreateUserTrait
         $user = new InternalUser($userId, $username, $username . '@example.com');
         $user->setPlaintextPassword($plaintextPassword);
 
-        $actor = new Person(Uuid::uuid4()->toString(), $user);
+        $actor = new Person($user);
 
         $user->setActor($actor);
 

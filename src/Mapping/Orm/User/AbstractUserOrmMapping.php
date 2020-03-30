@@ -7,7 +7,6 @@ namespace Mitra\Mapping\Orm\User;
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Mitra\Entity\Actor\Actor;
-use Mitra\Entity\User\AbstractUser;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 
@@ -31,7 +30,7 @@ final class AbstractUserOrmMapping implements ClassMapMappingInterface
         ]);
 
         $metadata->setDiscriminatorMap([
-            'user' => InternalUser::class,
+            'internal' => InternalUser::class,
             'external' => ExternalUser::class,
         ]);
 
@@ -49,7 +48,6 @@ final class AbstractUserOrmMapping implements ClassMapMappingInterface
             'targetEntity' => Actor::class,
             'mappedBy' => 'user',
             'cascade' => ['persist', 'remove'],
-
         ]);
     }
 }

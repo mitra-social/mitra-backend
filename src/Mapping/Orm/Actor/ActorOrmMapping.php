@@ -37,15 +37,6 @@ final class ActorOrmMapping implements ClassMapMappingInterface
         ]);
 
         $metadata->mapField([
-            'fieldName' => 'id',
-            'type' => 'string',
-            'length' => 36,
-            'id' => true,
-            'strategy' => 'none',
-            'unique' => true,
-        ]);
-
-        $metadata->mapField([
             'fieldName' => 'name',
             'type' => 'string',
             'length' => 2048,
@@ -61,12 +52,13 @@ final class ActorOrmMapping implements ClassMapMappingInterface
 
         $metadata->mapOneToOne([
             'fieldName' => 'user',
+            'id' => true,
             'targetEntity' => AbstractUser::class,
             'inversedBy' => 'actor',
             'cascade' => ['persist', 'remove'],
             'joinColumns' => [
                 [
-                    'name' => 'user_id',
+                    'name' => 'id',
                     'nullable' => false,
                 ]
             ],

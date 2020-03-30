@@ -9,12 +9,6 @@ use Mitra\Entity\User\AbstractUser;
 class Actor
 {
     /**
-     * The internal id of the external or internal actor
-     * @var string
-     */
-    private $id;
-
-    /**
      * An optional display name of the actor
      * @var null|string
      */
@@ -32,18 +26,9 @@ class Actor
      */
     private $user;
 
-    public function __construct(string $id, AbstractUser $user)
+    public function __construct(AbstractUser $user)
     {
-        $this->id = $id;
         $this->user = $user;
-    }
-
-    /**
-     * @return string
-     */
-    public function getId(): string
-    {
-        return $this->id;
     }
 
     /**

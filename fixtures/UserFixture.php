@@ -21,7 +21,7 @@ final class UserFixture extends AbstractFixture
         $user->setHashedPassword('$2y$10$DdhRHcSM1WpU.0QfgNqvc.TPL71CToS/0l/WQcQC7FfQliXtu09z.'); // helloworld
         $user->setCreatedAt(new \DateTime());
 
-        $actor = new Person('31494782-a0b3-4327-b555-44d59b521d1f', $user);
+        $actor = new Person($user);
         $actor->setName('John Doe');
 
         $manager->persist($user);

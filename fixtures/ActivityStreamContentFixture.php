@@ -84,7 +84,7 @@ final class ActivityStreamContentFixture extends AbstractFixture
                     $attributedTo . '/outbox'
                 );
 
-                $this->actorMap[$actorIdHash] = new Person(Uuid::uuid4()->toString(), $user);
+                $this->actorMap[$actorIdHash] = new Person($user);
             }
 
             $attributedToActor = $this->actorMap[$actorIdHash];
@@ -101,7 +101,7 @@ final class ActivityStreamContentFixture extends AbstractFixture
                     $attributedTo['outbox'] ?? 'http://nowhere.org/outbox'
                 );
 
-                $person = new Person(Uuid::uuid4()->toString(), $user);
+                $person = new Person($user);
                 $person->setName($attributedTo['name'] ?? null);
 
                 $this->actorMap[$actorIdHash] = $person;

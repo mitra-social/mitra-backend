@@ -37,7 +37,7 @@ final class CreateUserRequestDtoMapping implements DtoToEntityMappingInterface
         $user = new InternalUser(Uuid::uuid4()->toString(), $dto->username, $dto->email);
         $user->setPlaintextPassword($dto->password);
 
-        $actor = new Person(Uuid::uuid4()->toString(), $user);
+        $actor = new Person($user);
         $actor->setName($dto->displayName);
 
         $user->setActor($actor);
