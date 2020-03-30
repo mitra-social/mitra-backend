@@ -15,11 +15,11 @@ use Ramsey\Uuid\Uuid;
  */
 trait CreateUserTrait
 {
-    protected function createUser(): InternalUser
+    protected function createUser(?string $password = null): InternalUser
     {
         $userId = Uuid::uuid4()->toString();
         $username = 'john.doe.' . uniqid();
-        $plaintextPassword = 's0mePässw0rd';
+        $plaintextPassword = $password ?? 's0mePässw0rd';
 
         $user = new InternalUser($userId, $username, $username . '@example.com');
         $user->setPlaintextPassword($plaintextPassword);

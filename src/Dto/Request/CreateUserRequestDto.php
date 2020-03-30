@@ -10,7 +10,12 @@ final class CreateUserRequestDto
     /**
      * @var string
      */
-    public $preferredUsername;
+    public $username;
+
+    /**
+     * @var null|string
+     */
+    public $displayName;
 
     /**
      * @var string

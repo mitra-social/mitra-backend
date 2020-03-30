@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration\Controller\Me;
 
-use Firebase\JWT\JWT;
-use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Entity\User\InternalUser;
+use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
-use Ramsey\Uuid\Uuid;
 
 /**
  * @group Integration
  */
 final class ProfileControllerTest extends IntegrationTestCase
 {
+    use CreateUserTrait;
+
     /**
      * @var CommandBusInterface
      */
@@ -38,16 +37,8 @@ final class ProfileControllerTest extends IntegrationTestCase
 
     public function testReturnsUserInformationIfAuthorized(): void
     {
-        $userId = Uuid::uuid4()->toString();
-        $username = 'foo.bar.2';
-        $plaintextPassword = 's0mePässw0rd';
-
-        $user = new InternalUser($userId, $username, 'foo.bar.2@example.com');
-        $user->setPlaintextPassword($plaintextPassword);
-
-        $this->commandBus->handle(new CreateUserCommand($user));
-
-        $token = JWT::encode(['userId' => $userId], $this->getContainer()->get('jwt.secret'));
+        $user = $this->createUser();
+        $token = $this->createTokenForUser($user);
 
         $request = $this->createRequest('GET', '/me', null, ['Authorization' => sprintf('Bearer %s', $token)]);
         $response = $this->executeRequest($request);

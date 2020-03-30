@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace Integration\Controller\System;
 
 use Firebase\JWT\JWT;
-use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Entity\User\InternalUser;
+use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
-use Ramsey\Uuid\Uuid;
 
 /**
  * @group Integration
  */
 final class TokenControllerTest extends IntegrationTestCase
 {
+    use CreateUserTrait;
 
     /**
      * @var CommandBusInterface
@@ -52,18 +51,12 @@ final class TokenControllerTest extends IntegrationTestCase
 
     public function testIssuingTokenSuccessful(): void
     {
-        $userId = Uuid::uuid4()->toString();
-        $username = 'foo.bar';
-        $plaintextPassword = 's0mePässw0rd';
-
-        $user = new InternalUser($userId, $username, 'foo.bar@example.com');
-        $user->setPlaintextPassword($plaintextPassword);
-
-        $this->commandBus->handle(new CreateUserCommand($user));
+        $password = 's0mePässw0rd';
+        $user = $this->createUser($password);
 
         $data = [
-            'username' => $username,
-            'password' => $plaintextPassword,
+            'username' => $user->getUsername(),
+            'password' => $password,
         ];
 
         $request = $this->createRequest('POST', '/token', json_encode($data));
@@ -78,6 +71,6 @@ final class TokenControllerTest extends IntegrationTestCase
 
         $decodedToken = JWT::decode($decodedPayload['token'], $this->getContainer()->get('jwt.secret'), ['HS256']);
 
-        self::assertEquals($userId, $decodedToken->userId);
+        self::assertEquals($user->getId(), $decodedToken->userId);
     }
 }
