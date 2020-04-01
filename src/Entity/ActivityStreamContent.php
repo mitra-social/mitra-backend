@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Entity;
 
+use Mitra\Entity\Actor\Actor;
+
 class ActivityStreamContent
 {
     /**
@@ -27,6 +29,11 @@ class ActivityStreamContent
     private $updated;
 
     /**
+     * @var null|Actor
+     */
+    private $attributedTo;
+
+    /**
      * @var array<mixed>
      */
     private $object;
@@ -36,6 +43,7 @@ class ActivityStreamContent
      * @param string $id
      * @param string $type
      * @param array<mixed> $object
+     * @param null|Actor $attributedTo
      * @param \DateTime|null $published
      * @param \DateTime|null $updated
      */
@@ -43,6 +51,7 @@ class ActivityStreamContent
         string $id,
         string $type,
         array $object,
+        ?Actor $attributedTo,
         ?\DateTime $published,
         ?\DateTime $updated
     ) {
@@ -51,6 +60,7 @@ class ActivityStreamContent
         $this->published = $published;
         $this->updated = $updated;
         $this->object = $object;
+        $this->attributedTo = $attributedTo;
     }
 
     /**

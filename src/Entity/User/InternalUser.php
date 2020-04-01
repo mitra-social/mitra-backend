@@ -2,26 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Entity;
+namespace Mitra\Entity\User;
 
-class User implements TimestampableInterface
+use Mitra\Entity\TimestampableInterface;
+use Mitra\Entity\TimestampableTrait;
+
+class InternalUser extends AbstractUser implements TimestampableInterface
 {
     use TimestampableTrait;
 
     /**
      * @var string
      */
-    private $id;
-
-    /**
-     * @var string
-     */
-    private $preferredUsername;
-
-    /**
-     * @var string
-     */
     private $email;
+
+    /**
+     * @var string
+     */
+    private $username;
 
     /**
      * @var string
@@ -33,26 +31,25 @@ class User implements TimestampableInterface
      */
     private $plaintextPassword;
 
-    public function __construct(string $id, string $preferredUsername, string $email)
+    public function __construct(string $id, string $username, string $email)
     {
-        $this->id = $id;
-        $this->preferredUsername = $preferredUsername;
+        parent::__construct($id);
+
         $this->email = $email;
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function getPreferredUsername(): string
-    {
-        return $this->preferredUsername;
+        $this->username = $username;
     }
 
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUsername(): string
+    {
+        return $this->username;
     }
 
     public function getHashedPassword(): ?string

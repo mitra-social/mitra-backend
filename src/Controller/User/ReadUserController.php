@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\Dto\Response\UserResponseDto;
-use Mitra\Entity\User;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Repository\UserRepository;
+use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,14 +24,14 @@ final class ReadUserController
     private $encoder;
 
     /**
-     * @var UserRepository
+     * @var InternalUserRepository
      */
     private $userRepository;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        UserRepository $userRepository
+        InternalUserRepository $userRepository
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
@@ -44,7 +43,7 @@ final class ReadUserController
         $accept = $request->getAttribute('accept');
         $preferredUsername = $request->getAttribute('preferredUsername');
 
-        if (null === $user = $this->userRepository->findOneByPreferredUsername($preferredUsername)) {
+        if (null === $user = $this->userRepository->findByUsername($preferredUsername)) {
             return $this->responseFactory->createResponse(404);
         }
 

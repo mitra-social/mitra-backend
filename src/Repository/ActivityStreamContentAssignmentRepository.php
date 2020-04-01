@@ -5,28 +5,27 @@ declare(strict_types=1);
 namespace Mitra\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query\Expr\Join;
 use Mitra\Entity\ActivityStreamContentAssignment;
-use Mitra\Entity\User;
+use Mitra\Entity\Actor\Actor;
 
 final class ActivityStreamContentAssignmentRepository extends EntityRepository
 {
     /**
-     * @param User $user
+     * @param Actor $actor
      * @param int $offset
      * @param int $limit
      * @return array<ActivityStreamContentAssignment>
      * @throws \Exception
      */
-    public function findContentForUserId(User $user, ?int $offset, ?int $limit): array
+    public function findContentForActor(Actor $actor, ?int $offset, ?int $limit): array
     {
         $qb = $this->createQueryBuilder('ca')
             ->select('ca', 'c')
             ->innerJoin('ca.content', 'c')
-            ->where('ca.user = :user')
+            ->where('ca.actor = :actor')
             ->orderBy('c.published', 'DESC')
             ->setParameters([
-                'user' => $user,
+                'actor' => $actor,
             ])
         ;
 
@@ -41,13 +40,13 @@ final class ActivityStreamContentAssignmentRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getTotalContentForUserId(User $user): int
+    public function getTotalContentForUserId(Actor $actor): int
     {
         $qb = $this->createQueryBuilder('ca');
         $qb
             ->select($qb->expr()->count('ca'))
-            ->where('ca.user = :user')
-            ->setParameter('user', $user);
+            ->where('ca.actor = :actor')
+            ->setParameter('actor', $actor);
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }

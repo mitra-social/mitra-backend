@@ -11,11 +11,21 @@ use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
-use Mitra\Entity\User;
+use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\Actor\Organization;
+use Mitra\Entity\Actor\Person;
+use Mitra\Entity\User\AbstractUser;
+use Mitra\Entity\User\ExternalUser;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Env\Env;
 use Mitra\Mapping\Orm\ActivityStreamContentAssignmentOrmMapping;
 use Mitra\Mapping\Orm\ActivityStreamContentOrmMapping;
-use Mitra\Mapping\Orm\UserOrmMapping;
+use Mitra\Mapping\Orm\Actor\ActorOrmMapping;
+use Mitra\Mapping\Orm\Actor\OrganizationOrmMapping;
+use Mitra\Mapping\Orm\Actor\PersonOrmMapping;
+use Mitra\Mapping\Orm\User\AbstractUserOrmMapping;
+use Mitra\Mapping\Orm\User\ExternalUserOrmMapping;
+use Mitra\Mapping\Orm\User\InternalUserOrmMapping;
 use Mitra\Mapping\Validation\TokenRequestDtoValidationMapping;
 use Mitra\Mapping\Validation\CreateUserRequestDtoValidationMapping;
 use Monolog\Logger;
@@ -90,9 +100,14 @@ final class Config implements ConfigInterface
             'doctrine.migrations.table' => 'doctrine_migration_version',
             'mappings' => [
                 'orm' => [
-                    User::class => UserOrmMapping::class,
+                    AbstractUser::class => AbstractUserOrmMapping::class,
+                    ExternalUser::class => ExternalUserOrmMapping::class,
+                    InternalUser::class => InternalUserOrmMapping::class,
                     ActivityStreamContent::class => ActivityStreamContentOrmMapping::class,
                     ActivityStreamContentAssignment::class => ActivityStreamContentAssignmentOrmMapping::class,
+                    Actor::class => ActorOrmMapping::class,
+                    Person::class => PersonOrmMapping::class,
+                    Organization::class => OrganizationOrmMapping::class,
                 ],
                 'validation' => [
                     CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,

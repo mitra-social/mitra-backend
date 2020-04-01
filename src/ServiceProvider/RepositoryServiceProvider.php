@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Mitra\ServiceProvider;
 
 use Mitra\Entity\ActivityStreamContentAssignment;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
-use Mitra\Repository\UserRepository;
+use Mitra\Repository\InternalUserRepository;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
@@ -19,8 +19,8 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[UserRepository::class] = function ($container) {
-            return $container['doctrine.orm.em']->getRepository(User::class);
+        $container[InternalUserRepository::class] = function ($container): InternalUserRepository {
+            return new InternalUserRepository($container['doctrine.orm.em']->getRepository(InternalUser::class));
         };
 
         $container[ActivityStreamContentAssignmentRepository::class] = function ($container) {

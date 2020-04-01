@@ -67,12 +67,14 @@ class ObjectDto implements TypeInterface
     public $generator;
 
     /**
-     * @var null|ImageDto|LinkDto|array<ImageDto,LinkDto>
+     * Indicates an entity that describes an icon for this object. The image should have an aspect ratio of
+     * one (horizontal) to one (vertical) and should be suitable for presentation at a small size.
+     * @var null|string|ImageDto|LinkDto|array<string|ImageDto|LinkDto>
      */
     public $icon;
 
     /**
-     * @var null|ImageDto|LinkDto|array<ImageDto,LinkDto>
+     * @var null|ImageDto|LinkDto|array<ImageDto|LinkDto>
      */
     public $image;
 

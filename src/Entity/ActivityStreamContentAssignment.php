@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Entity;
 
+use Mitra\Entity\Actor\Actor;
+
 class ActivityStreamContentAssignment
 {
 
@@ -13,19 +15,19 @@ class ActivityStreamContentAssignment
     private $id;
 
     /**
-     * @var User
+     * @var Actor
      */
-    private $user;
+    private $actor;
 
     /**
      * @var ActivityStreamContent
      */
     private $content;
 
-    public function __construct(string $id, User $user, ActivityStreamContent $content)
+    public function __construct(string $id, Actor $actor, ActivityStreamContent $content)
     {
         $this->id = $id;
-        $this->user = $user;
+        $this->actor = $actor;
         $this->content = $content;
     }
 
@@ -34,9 +36,9 @@ class ActivityStreamContentAssignment
         return $this->id;
     }
 
-    public function getUser(): User
+    public function getActor(): Actor
     {
-        return $this->user;
+        return $this->actor;
     }
 
     public function getContent(): ActivityStreamContent

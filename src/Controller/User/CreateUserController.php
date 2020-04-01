@@ -10,13 +10,12 @@ use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoManager;
 use Mitra\Dto\Response\UserResponseDto;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Ramsey\Uuid\Uuid;
 
 final class CreateUserController
 {
@@ -86,8 +85,8 @@ final class CreateUserController
             return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
-        /** @var User $user */
-        $user = $this->dtoToEntityMapper->map($createUserRequestDto, User::class);
+        /** @var InternalUser $user */
+        $user = $this->dtoToEntityMapper->map($createUserRequestDto, InternalUser::class);
 
         $this->commandBus->handle(new CreateUserCommand($user));
 

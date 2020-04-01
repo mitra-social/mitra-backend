@@ -24,10 +24,11 @@ use Mitra\Dto\Response\ActivityStreams\TombstoneDto;
 use Mitra\Dto\Response\ActivityStreams\TypeInterface;
 use Mitra\Dto\Response\ActivityStreams\VideoDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
-use Mitra\Entity\User;
+use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
-use Mitra\Repository\UserRepository;
+use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -45,7 +46,7 @@ final class InboxController
     private $responseFactory;
 
     /**
-     * @var UserRepository
+     * @var InternalUserRepository
      */
     private $userRepository;
 
@@ -72,7 +73,7 @@ final class InboxController
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        UserRepository $userRepository,
+        InternalUserRepository $userRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
         RouteCollectorInterface $routeCollector,
         DataToDtoManager $dataToDtoManager
@@ -92,18 +93,21 @@ final class InboxController
         $authenticatedUserId = $request->getAttribute('token')['userId'];
         $pageNo = $request->getQueryParams()['page'] ?? null;
 
-        /** @var User|null $authenticatedUser */
-        $authenticatedUser = $this->userRepository->find($authenticatedUserId);
+        /** @var InternalUser|null $authenticatedUser */
+        $authenticatedUser = $this->userRepository->findById($authenticatedUserId);
 
         if (null === $authenticatedUser) {
             return $this->responseFactory->createResponse(403);
         }
 
-        if (null === $inboxUser = $this->userRepository->findOneByPreferredUsername($username)) {
+        if (null === $inboxUser = $this->userRepository->findByUsername($username)) {
             return $this->responseFactory->createResponse(404);
         }
 
-        $totalItems = $this->activityStreamContentAssignmentRepository->getTotalContentForUserId($inboxUser);
+        $inboxUsername = $inboxUser->getUsername();
+        $inboxActor = $inboxUser->getActor();
+
+        $totalItems = $this->activityStreamContentAssignmentRepository->getTotalContentForUserId($inboxActor);
         $totalPages = (int) ceil($totalItems / self::ITEMS_PER_PAGE_LIMIT);
         $lastPageNo = 0 === $totalPages ? 0 : $totalPages - 1;
 
@@ -112,13 +116,13 @@ final class InboxController
             $orderedCollectionDto->first = $this->routeCollector->getRouteParser()->fullUrlFor(
                 $request->getUri(),
                 'user-inbox',
-                ['preferredUsername' => $inboxUser->getPreferredUsername()],
+                ['preferredUsername' => $inboxUsername],
                 ['page' => 0]
             );
             $orderedCollectionDto->last = $this->routeCollector->getRouteParser()->fullUrlFor(
                 $request->getUri(),
                 'user-inbox',
-                ['preferredUsername' => $inboxUser->getPreferredUsername()],
+                ['preferredUsername' => $inboxUsername],
                 ['page' => $lastPageNo]
             );
         } else {
@@ -131,7 +135,7 @@ final class InboxController
             $inboxUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
                 $request->getUri(),
                 'user-inbox',
-                ['preferredUsername' => $inboxUser->getPreferredUsername()]
+                ['preferredUsername' => $inboxUsername]
             );
 
             $orderedCollectionDto = new OrderedCollectionPageDto();
@@ -141,7 +145,7 @@ final class InboxController
                 $orderedCollectionDto->prev = $this->routeCollector->getRouteParser()->fullUrlFor(
                     $request->getUri(),
                     'user-inbox',
-                    ['preferredUsername' => $inboxUser->getPreferredUsername()],
+                    ['preferredUsername' => $inboxUsername],
                     ['page' => $pageNo - 1]
                 );
             }
@@ -150,12 +154,12 @@ final class InboxController
                 $orderedCollectionDto->next = $this->routeCollector->getRouteParser()->fullUrlFor(
                     $request->getUri(),
                     'user-inbox',
-                    ['preferredUsername' => $inboxUser->getPreferredUsername()],
+                    ['preferredUsername' => $inboxUsername],
                     ['page' => $pageNo + 1]
                 );
             }
 
-            $orderedCollectionDto->orderedItems = $this->getItems($inboxUser, $pageNo);
+            $orderedCollectionDto->orderedItems = $this->getItems($inboxActor, $pageNo);
         }
 
         $orderedCollectionDto->context = TypeInterface::CONTEXT_ACTIVITY_STREAMS;
@@ -169,11 +173,12 @@ final class InboxController
     }
 
     /**
-     * @param User $user
+     * @param Actor $actor
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
+     * @throws \Exception
      */
-    private function getItems(User $user, ?int $page): array
+    private function getItems(Actor $actor, ?int $page): array
     {
         $offset = null;
         $limit = null;
@@ -183,7 +188,11 @@ final class InboxController
             $limit = self::ITEMS_PER_PAGE_LIMIT;
         }
 
-        $items = $this->activityStreamContentAssignmentRepository->findContentForUserId($user, $offset, $limit);
+        $items = $this->activityStreamContentAssignmentRepository->findContentForActor(
+            $actor,
+            $offset,
+            $limit
+        );
 
         $dtoItems = [];
 

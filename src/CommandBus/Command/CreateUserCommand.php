@@ -4,28 +4,21 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Command;
 
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 
 final class CreateUserCommand
 {
     /**
-     * @var User
+     * @var InternalUser
      */
     protected $user;
 
-    /**
-     * CreateUserCommand constructor.
-     * @param User $user
-     */
-    public function __construct(User $user)
+    public function __construct(InternalUser $user)
     {
         $this->user = $user;
     }
 
-    /**
-     * @return User
-     */
-    public function getUser(): User
+    public function getUser(): InternalUser
     {
         return $this->user;
     }

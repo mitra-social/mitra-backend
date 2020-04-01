@@ -18,7 +18,7 @@ use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\RequestToDtoManager;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
-use Mitra\Repository\UserRepository;
+use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
@@ -63,7 +63,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new ReadUserController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[UserRepository::class]
+                $container[InternalUserRepository::class]
             );
         };
 
@@ -71,7 +71,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new InboxController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[UserRepository::class],
+                $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
                 $container[RouteCollector::class],
                 $container[DataToDtoManager::class]
@@ -82,7 +82,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new WebfingerController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[UserRepository::class]
+                $container[InternalUserRepository::class]
             );
         };
 
@@ -91,7 +91,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new ProfileController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[UserRepository::class]
+                $container[InternalUserRepository::class]
             );
         };
     }
