@@ -80,12 +80,11 @@ final class HttpSignature
 
         $signature = $rsa->sign($plaintext);
 
-        return $request
-            ->withHeader('Signature', sprintf(
-                'keyId="%s",headers="(request-target) host date",signature="%s"',
-                $publicKeyUrl,
-                base64_encode($signature)
-            ));
+        return $request->withHeader('Signature', sprintf(
+            'keyId="%s",headers="(request-target) host date",signature="%s"',
+            $publicKeyUrl,
+            base64_encode($signature)
+        ));
     }
 
     /**

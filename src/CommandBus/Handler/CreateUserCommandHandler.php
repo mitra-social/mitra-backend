@@ -6,6 +6,7 @@ namespace Mitra\CommandBus\Handler;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\Entity\User\InternalUser;
 use Webmozart\Assert\Assert;
 
 final class CreateUserCommandHandler
@@ -32,6 +33,15 @@ final class CreateUserCommandHandler
 
         $user->setCreatedAt(new \DateTime());
 
+        $this->hashPassword($user);
+        $this->seedKeyPair($user);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+    }
+
+    private function hashPassword(InternalUser $user): void
+    {
         $hashedPassword = password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT);
 
         if (false === $hashedPassword) {
@@ -40,8 +50,20 @@ final class CreateUserCommandHandler
 
         $user->setHashedPassword($hashedPassword);
         $user->setPlaintextPassword(null);
+    }
 
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+    private function seedKeyPair(InternalUser $user): void
+    {
+        // Create the keypair
+        $res = openssl_pkey_new();
+
+        // Get private key
+        openssl_pkey_export($res, $privKey);
+        $user->setPrivateKey($privKey);
+        unset($privKey);
+
+        // Get public key
+        $pubKey = openssl_pkey_get_details($res);
+        $user->setPublicKey($pubKey['key']);
     }
 }

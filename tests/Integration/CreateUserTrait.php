@@ -24,6 +24,11 @@ trait CreateUserTrait
         $user = new InternalUser($userId, $username, $username . '@example.com');
         $user->setPlaintextPassword($plaintextPassword);
 
+        $keyPair = $this->generateKeyPair();
+
+        $user->setPrivateKey($keyPair['private']);
+        $user->setPublicKey($keyPair['public']);
+
         $actor = new Person($user);
 
         $user->setActor($actor);
@@ -36,5 +41,20 @@ trait CreateUserTrait
     protected function createTokenForUser(InternalUser $user): string
     {
         return JWT::encode(['userId' => $user->getId()], $this->getContainer()->get('jwt.secret'));
+    }
+
+    private function generateKeyPair(): array
+    {
+        // Create the keypair
+        $res = openssl_pkey_new();
+
+        // Get private key
+        openssl_pkey_export($res, $privKey);
+
+        // Get public key
+        $pubKey = openssl_pkey_get_details($res);
+        $pubKey = $pubKey["key"];
+
+        return ['public' => $pubKey, 'private' => $privKey];
     }
 }

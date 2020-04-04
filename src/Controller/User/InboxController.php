@@ -105,6 +105,7 @@ final class InboxController
 
         $inboxUsername = $inboxUser->getUsername();
         $inboxActor = $inboxUser->getActor();
+        $inboxRouteName = 'user-inbox-read';
 
         $totalItems = $this->activityStreamContentAssignmentRepository->getTotalContentForUserId($inboxActor);
         $totalPages = (int) ceil($totalItems / self::ITEMS_PER_PAGE_LIMIT);
@@ -114,13 +115,13 @@ final class InboxController
             $orderedCollectionDto = new OrderedCollectionDto();
             $orderedCollectionDto->first = $this->routeCollector->getRouteParser()->fullUrlFor(
                 $request->getUri(),
-                'user-inbox',
+                $inboxRouteName,
                 ['preferredUsername' => $inboxUsername],
                 ['page' => 0]
             );
             $orderedCollectionDto->last = $this->routeCollector->getRouteParser()->fullUrlFor(
                 $request->getUri(),
-                'user-inbox',
+                $inboxRouteName,
                 ['preferredUsername' => $inboxUsername],
                 ['page' => $lastPageNo]
             );
@@ -133,7 +134,7 @@ final class InboxController
 
             $inboxUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
                 $request->getUri(),
-                'user-inbox',
+                $inboxRouteName,
                 ['preferredUsername' => $inboxUsername]
             );
 

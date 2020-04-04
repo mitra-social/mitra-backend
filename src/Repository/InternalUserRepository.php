@@ -48,7 +48,7 @@ final class InternalUserRepository
     {
         $decodedToken = $request->getAttribute('token');
 
-        if (!is_array($decodedToken) || array_key_exists('userId', $decodedToken)) {
+        if (!is_array($decodedToken) || !array_key_exists('userId', $decodedToken)) {
             return null;
         }
 

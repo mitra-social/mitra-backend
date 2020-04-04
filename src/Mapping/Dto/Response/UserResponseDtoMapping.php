@@ -61,7 +61,7 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
         $userResponseDto->preferredUsername = $entity->getUsername();
         $userResponseDto->inbox = $this->routeCollector->getRouteParser()->fullUrlFor(
             $this->baseUri,
-            'user-inbox',
+            'user-inbox-read',
             ['preferredUsername' => $entity->getUsername()]
         );
 
