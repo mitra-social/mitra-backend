@@ -9,6 +9,7 @@ use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
@@ -18,9 +19,15 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
      */
     private $routeCollector;
 
-    public function __construct(RouteCollectorInterface $routeCollector)
+    /**
+     * @var UriInterface
+     */
+    private $baseUri;
+
+    public function __construct(RouteCollectorInterface $routeCollector, UriInterface $baseUri)
     {
         $this->routeCollector = $routeCollector;
+        $this->baseUri = $baseUri;
     }
 
     public static function getDtoClass(): string
@@ -35,11 +42,10 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|InternalUser $entity
-     * @param ServerRequestInterface $request
      * @return object|UserResponseDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity, ServerRequestInterface $request): object
+    public function toDto(object $entity): object
     {
         if (!$entity instanceof InternalUser) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -54,7 +60,7 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
         // ActivityPub
         $userResponseDto->preferredUsername = $entity->getUsername();
         $userResponseDto->inbox = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $request->getUri(),
+            $this->baseUri,
             'user-inbox',
             ['preferredUsername' => $entity->getUsername()]
         );

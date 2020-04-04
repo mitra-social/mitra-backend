@@ -37,11 +37,10 @@ final class ViolationListDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param ViolationList|object $entity
-     * @param ServerRequestInterface $request
      * @return ViolationListDto|object
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity, ServerRequestInterface $request): object
+    public function toDto(object $entity): object
     {
         if (!$entity instanceof ViolationList) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -51,7 +50,7 @@ final class ViolationListDtoMapping implements EntityToDtoMappingInterface
 
         foreach ($entity->getViolations() as $violation) {
             /** @var ViolationDto $violationDto */
-            $violationDto = $this->violationMapping->toDto($violation, $request);
+            $violationDto = $this->violationMapping->toDto($violation);
             $violationListDto->violations[] = $violationDto;
         }
 

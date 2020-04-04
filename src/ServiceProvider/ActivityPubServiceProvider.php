@@ -8,9 +8,15 @@ use ActivityPhp\Server;
 use ActivityPhp\Type\TypeResolver;
 use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
+use Mitra\ActivityPub\Client\ActivityPubClient;
+use Mitra\ActivityPub\Client\HttpSignature;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
+use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Serialization\Decode\DecoderInterface;
+use Mitra\Serialization\Encode\EncoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 
 final class ActivityPubServiceProvider implements ServiceProviderInterface
@@ -51,6 +57,17 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
                 $encoder,
                 $container[Server\Http\DecoderInterface::class],
                 $config
+            );
+        };
+
+        $container[ActivityPubClient::class] = static function (Container $container): ActivityPubClient {
+            return new ActivityPubClient(
+                $container['api_http_client'],
+                $container[RequestFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[DecoderInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                new HttpSignature()
             );
         };
     }

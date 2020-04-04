@@ -4,11 +4,22 @@ declare(strict_types=1);
 
 namespace Mitra\Config;
 
+use ActivityPhp\Type\Extended\Activity\Follow;
+use ActivityPhp\Type\Extended\Object\Image;
 use Chubbyphp\Config\ConfigInterface;
+use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\CommandBus\Handler\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
+use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Dto\Response\ActivityStreams\ArticleDto;
+use Mitra\Dto\Response\ActivityStreams\DocumentDto;
+use Mitra\Dto\Response\ActivityStreams\LinkDto;
+use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
@@ -26,6 +37,8 @@ use Mitra\Mapping\Orm\Actor\PersonOrmMapping;
 use Mitra\Mapping\Orm\User\AbstractUserOrmMapping;
 use Mitra\Mapping\Orm\User\ExternalUserOrmMapping;
 use Mitra\Mapping\Orm\User\InternalUserOrmMapping;
+use Mitra\Mapping\Validation\ActivityPub\ActivityDtoValidationMapping;
+use Mitra\Mapping\Validation\ActivityPub\ObjectDtoValidationMapping;
 use Mitra\Mapping\Validation\TokenRequestDtoValidationMapping;
 use Mitra\Mapping\Validation\CreateUserRequestDtoValidationMapping;
 use Monolog\Logger;
@@ -52,6 +65,8 @@ final class Config implements ConfigInterface
      * @var string
      */
     private const ENV_JWT_SECRET = 'JWT_SECRET';
+
+    private const ENV_BASE_URL = 'BASE_URL';
 
     /**
      * @var string
@@ -83,6 +98,7 @@ final class Config implements ConfigInterface
 
         $config = [
             'env' => $appEnv,
+            'baseUrl' => $this->env->get(self::ENV_BASE_URL),
             'debug' => (bool) $this->env->get(self::ENV_APP_DEBUG),
             'rootDir' => $this->rootDir,
             'routerCacheFile' => null,
@@ -111,10 +127,23 @@ final class Config implements ConfigInterface
                 ],
                 'validation' => [
                     CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,
-                    TokenRequestDto::class => TokenRequestDtoValidationMapping::class ,
+                    TokenRequestDto::class => TokenRequestDtoValidationMapping::class,
+
+                    // ActivityPub
+                    ObjectDto::class => ObjectDtoValidationMapping::class,
+                    // TODO: LinkDto::class => ,
+                    ArticleDto::class => ObjectDtoValidationMapping::class,
+                    DocumentDto::class => ObjectDtoValidationMapping::class,
+                    Image::class => ObjectDtoValidationMapping::class,
+
+                    PersonDto::class => ObjectDtoValidationMapping::class,
+
+                    FollowDto::class => ActivityDtoValidationMapping::class,
+                    CreateDto::class => ActivityDtoValidationMapping::class,
                 ],
                 'command_handlers' => [
-                    CreateUserCommand::class => CreateUserCommandHandler::class
+                    CreateUserCommand::class => CreateUserCommandHandler::class,
+                    FollowCommand::class => FollowCommandHandler::class,
                 ],
             ],
             'monolog.name' => 'default',

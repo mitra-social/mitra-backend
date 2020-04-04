@@ -7,7 +7,6 @@ namespace Mitra\Mapping\Orm\User;
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Mitra\Mapping\Orm\TimestampableOrmMappingTrait;
-use Mitra\Repository\InternalUserRepository;
 
 final class InternalUserOrmMapping implements ClassMapMappingInterface
 {
@@ -41,6 +40,13 @@ final class InternalUserOrmMapping implements ClassMapMappingInterface
             'fieldName' => 'hashedPassword',
             'columnName' => 'password',
             'type' => 'string',
+            'nullable' => false,
+        ]);
+
+        $metadata->mapField([
+            'fieldName' => 'privateKey',
+            'columnName' => 'private_key',
+            'type' => 'text',
             'nullable' => false,
         ]);
 

@@ -7,12 +7,14 @@ namespace Mitra\ServiceProvider;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Http\Message\ResponseFactory;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Http\Routing\UrlGenerator;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
+use Slim\Psr7\Factory\RequestFactory;
 use Slim\Psr7\Factory\ResponseFactory as PsrResponseFactory;
-use Slim\Routing\RouteCollector;
+use Slim\Psr7\Factory\UriFactory;
 
 final class HttpServiceProvider implements ServiceProviderInterface
 {
@@ -30,11 +32,12 @@ final class HttpServiceProvider implements ServiceProviderInterface
             );
         };
 
-        /*$container[UrlGenerator::class] = static function (Container $container): UrlGenerator {
-            return new UrlGenerator(
-                $container[RouteCollector::class],
-                new Uri
-            );
-        };*/
+        $container[RequestFactoryInterface::class] = static function (): RequestFactoryInterface {
+            return new RequestFactory();
+        };
+
+        $container[UriFactoryInterface::class] = static function (): UriFactoryInterface {
+            return new UriFactory();
+        };
     }
 }

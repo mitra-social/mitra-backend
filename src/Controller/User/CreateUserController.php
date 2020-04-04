@@ -8,7 +8,7 @@ use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
-use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -41,7 +41,7 @@ final class CreateUserController
     private $responseFactory;
 
     /**
-     * @var RequestToDtoManager
+     * @var RequestToDtoTransformer
      */
     private $requestToDtoManager;
 
@@ -50,20 +50,12 @@ final class CreateUserController
      */
     private $dtoToEntityMapper;
 
-    /**
-     * @param ResponseFactoryInterface $responseFactory
-     * @param EncoderInterface $encoder
-     * @param ValidatorInterface $validator
-     * @param CommandBusInterface $commandBus
-     * @param RequestToDtoManager $dataToDtoManager
-     * @param DtoToEntityMapper $dtoToEntityMapper
-     */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
         CommandBusInterface $commandBus,
-        RequestToDtoManager $dataToDtoManager,
+        RequestToDtoTransformer $dataToDtoManager,
         DtoToEntityMapper $dtoToEntityMapper
     ) {
         $this->responseFactory = $responseFactory;

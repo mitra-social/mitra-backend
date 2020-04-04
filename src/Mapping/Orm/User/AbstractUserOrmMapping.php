@@ -43,6 +43,13 @@ final class AbstractUserOrmMapping implements ClassMapMappingInterface
             'unique' => true,
         ]);
 
+        $metadata->mapField([
+            'fieldName' => 'publicKey',
+            'columnName' => 'public_key',
+            'type' => 'text',
+            'nullable' => true,
+        ]);
+
         $metadata->mapOneToOne([
             'fieldName' => 'actor',
             'targetEntity' => Actor::class,

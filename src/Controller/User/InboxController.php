@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use Mitra\Dto\DataToDtoManager;
+use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
@@ -27,6 +27,7 @@ use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
+use Mitra\Mapping\Dto\ActivityStreamTypeToDtoClassMapping;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -48,7 +49,7 @@ final class InboxController
     /**
      * @var InternalUserRepository
      */
-    private $userRepository;
+    private $internalUserRepository;
 
     /**
      * @var ActivityStreamContentAssignmentRepository
@@ -66,7 +67,7 @@ final class InboxController
     private $routeCollector;
 
     /**
-     * @var DataToDtoManager
+     * @var DataToDtoTransformer
      */
     private $dataToDtoManager;
 
@@ -76,10 +77,10 @@ final class InboxController
         InternalUserRepository $userRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
         RouteCollectorInterface $routeCollector,
-        DataToDtoManager $dataToDtoManager
+        DataToDtoTransformer $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
-        $this->userRepository = $userRepository;
+        $this->internalUserRepository = $userRepository;
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->encoder = $encoder;
         $this->routeCollector = $routeCollector;
@@ -90,17 +91,15 @@ final class InboxController
     {
         $accept = $request->getAttribute('accept');
         $username = $request->getAttribute('preferredUsername');
-        $authenticatedUserId = $request->getAttribute('token')['userId'];
         $pageNo = $request->getQueryParams()['page'] ?? null;
 
-        /** @var InternalUser|null $authenticatedUser */
-        $authenticatedUser = $this->userRepository->findById($authenticatedUserId);
+        $authenticatedUser = $this->internalUserRepository->resolveFromRequest($request);
 
         if (null === $authenticatedUser) {
             return $this->responseFactory->createResponse(403);
         }
 
-        if (null === $inboxUser = $this->userRepository->findByUsername($username)) {
+        if (null === $inboxUser = $this->internalUserRepository->findByUsername($username)) {
             return $this->responseFactory->createResponse(404);
         }
 
@@ -204,7 +203,7 @@ final class InboxController
             unset($object['@context']);
 
             $dtoItems[] = $this->dataToDtoManager->populate(
-                $this->mapActivityStreamTypeToDtoClass($content->getType()),
+                ActivityStreamTypeToDtoClassMapping::map($content->getType()),
                 $object
             );
         }
@@ -212,33 +211,5 @@ final class InboxController
         Assert::allIsInstanceOfAny($dtoItems, [ObjectDto::class, LinkDto::class]);
 
         return $dtoItems;
-    }
-
-    private function mapActivityStreamTypeToDtoClass(string $type): string
-    {
-        $map = [
-            'Object' => ObjectDto::class,
-            'Article' => ArticleDto::class,
-            'Audio' => AudioDto::class,
-            'Document' => DocumentDto::class,
-            'Event' => EventDto::class,
-            'Image' => ImageDto::class,
-            'Link' => LinkDto::class,
-            'Mention' => MentionDto::class,
-            'Note' => NoteDto::class,
-            'Place' => PlaceDto::class,
-            'Profile' => ProfileDto::class,
-            'Relationship' => RelationshipDto::class,
-            'Tombstone' => TombstoneDto::class,
-            'Video' => VideoDto::class,
-
-            'Create' => CreateDto::class,
-        ];
-
-        if (!array_key_exists($type, $map)) {
-            throw new \RuntimeException(sprintf('Could not map type `%s` to DTO class', $type));
-        }
-
-        return $map[$type];
     }
 }

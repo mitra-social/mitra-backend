@@ -20,6 +20,8 @@ final class UserFixture extends AbstractFixture
         $user = new InternalUser('362408a8-67ac-4546-80f9-cb8a22364bfa', 'john.doe', 'john.doe@example.org');
         $user->setHashedPassword('$2y$10$DdhRHcSM1WpU.0QfgNqvc.TPL71CToS/0l/WQcQC7FfQliXtu09z.'); // helloworld
         $user->setCreatedAt(new \DateTime());
+        $user->setPrivateKey(file_get_contents(__DIR__ . '/resources/john.doe-private-key'));
+        $user->setPublicKey(file_get_contents(__DIR__ . '/resources/john.doe-public-key'));
 
         $actor = new Person($user);
         $actor->setName('John Doe');

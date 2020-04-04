@@ -52,7 +52,7 @@ trait ActorTrait
 
     /**
      * A list of supplementary Collections which may be of interest.
-     * @var array<string, string|LinkDto>
+     * @var null|array<string, string|LinkDto>
      */
     public $streams;
 
@@ -60,7 +60,76 @@ trait ActorTrait
      * A json object which maps additional (typically server/domain-wide) endpoints which may be useful either for this
      * actor or someone referencing this actor. This mapping may be nested inside the actor document as the value or may
      * be a link to a JSON-LD document with these properties.
-     * @var array<string, string|LinkDto>
+     * @var null|array<string, string|LinkDto>
      */
     public $endpoints;
+
+    /**
+     * @var null|string
+     */
+    public $publicKey;
+
+    /**
+     * @return string|null
+     */
+    public function getPreferredUsername(): ?string
+    {
+        return $this->preferredUsername;
+    }
+
+    /**
+     * @return LinkDto|string
+     */
+    public function getInbox()
+    {
+        return $this->inbox;
+    }
+
+    /**
+     * @return LinkDto|string
+     */
+    public function getOutbox()
+    {
+        return $this->outbox;
+    }
+
+    /**
+     * @return LinkDto|string|null
+     */
+    public function getFollowing()
+    {
+        return $this->following;
+    }
+
+    /**
+     * @return LinkDto|string|null
+     */
+    public function getFollowers()
+    {
+        return $this->followers;
+    }
+
+    /**
+     * @return LinkDto|string|null
+     */
+    public function getLiked()
+    {
+        return $this->liked;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getStreams(): ?array
+    {
+        return $this->streams;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getEndpoints(): ?array
+    {
+        return $this->endpoints;
+    }
 }

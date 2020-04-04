@@ -6,7 +6,7 @@ namespace Mitra\Dto\Response\ActivityStreams\Actor;
 
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 
-class PersonDto extends ObjectDto
+class PersonDto extends ObjectDto implements ActorDtoInterface
 {
     /**
      * @var string

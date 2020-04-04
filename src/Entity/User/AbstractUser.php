@@ -18,6 +18,11 @@ abstract class AbstractUser
      */
     private $actor;
 
+    /**
+     * @var null|string
+     */
+    private $publicKey;
+
     public function __construct(string $id)
     {
         $this->id = $id;
@@ -36,5 +41,21 @@ abstract class AbstractUser
     public function setActor(Actor $actor): void
     {
         $this->actor = $actor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPublicKey(): ?string
+    {
+        return $this->publicKey;
+    }
+
+    /**
+     * @param string|null $publicKey
+     */
+    public function setPublicKey(?string $publicKey): void
+    {
+        $this->publicKey = $publicKey;
     }
 }

@@ -6,10 +6,15 @@ namespace Mitra\ServiceProvider;
 
 use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandHandlerMiddleware;
+use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\CommandBus\Handler\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\CommandBus\TacticianCommandBus;
 use Mitra\CommandBus\TacticianMapByStaticClassList;
+use Mitra\Dto\DtoToEntityMapper;
+use Mitra\Dto\EntityToDtoMapper;
+use Mitra\Repository\ExternalUserRepository;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -36,8 +41,17 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
 
     private function registerHandlers(Container $container): void
     {
-        $container[CreateUserCommandHandler::class] = function () use ($container): CreateUserCommandHandler {
+        $container[CreateUserCommandHandler::class] = static function (Container $container): CreateUserCommandHandler {
             return new CreateUserCommandHandler($container['doctrine.orm.em']);
+        };
+
+        $container[FollowCommandHandler::class] = static function (Container $container): FollowCommandHandler {
+            return new FollowCommandHandler(
+                $container[ExternalUserRepository::class],
+                $container['doctrine.orm.em'],
+                $container[ActivityPubClient::class],
+                $container[EntityToDtoMapper::class]
+            );
         };
     }
 }

@@ -11,14 +11,17 @@ use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
+use Mitra\Controller\User\OutboxController;
 use Mitra\Controller\User\ReadUserController;
 use Mitra\Controller\Webfinger\WebfingerController;
-use Mitra\Dto\DataToDtoManager;
+use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\DtoToEntityMapper;
-use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
@@ -44,7 +47,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[TokenProvider::class],
-                $container[RequestToDtoManager::class]
+                $container[RequestToDtoTransformer::class]
             );
         };
 
@@ -54,7 +57,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[CommandBusInterface::class],
-                $container[RequestToDtoManager::class],
+                $container[RequestToDtoTransformer::class],
                 $container[DtoToEntityMapper::class]
             );
         };
@@ -74,7 +77,20 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
                 $container[RouteCollector::class],
-                $container[DataToDtoManager::class]
+                $container[DataToDtoTransformer::class]
+            );
+        };
+
+        $container[OutboxController::class] = static function (Container $container): OutboxController {
+            return new OutboxController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[CommandBusInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                $container[DecoderInterface::class],
+                $container[DtoToEntityMapper::class],
+                $container[InternalUserRepository::class]
             );
         };
 

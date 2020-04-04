@@ -6,7 +6,7 @@ namespace Mitra\Dto;
 
 use Psr\Container\ContainerInterface;
 
-final class DataToDtoManager
+final class DataToDtoTransformer
 {
 
     /**
@@ -36,26 +36,16 @@ final class DataToDtoManager
     }
 
     /**
-     * @param object|string $dto
+     * @param string $dtoClassName
      * @param array<mixed> $data
      * @return object
      */
-    public function populate($dto, array $data): object
+    public function populate(string $dtoClassName, array $data): object
     {
-        if (is_object($dto)) {
-            $dtoClassName = get_class($dto);
-            $dtoInstance = $dto;
-        } elseif (is_string($dto) && class_exists($dto)) {
-            $dtoClassName = $dto;
-            $dtoInstance = null;
-        } else {
-            throw new \InvalidArgumentException('Whether a DTO object nor a FQCN of a DTO');
-        }
-
         if (!isset($this->populatorMap[$dtoClassName])) {
             throw new \RuntimeException(sprintf('Could not find DTO populator for class `%s`', $dtoClassName));
         }
 
-        return $this->container->get($this->populatorMap[$dtoClassName])->populate($data, $dtoInstance);
+        return $this->container->get($this->populatorMap[$dtoClassName])->populate($data);
     }
 }
