@@ -173,7 +173,6 @@ final class FollowCommandHandler
      */
     private function fetchUserData(object $object): array
     {
-        $propertiesRemote = [];
         $propertiesLocal = [];
 
         if ($object instanceof ObjectDto) {
@@ -190,28 +189,33 @@ final class FollowCommandHandler
             ];
         }
 
+        $userUrl = $this->getObjectUrl($object) ?? $object->id;
+
+        if (null === $userUrl) {
+            return $propertiesLocal;
+        }
+
+        $propertiesRemote = [];
+
         try {
-            $userUrl = $this->getObjectUrl($object) ?? $object->id;
+            /** @var ActorInterface $response */
+            $response = $this->activityPubClient->sendRequest(
+                $this->activityPubClient->createRequest('GET', $userUrl)
+            );
 
-            if (null !== $userUrl) {
-                /** @var ActorInterface $response */
-                $response = $this->activityPubClient->sendRequest(
-                    $this->activityPubClient->createRequest('GET', $userUrl)
-                );
-
-                $propertiesRemote = [
-                    'id' => $this->normalizeProperty($response, 'id'),
-                    'preferredUsername' => $this->normalizeProperty($response, 'preferredUsername'),
-                    'inbox' => $this->normalizeProperty($response, 'inbox'),
-                    'outbox' => $this->normalizeProperty($response, 'outbox'),
-                    'name' => $this->normalizeProperty($response, 'name'),
-                    'icon' => $this->normalizeProperty($response, 'icon'),
-                    'following' => $this->normalizeProperty($response, 'following'),
-                    'followers' => $this->normalizeProperty($response, 'followers'),
-                    'url' => $this->normalizeProperty($response, 'url'),
-                ];
-            }
+            $propertiesRemote = [
+                'id' => $this->normalizeProperty($response, 'id'),
+                'preferredUsername' => $this->normalizeProperty($response, 'preferredUsername'),
+                'inbox' => $this->normalizeProperty($response, 'inbox'),
+                'outbox' => $this->normalizeProperty($response, 'outbox'),
+                'name' => $this->normalizeProperty($response, 'name'),
+                'icon' => $this->normalizeProperty($response, 'icon'),
+                'following' => $this->normalizeProperty($response, 'following'),
+                'followers' => $this->normalizeProperty($response, 'followers'),
+                'url' => $this->normalizeProperty($response, 'url'),
+            ];
         } catch (\Exception $e) {
+            echo sprintf('Could not get remote object from url `%s`: %s', $userUrl, $e->getMessage());
         }
 
         return array_filter($propertiesRemote) + $propertiesLocal;
