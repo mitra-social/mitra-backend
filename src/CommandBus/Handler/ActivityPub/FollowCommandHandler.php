@@ -173,7 +173,17 @@ final class FollowCommandHandler
      */
     private function fetchUserData(object $object): array
     {
-        $propertiesLocal = [];
+        $propertiesLocal = [
+            'id' => null,
+            'preferredUsername' => null,
+            'inbox' => null,
+            'outbox' => null,
+            'name' => null,
+            'icon' => null,
+            'following' => null,
+            'followers' => null,
+            'url' => null,
+        ];
 
         if ($object instanceof ObjectDto) {
             $propertiesLocal = [
@@ -192,7 +202,6 @@ final class FollowCommandHandler
         $userUrl = $this->getObjectUrl($object) ?? $object->id;
 
         if (null === $userUrl) {
-            echo 'User URL is null';
             return $propertiesLocal;
         }
 
@@ -217,7 +226,6 @@ final class FollowCommandHandler
             ];
         } catch (\Exception $e) {
             echo sprintf('Could not get remote object from url `%s`: %s', $userUrl, $e->getMessage());
-            throw $e;
         }
 
         return array_filter($propertiesRemote) + $propertiesLocal;
