@@ -22,26 +22,6 @@ export USER_ID=$(id -u)
 Create an rsa key with the following instructions
 ```
 $ ssh-keygen 
-Generating public/private rsa key pair.
-Enter file in which to save the key (/Users/fgervasi/.ssh/id_rsa): // press <ENTER>
-Enter passphrase (empty for no passphrase): // press <ENTER> 
-Enter same passphrase again: // press <ENTER>
-Your identification has been saved in /Users/fgervasi/.ssh/id_rsa.
-Your public key has been saved in /Users/fgervasi/.ssh/id_rsa.pub.
-The key fingerprint is:
-SHA256:w56BPoD4NuHAwUxKKjJoeb6LvoFqSmM5j1EnOqiPFdY fgervasi@Francos-MacBook-Pro-2.local
-The key's randomart image is:
-+---[RSA 2048]----+
-| o               |
-|O .              |
-|B* .             |
-|=o+o   o         |
-|o.=+E.. S        |
-|o=+o+o . +       |
-|o@*.  o o        |
-|==X..  .         |
-|O*oo             |
-+----[SHA256]-----+
 ```
 
 ⚠️ Be sure to source your .bashrc or open a new console
