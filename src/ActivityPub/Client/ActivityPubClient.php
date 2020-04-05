@@ -99,7 +99,12 @@ final class ActivityPubClient
             throw new ActivityPubClientException(
                 $request,
                 null,
-                sprintf('Request to remote server failed: %s', $e->getMessage()),
+                sprintf(
+                    'Request (%s %s) to remote server failed: %s',
+                    $request->getMethod(),
+                    (string) $request->getUri(),
+                    $e->getMessage()
+                ),
                 1,
                 $e
             );

@@ -21,7 +21,7 @@ final class HttpClientServiceProvider implements ServiceProviderInterface
         $container['api_http_client'] = static function (Container $container): ClientInterface {
             return new Curl(
                 $container[PsrResponseFactory::class],
-                ['timeout' => 2] // Short time out as we don't want to block the user for too long
+                ['timeout' => 15] // Short time out as we don't want to block the user for too long
             );
         };
     }
