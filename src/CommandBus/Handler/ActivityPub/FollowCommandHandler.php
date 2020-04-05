@@ -67,8 +67,6 @@ final class FollowCommandHandler
         $follow = $command->getFollowDto();
         $object = $follow->object;
 
-        Assert::isInstanceOfAny($object, ['string', LinkDto::class, ObjectDto::class]);
-
         if (null === $objectId = $this->getIdFromObject($object)) {
             throw new \RuntimeException('Could not determine id of object');
         }
