@@ -18,6 +18,7 @@ use Mitra\Entity\Subscription;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Repository\ExternalUserRepository;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Webmozart\Assert\Assert;
 
@@ -43,16 +44,23 @@ final class FollowCommandHandler
      */
     private $entityToDtoMapper;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         ExternalUserRepository $externalUserRepository,
         EntityManagerInterface $entityManager,
         ActivityPubClient $activityPubClient,
-        EntityToDtoMapper $entityToDtoMapper
+        EntityToDtoMapper $entityToDtoMapper,
+        LoggerInterface $logger
     ) {
         $this->externalUserRepository = $externalUserRepository;
         $this->entityManager = $entityManager;
         $this->activityPubClient = $activityPubClient;
         $this->entityToDtoMapper = $entityToDtoMapper;
+        $this->logger = $logger;
     }
 
     public function __invoke(FollowCommand $command): void
@@ -97,11 +105,13 @@ final class FollowCommandHandler
 
             print_r($response);
         } catch (ActivityPubClientException $e) {
-            echo $e->getMessage() , PHP_EOL;
+            $context = [];
 
             if (null !== $response = $e->getResponse()) {
-                echo (string)$response->getBody();
+                $context['responseBody'] = (string) $response->getBody();
             }
+
+            $this->logger->error($e->getMessage(), $context);
         }
 
         exit;
@@ -225,7 +235,7 @@ final class FollowCommandHandler
                 'url' => $this->normalizeProperty($response, 'url'),
             ];
         } catch (\Exception $e) {
-            echo sprintf('Could not get remote object from url `%s`: %s', $userUrl, $e->getMessage());
+            $this->logger->error(sprintf('Could not get remote object from url `%s`: %s', $userUrl, $e->getMessage()));
         }
 
         return array_filter($propertiesRemote) + $propertiesLocal;

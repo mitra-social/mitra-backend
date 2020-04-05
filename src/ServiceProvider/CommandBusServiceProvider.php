@@ -18,6 +18,7 @@ use Mitra\Repository\ExternalUserRepository;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 final class CommandBusServiceProvider implements ServiceProviderInterface
 {
@@ -50,7 +51,8 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container[ExternalUserRepository::class],
                 $container['doctrine.orm.em'],
                 $container[ActivityPubClient::class],
-                $container[EntityToDtoMapper::class]
+                $container[EntityToDtoMapper::class],
+                $container[LoggerInterface::class]
             );
         };
     }

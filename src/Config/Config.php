@@ -47,7 +47,7 @@ final class Config implements ConfigInterface
 {
 
     /**
-     * string
+     * @var string
      */
     private const ENV_DATABASE_URL = 'DATABASE_URL';
 
@@ -66,6 +66,9 @@ final class Config implements ConfigInterface
      */
     private const ENV_JWT_SECRET = 'JWT_SECRET';
 
+    /**
+     * @var string
+     */
     private const ENV_BASE_URL = 'BASE_URL';
 
     /**
@@ -147,14 +150,18 @@ final class Config implements ConfigInterface
                 ],
             ],
             'monolog.name' => 'default',
-            'monolog.path' => $dirs['logs'] . '/application.log',
-            'monolog.level' => Logger::NOTICE,
+            'monolog.handlers' => [
+                'php://stderr' => Logger::NOTICE,
+            ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
 
         if ('dev' === $appEnv) {
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
-            $config['monolog.level'] = Logger::DEBUG;
+            $config['monolog.handlers'] = [
+                'php://stderr' => Logger::DEBUG,
+                $dirs['logs'] . '/application.log' => Logger::DEBUG,
+            ];
         }
 
         return $config;
