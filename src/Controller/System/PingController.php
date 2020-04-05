@@ -33,8 +33,13 @@ final class PingController
         $data = [
             sprintf('host: %s', $request->getUri()->getHost()),
             sprintf('scheme: %s', $request->getUri()->getScheme()),
-            sprintf('serverDate: %s', date('Y-m-d\TH:i:sT')),
         ];
+
+        if (null !== $forwardedProto = $request->getHeaderLine('X-Forwarded-Proto')) {
+            $data[] = sprintf('originalScheme: %s', $forwardedProto);
+        }
+
+        $data[] = sprintf('serverDate: %s', date('Y-m-d\TH:i:sT'));
 
         $response->getBody()->write(implode("\n", $data));
 
