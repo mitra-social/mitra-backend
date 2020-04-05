@@ -31,7 +31,8 @@
     "symfony/validator": "^5.0.4",
     "tuupola/slim-jwt-auth": "dev-fix/respect-x-forwarded-proto-header@dev",
     "kriswallsmith/buzz": "^1.1",
-    "webmozart/assert": "^1.7.0"
+    "webmozart/assert": "^1.7.0",
+    "willdurand/negotiation": "^2.3"
   },
   "require-dev": {
     "ergebnis/phpstan-rules": "^0.14.3",

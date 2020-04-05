@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Mitra\Middleware;
 
 use Mitra\Http\Message\ResponseFactoryInterface;
+use Negotiation\AcceptEncoding;
+use Negotiation\EncodingNegotiator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -23,7 +25,7 @@ final class AcceptAndContentTypeMiddleware
 
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ('' === $accept = $request->getHeaderLine('Accept')) {
+        if ('' === $acceptHeader = $request->getHeaderLine('Accept')) {
             $response = $this->responseFactory->createResponse(406);
 
             $response->getBody()->write('"Accept" header is missing');
@@ -31,7 +33,11 @@ final class AcceptAndContentTypeMiddleware
             return $response;
         }
 
-        $request = $request->withAttribute('accept', $accept);
+        $negotiator = new EncodingNegotiator();
+        /** @var AcceptEncoding $mediaType */
+        $mediaType = $negotiator->getBest($acceptHeader, ['application/json', 'application/activity+json']);
+
+        $request = $request->withAttribute('accept', $mediaType->getValue());
 
         if ($request->getBody()->getSize() > 0 && in_array($request->getMethod(), ['POST', 'PUT', 'PATCH'], true)) {
             if ('' === $contentType = $request->getHeaderLine('Content-Type')) {
