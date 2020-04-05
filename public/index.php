@@ -30,6 +30,8 @@ $app = (new AppFactory())->create($env);
 $loop = ReactEventLoopFactory::create();
 
 $server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app) {
+    echo 'Requested ' , $request->getMethod() , ' ' , (string) $request->getUri() , print_r($request->getHeaders(), true);
+
     $response = $app->handle($request);
 
     return new ReactResponse(
