@@ -192,6 +192,7 @@ final class FollowCommandHandler
         $userUrl = $this->getObjectUrl($object) ?? $object->id;
 
         if (null === $userUrl) {
+            echo 'User URL is null';
             return $propertiesLocal;
         }
 
@@ -216,6 +217,7 @@ final class FollowCommandHandler
             ];
         } catch (\Exception $e) {
             echo sprintf('Could not get remote object from url `%s`: %s', $userUrl, $e->getMessage());
+            throw $e;
         }
 
         return array_filter($propertiesRemote) + $propertiesLocal;
