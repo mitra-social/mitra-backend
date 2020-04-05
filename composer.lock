@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "868baf29e3520b11bbbe0e87b10192a9",
+    "content-hash": "4860962a64da8bbe67bb0c2ff9fcffdf",
     "packages": [
         {
             "name": "cache/adapter-common",
@@ -4480,16 +4480,16 @@
         },
         {
             "name": "tuupola/slim-jwt-auth",
-            "version": "3.4.0",
+            "version": "dev-fix/respect-x-forwarded-proto-header",
             "source": {
                 "type": "git",
-                "url": "https://github.com/tuupola/slim-jwt-auth.git",
-                "reference": "bdc87f7fffb04b2457910f6cf7bd83e29efb2f6b"
+                "url": "https://github.com/TiMESPLiNTER/slim-jwt-auth.git",
+                "reference": "510bc22a090bf5f528dfc0de9b57714b363e3be5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/slim-jwt-auth/zipball/bdc87f7fffb04b2457910f6cf7bd83e29efb2f6b",
-                "reference": "bdc87f7fffb04b2457910f6cf7bd83e29efb2f6b",
+                "url": "https://api.github.com/repos/TiMESPLiNTER/slim-jwt-auth/zipball/510bc22a090bf5f528dfc0de9b57714b363e3be5",
+                "reference": "510bc22a090bf5f528dfc0de9b57714b363e3be5",
                 "shasum": ""
             },
             "require": {
@@ -4521,7 +4521,11 @@
                     "Tuupola\\Middleware\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Tuupola\\Middleware\\": "tests"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -4543,7 +4547,7 @@
                 "psr-15",
                 "psr-7"
             ],
-            "time": "2019-07-01T08:28:35+00:00"
+            "time": "2020-04-05T07:41:38+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -7098,6 +7102,7 @@
         "landrok/activitypub": 20,
         "league/tactician": 5,
         "mitra-social/php-env": 20,
+        "tuupola/slim-jwt-auth": 20,
         "phpstan/phpstan-webmozart-assert": 20
     },
     "prefer-stable": false,
