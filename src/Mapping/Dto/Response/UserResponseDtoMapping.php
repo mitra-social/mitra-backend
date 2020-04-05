@@ -57,13 +57,31 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
         $userResponseDto->email = $entity->getEmail();
         $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
 
+        $userUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
+            $this->baseUri,
+            'user-read',
+            ['preferredUsername' => $entity->getUsername()]
+        );
+
         // ActivityPub
+        $userResponseDto->id = $userUrl;
         $userResponseDto->preferredUsername = $entity->getUsername();
         $userResponseDto->inbox = $this->routeCollector->getRouteParser()->fullUrlFor(
             $this->baseUri,
             'user-inbox-read',
             ['preferredUsername' => $entity->getUsername()]
         );
+        $userResponseDto->outbox = $this->routeCollector->getRouteParser()->fullUrlFor(
+            $this->baseUri,
+            'user-outbox-read',
+            ['preferredUsername' => $entity->getUsername()]
+        );
+        $userResponseDto->url = $userUrl;
+        $userResponseDto->publicKey = [
+            'id' => $userUrl . '#main-key',
+            'owner' =>  $userResponseDto->url,
+            'publicKeyPem' => $entity->getPublicKey(),
+        ];
 
         return $userResponseDto;
     }

@@ -65,13 +65,13 @@ final class FollowCommandHandler
         /** @var InternalUser $commandActorUser */
 
         $follow = $command->getFollowDto();
-        $object = $follow->object;
+        $object = $this->getLinkOrObject($follow->object);
 
-        if (null === $objectId = $this->getIdFromObject($object)) {
-            throw new \RuntimeException('Could not determine id of object');
+        $externalUser = null;
+
+        if (null !== $objectId = $this->getIdFromObject($object)) {
+            $externalUser = $this->externalUserRepository->findOneByExternalId(hash('sha256', $objectId));
         }
-
-        $externalUser = $this->externalUserRepository->findOneByExternalId(hash('sha256', $objectId));
 
         if (null === $externalUser) {
             $externalUser = $this->createExternalUser($object);
@@ -109,17 +109,13 @@ final class FollowCommandHandler
 
     /**
      * Tries to extract the object id out of all the possible values
-     * @param string|LinkDto|ObjectDto $object
+     * @param object|LinkDto|ObjectDto $object
      * @return string|null
      */
-    private function getIdFromObject($object): ?string
+    private function getIdFromObject(object $object): ?string
     {
-        if (is_string($object)) {
-            return $object;
-        } elseif (!is_object($object)) {
-            return null;
-        } elseif ($object instanceof LinkDto) {
-            return $object->href;
+        if ($object instanceof LinkDto) {
+            return $object->id;
         } elseif ($object instanceof ObjectDto) {
             return $object->id;
         }
@@ -175,20 +171,24 @@ final class FollowCommandHandler
     private function fetchUserData(object $object): array
     {
         $propertiesRemote = [];
-        $propertiesLocal = [
-            'id' => $this->normalizeProperty($object, 'id'),
-            'preferredUsername' => $this->normalizeProperty($object, 'preferredUsername'),
-            'inbox' => $this->normalizeProperty($object, 'inbox'),
-            'outbox' => $this->normalizeProperty($object, 'outbox'),
-            'name' => $this->normalizeProperty($object, 'name'),
-            'icon' => $this->normalizeProperty($object, 'icon'),
-            'following' => $this->normalizeProperty($object, 'following'),
-            'followers' => $this->normalizeProperty($object, 'followers'),
-            'url' => $this->normalizeProperty($object, 'url'),
-        ];
+        $propertiesLocal = [];
+
+        if ($object instanceof ObjectDto) {
+            $propertiesLocal = [
+                'id' => $this->normalizeProperty($object, 'id'),
+                'preferredUsername' => $this->normalizeProperty($object, 'preferredUsername'),
+                'inbox' => $this->normalizeProperty($object, 'inbox'),
+                'outbox' => $this->normalizeProperty($object, 'outbox'),
+                'name' => $this->normalizeProperty($object, 'name'),
+                'icon' => $this->normalizeProperty($object, 'icon'),
+                'following' => $this->normalizeProperty($object, 'following'),
+                'followers' => $this->normalizeProperty($object, 'followers'),
+                'url' => $this->normalizeProperty($object, 'url'),
+            ];
+        }
 
         try {
-            $userUrl = $this->normalizeProperty($object, 'url') ?? $object->id;
+            $userUrl = $this->getObjectUrl($object) ?? $object->id;
 
             if (null !== $userUrl) {
                 /** @var ActorInterface $response */
@@ -205,11 +205,44 @@ final class FollowCommandHandler
                     'icon' => $this->normalizeProperty($response, 'icon'),
                     'following' => $this->normalizeProperty($response, 'following'),
                     'followers' => $this->normalizeProperty($response, 'followers'),
+                    'url' => $this->normalizeProperty($response, 'url'),
                 ];
             }
         } catch (\Exception $e) {
         }
 
         return array_filter($propertiesRemote) + $propertiesLocal;
+    }
+
+    /**
+     * @param null|string|LinkDto|ObjectDto $value
+     * @return object
+     */
+    private function getLinkOrObject($value): ?object
+    {
+        if (is_string($value)) {
+            $link = new LinkDto();
+            $link->href = $value;
+            
+            return $link;
+        }
+        
+        return $value;
+    }
+
+    private function getObjectUrl(object $object): ?string
+    {
+        if ($object instanceof LinkDto) {
+            return $object->href;
+        }
+
+        if ($object instanceof ObjectDto) {
+            if (null !== $object->url) {
+                $firstUrl = is_array($object->url) ? array_shift($object->url) : $object->url;
+                return is_object($firstUrl) ? $this->getObjectUrl($firstUrl) : $firstUrl;
+            }
+        }
+
+        return null;
     }
 }
