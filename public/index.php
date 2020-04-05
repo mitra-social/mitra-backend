@@ -10,6 +10,7 @@ use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Logger\RequestContext;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use React\Http\Response as ReactResponse;
 use React\Http\Server as ReactHttpServer;
 use React\Socket\Server as ReactSocketServer;
@@ -30,10 +31,23 @@ $app = (new AppFactory())->create($env);
 
 $loop = ReactEventLoopFactory::create();
 
-$server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app) {
-    echo 'Requested ' , $request->getMethod() , ' ' , (string) $request->getUri() , print_r($request->getHeaders(), true);
+/** @var RequestContext $requestContext */
+$requestContext = $app->getContainer()->get(RequestContext::class);
+/** @var LoggerInterface $logger */
+$logger = $app->getContainer()->get(LoggerInterface::class);
 
-    $app->getContainer()->get(RequestContext::class)->setRequest($request);
+$server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app, $requestContext, $logger) {
+    $requestContext->setRequest($request);
+
+    $logger->info(sprintf(
+        'Incoming request %s %s',
+        $request->getMethod(),
+        (string) $request->getUri()
+    ), [
+        'request.headers' => $request->getHeaders(),
+        'request.method' => $request->getMethod(),
+        'request.path' => (string) $request->getUri(),
+    ]);
 
     $response = $app->handle($request);
 
