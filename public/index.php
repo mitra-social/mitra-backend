@@ -8,6 +8,7 @@ use Mitra\Env\Reader\DelegateReader;
 use Mitra\Env\Reader\EnvVarReader;
 use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
+use Mitra\Logger\RequestContext;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Response as ReactResponse;
 use React\Http\Server as ReactHttpServer;
@@ -31,6 +32,8 @@ $loop = ReactEventLoopFactory::create();
 
 $server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app) {
     echo 'Requested ' , $request->getMethod() , ' ' , (string) $request->getUri() , print_r($request->getHeaders(), true);
+
+    $app->getContainer()->get(RequestContext::class)->setRequest($request);
 
     $response = $app->handle($request);
 
