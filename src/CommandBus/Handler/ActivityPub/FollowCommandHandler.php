@@ -98,7 +98,10 @@ final class FollowCommandHandler
             print_r($response);
         } catch (ActivityPubClientException $e) {
             echo $e->getMessage() , PHP_EOL;
-            echo (string) $e->getResponse()->getBody();
+
+            if (null !== $response = $e->getResponse()) {
+                echo (string)$response->getBody();
+            }
         }
 
         exit;

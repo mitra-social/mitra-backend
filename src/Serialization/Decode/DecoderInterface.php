@@ -13,4 +13,6 @@ interface DecoderInterface
      * @throw UnsupportedMimeTypeException
      */
     public function decode(string $data, string $mimeType): array;
+
+    public function supports(string $mimeType): bool;
 }

@@ -31,4 +31,15 @@ final class DelegateDecoder implements DecoderInterface
     {
         $this->decoders[$mimeType] = $decoder;
     }
+
+    public function supports(string $mimeType): bool
+    {
+        foreach ($this->decoders as $decoder) {
+            if ($decoder->supports($mimeType)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

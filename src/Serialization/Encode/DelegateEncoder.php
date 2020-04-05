@@ -69,4 +69,15 @@ final class DelegateEncoder implements EncoderInterface
     {
         return get_object_vars($data);
     }
+
+    public function supports(string $mimeType): bool
+    {
+        foreach ($this->encoders as $encoder) {
+            if ($encoder->supports($mimeType)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
