@@ -76,8 +76,9 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
         string $mimeType,
         int $code = 200
     ): ResponseInterface {
-        $dto = $this->entityToDtoMapper->map($entity, $dtoClass, $request);
-        $response = $this->responseFactory->createResponse($code);
+        $dto = $this->entityToDtoMapper->map($entity, $dtoClass);
+        $response = $this->responseFactory->createResponse($code)
+            ->withHeader('Content-Type', $mimeType);
 
         $response->getBody()->write($this->encoder->encode($dto, $mimeType));
 
