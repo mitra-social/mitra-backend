@@ -37,13 +37,25 @@ final class ValidateHttpSignatureMiddleware
             return $handler->handle($request);
         }
 
-        if (!$this->verifier->isSigned($request)) {
+        try {
+            if (!$this->verifier->isSigned($request)) {
+                $response = $this->responseFactory->createResponse(401);
+
+                $response->getBody()->write(sprintf(
+                    'Could not verify signature header with value `%s`: %s',
+                    $request->getHeaderLine('signature'),
+                    implode(', ', $this->verifier->getStatus())
+                ));
+
+                return $response;
+            }
+        } catch (\Exception $e) {
             $response = $this->responseFactory->createResponse(401);
 
             $response->getBody()->write(sprintf(
                 'Could not verify signature header with value `%s`: %s',
                 $request->getHeaderLine('signature'),
-                implode(', ', $this->verifier->getStatus())
+                $e->getMessage()
             ));
 
             return $response;
