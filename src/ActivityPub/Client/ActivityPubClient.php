@@ -108,7 +108,7 @@ final class ActivityPubClient
      * @return object
      * @throws ActivityPubClientException
      */
-    public function sendRequest(RequestInterface $request): object
+    public function sendRequest(RequestInterface $request): ?object
     {
         try {
             $response = $this->httpClient->sendRequest($request);
@@ -141,13 +141,22 @@ final class ActivityPubClient
             );
         }
 
+        $responseBody = (string) $response->getBody();
+
+        if ('' === $responseBody) {
+            return null;
+        }
+
+        $mediaType = $response->getHeaderLine('Content-Type');
+
         try {
-            $decodedBody = $this->decoder->decode((string)$response->getBody(), 'application/json');
+            $decodedBody = $this->decoder->decode($responseBody, $mediaType);
         } catch (\JsonException $e) {
             throw new ActivityPubClientException($request, $response, sprintf(
-                'Could not decode body from remote serve response: %s (body: %s)',
+                'Could not decode body from remote serve response: %s (body: %s, content-type: %s)',
                 $e->getMessage(),
-                (string) $response->getBody()
+                (string) $response->getBody(),
+                $mediaType
             ), 3, $e);
         }
 
