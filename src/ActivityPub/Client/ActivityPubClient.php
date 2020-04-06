@@ -77,7 +77,8 @@ final class ActivityPubClient
     public function createRequest(string $method, string $url, ?object $content = null): RequestInterface
     {
         $request =  $this->requestFactory->createRequest($method, $url)
-            ->withHeader('Accept', 'application/activity+json');
+            ->withHeader('Accept', 'application/activity+json')
+            ->withHeader('User-Agent', 'mitra-social/0.1');
 
         if (null !== $content) {
             $encodedType = $this->encoder->encode($content, 'application/json');
