@@ -10,7 +10,6 @@ use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Logger\RequestContext;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Log\LoggerInterface;
 use React\Http\Response as ReactResponse;
 use React\Http\Server as ReactHttpServer;
 use React\Socket\Server as ReactSocketServer;
@@ -38,7 +37,7 @@ $loop = ReactEventLoopFactory::create();
 /** @var RequestContext $requestContext */
 $requestContext = $app->getContainer()->get(RequestContext::class);
 
-$server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app, $requestContext, $logger, $data) {
+$server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app, $requestContext, $data) {
     $data->processed++;
     $requestContext->setRequest($request);
 
