@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
+use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\DataToDtoPopulatorInterface;
@@ -14,6 +15,7 @@ use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Dto\Response\UserResponseDto;
@@ -127,6 +129,8 @@ final class OutboxController
     {
         if ($object instanceof FollowDto) {
             return new FollowCommand($outboxActor, $object);
+        } elseif ($object instanceof UndoDto) {
+            return new UndoCommand($outboxActor, $object);
         }
 
         throw new \RuntimeException(sprintf('Type `%s` is currently not supported', $object->type));

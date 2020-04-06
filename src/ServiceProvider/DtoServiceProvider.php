@@ -14,6 +14,7 @@ use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
@@ -92,6 +93,7 @@ final class DtoServiceProvider implements ServiceProviderInterface
 
             CreateDto::class => DataToDtoPopulator::class . CreateDto::class,
             FollowDto::class => DataToDtoPopulator::class . FollowDto::class,
+            UndoDto::class => DataToDtoPopulator::class . UndoDto::class,
         ];
 
         foreach ($activityStreamDtoClasses as $activityStreamDtoClass => $serviceId) {

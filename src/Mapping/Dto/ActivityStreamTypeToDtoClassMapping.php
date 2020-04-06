@@ -7,6 +7,7 @@ namespace Mitra\Mapping\Dto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
@@ -47,6 +48,7 @@ final class ActivityStreamTypeToDtoClassMapping
         // Activities
         'Create' => CreateDto::class,
         'Follow' => FollowDto::class,
+        'Undo' => UndoDto::class,
     ];
 
     public static function map(string $activityStreamType): string
