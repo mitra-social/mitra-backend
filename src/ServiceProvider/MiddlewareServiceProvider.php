@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use HttpSignatures\Verifier;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Tuupola\Middleware\JwtAuthentication;
 
@@ -52,8 +52,7 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
             Container $container
         ): ValidateHttpSignatureMiddleware {
             return new ValidateHttpSignatureMiddleware(
-                $container['api_http_client'],
-                $container[RequestFactoryInterface::class],
+                $container[Verifier::class],
                 $container[ResponseFactoryInterface::class]
             );
         };

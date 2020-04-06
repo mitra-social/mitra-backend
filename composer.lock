@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "904b0c4b58b9e76e6c85e9bae99327ff",
+    "content-hash": "3fbf13cb2c511d58e67e712e6a820400",
     "packages": [
         {
             "name": "cache/adapter-common",
@@ -1885,6 +1885,70 @@
                 "service layer"
             ],
             "time": "2019-07-28T13:22:27+00:00"
+        },
+        {
+            "name": "liamdennehy/http-signatures-php",
+            "version": "10.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/liamdennehy/http-signatures-php.git",
+                "reference": "08c65d3166aa752635e0a93497e646b0f3b0be73"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/liamdennehy/http-signatures-php/zipball/08c65d3166aa752635e0a93497e646b0f3b0be73",
+                "reference": "08c65d3166aa752635e0a93497e646b0f3b0be73",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6",
+                "psr/http-message": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2",
+                "guzzlehttp/psr7": "^1.2",
+                "kriswallsmith/buzz": "^1.0",
+                "nyholm/psr7": "^1.1",
+                "nyholm/psr7-server": "^0.3.0",
+                "phpunit/phpunit": "~5.6",
+                "symfony/http-foundation": "~2.8|~3.0",
+                "symfony/psr-http-message-bridge": "^1.0.2",
+                "zendframework/zend-diactoros": "^1.1",
+                "zendframework/zend-httphandlerrunner": "^1.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "HttpSignatures\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Liam Dennehy",
+                    "email": "liam@wiemax.net"
+                },
+                {
+                    "name": "Paul Annesley",
+                    "email": "paul@99designs.com"
+                }
+            ],
+            "description": "Sign and verify PSR-7 HTTP messages with HMAC and RSA keys",
+            "keywords": [
+                "digital signature",
+                "electronic signature",
+                "hmac",
+                "http",
+                "https",
+                "rsa",
+                "signature",
+                "signed",
+                "signing"
+            ],
+            "time": "2019-08-18T20:41:34+00:00"
         },
         {
             "name": "mitra-social/php-env",
