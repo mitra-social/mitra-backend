@@ -6,12 +6,15 @@ namespace Mitra\Controller\Webfinger;
 
 use ActivityPhp\Server;
 use Doctrine\ORM\EntityRepository;
+use FastRoute\RouteCollector;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
+use Slim\Interfaces\RouteCollectorInterface;
 
 final class WebfingerController
 {
@@ -32,18 +35,27 @@ final class WebfingerController
     private $userRepository;
 
     /**
-     * @param ResponseFactoryInterface $responseFactory
-     * @param EncoderInterface $encoder
-     * @param InternalUserRepository $userRepository
+     * @var RouteCollector
      */
+    private $routeCollector;
+
+    /**
+     * @var UriInterface
+     */
+    private $baseUri;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        InternalUserRepository $userRepository
+        InternalUserRepository $userRepository,
+        RouteCollectorInterface $routeCollector,
+        UriInterface $baseUri
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->userRepository = $userRepository;
+        $this->routeCollector = $routeCollector;
+        $this->baseUri = $baseUri;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -75,11 +87,17 @@ final class WebfingerController
             return $this->responseFactory->createResponse(404);
         }
 
+        $userUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
+            $this->baseUri,
+            'user-read',
+            ['preferredUsername' => $user->getUsername()]
+        );
+
         $webfinger = new Server\Http\WebFinger(['subject' => $resource, 'aliases' => [], 'links' => [
             [
                 'rel' => 'self',
                 'type' => 'application/activity+json',
-                'href' => 'http://localhost/users/' . $user->getUsername()
+                'href' => $userUrl,
             ]
         ]]);
 

@@ -26,6 +26,7 @@ use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Slim\Routing\RouteCollector;
 
 final class ControllerServiceProvider implements ServiceProviderInterface
@@ -98,7 +99,9 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new WebfingerController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[InternalUserRepository::class]
+                $container[InternalUserRepository::class],
+                $container[RouteCollector::class],
+                $container[UriFactoryInterface::class]->createUri($container['baseUrl'])
             );
         };
 

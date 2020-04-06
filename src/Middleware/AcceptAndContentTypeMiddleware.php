@@ -25,17 +25,27 @@ final class AcceptAndContentTypeMiddleware
 
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ('' === $acceptHeader = $request->getHeaderLine('Accept')) {
-            $response = $this->responseFactory->createResponse(406);
+        $defaultMimeType = 'application/json';
+        $acceptHeader = $request->getHeaderLine('Accept');
 
-            $response->getBody()->write('"Accept" header is missing');
-
-            return $response;
+        if ('' === $acceptHeader || '*/*' === $acceptHeader) {
+            $acceptHeader = $defaultMimeType;
         }
 
         $negotiator = new EncodingNegotiator();
         /** @var AcceptEncoding $mediaType */
-        $mediaType = $negotiator->getBest($acceptHeader, ['application/json', 'application/activity+json']);
+        $mediaType = $negotiator->getBest($acceptHeader, [$defaultMimeType, 'application/activity+json']);
+
+        if (null === $mediaType) {
+            $response = $this->responseFactory->createResponse(406)->withHeader('Content-Type', 'text/plain');
+
+            $response->getBody()->write(sprintf(
+                'None of the accepted MIME-types `%s` provided is supported',
+                $acceptHeader
+            ));
+
+            return $response;
+        }
 
         $request = $request->withAttribute('accept', $mediaType->getValue());
 
