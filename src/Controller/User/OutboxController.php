@@ -114,15 +114,17 @@ final class OutboxController
             return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
-        /*$response = $this->responseFactory->createResponse();
+        try {
+            $this->commandBus->handle($this->getCommandFromObject($outboxUser->getActor(), $objectDto));
 
-        $response->getBody()->write(print_r($objectDto, true));
+            return $this->responseFactory->createResponse(204);
+        } catch (\Exception $e) {
+            $response = $this->responseFactory->createResponse(500)->withHeader('Content-Type', 'text/plain');
 
-        return $response;*/
+            $response->getBody()->write('ERROR: ' . $e->getMessage() . PHP_EOL . PHP_EOL . $e->getTraceAsString());
 
-        $this->commandBus->handle($this->getCommandFromObject($outboxUser->getActor(), $objectDto));
-
-        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $request, $accept, 201);
+            return $response;
+        }
     }
 
     private function getCommandFromObject(Actor $outboxActor, object $object): object

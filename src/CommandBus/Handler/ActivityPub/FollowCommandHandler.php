@@ -114,7 +114,7 @@ final class FollowCommandHandler
             $this->logger->error($e->getMessage(), $context);
         }
 
-        exit;
+        $this->logger->info('Persist subscription to database! Wuhuu!');
 
         $this->entityManager->persist($subscription);
         //$this->entityManager->flush();
