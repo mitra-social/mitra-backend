@@ -11,6 +11,7 @@ use Mitra\Env\Writer\NullWriter;
 use Mitra\Logger\RequestContext;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
+use React\ChildProcess\Process;
 use React\Http\Response as ReactResponse;
 use React\Http\Server as ReactHttpServer;
 use React\Socket\Server as ReactSocketServer;
@@ -29,10 +30,6 @@ $port = $env->get('APP_PORT') ?? 8080;
 
 $app = (new AppFactory())->create($env);
 
-$data = (object)[
-    'processed' => 0,
-];
-
 $loop = ReactEventLoopFactory::create();
 
 /** @var RequestContext $requestContext */
@@ -40,8 +37,9 @@ $requestContext = $app->getContainer()->get(RequestContext::class);
 /** @var LoggerInterface $logger */
 $logger = $app->getContainer()->get(LoggerInterface::class);
 
-$server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app, $requestContext, $logger, $data) {
-    $data->processed++;
+$process = new Process();
+
+$server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app, $requestContext, $logger) {
     $requestContext->setRequest($request);
 
     $logger->info(sprintf(
@@ -66,44 +64,6 @@ $server = new ReactHttpServer(function (ServerRequestInterface $request) use ($a
 $socket = new ReactSocketServer(sprintf('0.0.0.0:%s', $port), $loop);
 $server->listen($socket);
 
-$fork = function (callable $child) {
-    $pid = pcntl_fork();
-    if ($pid === -1) {
-        throw new \RuntimeException('Cant fork a process');
-    } elseif ($pid > 0) {
-        return $pid;
-    } else {
-        posix_setsid();
-        $child();
-        exit(0);
-    }
-};
-
-$processes = [];
-
-for ($i = 1; $i < 10; $i++) {
-    $socket->pause();
-
-    $processes[] = $fork(function () use ($socket, $loop, $data) {
-        $socket->resume();
-        $loop->addSignal(SIGINT, function () use ($data, $loop) {
-            fwrite(STDERR, sprintf('%s finished running, Processed %d requests' . PHP_EOL, posix_getpid(), $data->processed));
-            $loop->stop();
-        });
-        $loop->run();
-    });
-}
-
-$loop->addSignal(SIGINT, function () use ($processes, $loop) {
-    foreach ($processes as $pid) {
-        posix_kill($pid, SIGINT);
-        $status = 0;
-        pcntl_waitpid($pid, $status);
-    }
-
-    $loop->stop();
-});
+echo sprintf("Server (%s) running at http://0.0.0.0:%s\n", $appEnv, $port);
 
 $loop->run();
-
-echo sprintf("Server (%s) running at http://0.0.0.0:%s\n", $appEnv, $port);

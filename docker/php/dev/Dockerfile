@@ -16,8 +16,8 @@ COPY prod/files/bin/ /usr/local/bin/
 # PHP: Install php extensions
 RUN pecl channel-update pecl.php.net && \
     pecl install xdebug pcov && \
-    docker-php-ext-install pdo_pgsql opcache > /dev/null 2>&1 && \
-    docker-php-ext-enable pdo_pgsql opcache xdebug pcov > /dev/null 2>&1
+    docker-php-ext-install pdo_pgsql opcache posix pcntl > /dev/null 2>&1 && \
+    docker-php-ext-enable pdo_pgsql opcache posix pcntl xdebug pcov > /dev/null 2>&1
 
 # USER: change user id if provided
 RUN /bin/bash -c 'if [ -n $HOST_USER_ID ] && [ $HOST_USER_ID -lt 60000 ]; then \
