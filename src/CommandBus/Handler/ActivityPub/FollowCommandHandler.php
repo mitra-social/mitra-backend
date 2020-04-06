@@ -98,7 +98,7 @@ final class FollowCommandHandler
             $followRequest = $this->activityPubClient->signRequest(
                 $this->activityPubClient->createRequest('POST', $externalUser->getInbox(), $follow),
                 $commandActorUser->getPrivateKey(),
-                $follow->actor->id
+                $follow->actor->id . '#main-key'
             );
 
             $response = $this->activityPubClient->sendRequest($followRequest);
