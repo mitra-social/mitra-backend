@@ -113,11 +113,13 @@ final class ActivityPubClient
      */
     public function sendRequest(RequestInterface $request): ?object
     {
+        $requestBody = (string) $request->getBody();
+
         $this->logger->info(sprintf(
             'Send request: %s %s (body: %s)',
             $request->getMethod(),
             (string) $request->getUri(),
-            (string) $request->getBody()
+            '' !== $requestBody ? $requestBody : '<empty>'
         ));
 
         try {
@@ -155,12 +157,19 @@ final class ActivityPubClient
 
         if ('' === $responseBody) {
             $this->logger->info(sprintf(
-                'Received <empty> response body for request: %s %s',
+                'Received response body for request: %s %s -> <empty>',
                 $request->getMethod(),
                 (string) $request->getUri()
             ));
             return null;
         }
+
+        $this->logger->info(sprintf(
+            'Received response body for request: %s %s -> %s',
+            $request->getMethod(),
+            (string) $request->getUri(),
+            (string) $response->getBody()
+        ));
 
         $contentTypeHeader = $response->getHeaderLine('Content-Type');
 
@@ -187,13 +196,6 @@ final class ActivityPubClient
                 $mediaType
             ), 3, $e);
         }
-
-        $this->logger->info(sprintf(
-            'Received response body for request: %s %s -> %s',
-            $request->getMethod(),
-            (string) $request->getUri(),
-            (string) $response->getBody()
-        ));
 
         return $this->activityPubDtoPopulator->populate($decodedBody);
     }
