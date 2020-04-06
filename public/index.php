@@ -86,15 +86,21 @@ for ($i = 1; $i < 10; $i++) {
 
     $processes[] = $fork(function () use ($socket, $loop, $data) {
         $socket->resume();
+        // Terminate process if SIGINT received (see line 103)
         $loop->addSignal(SIGINT, function () use ($data, $loop) {
-            fwrite(STDERR, sprintf('%s finished running, Processed %d requests' . PHP_EOL, posix_getpid(), $data->processed));
+            fwrite(STDERR, sprintf(
+                'Process %s finished running, processed %d requests' . PHP_EOL,
+                posix_getpid(),
+                $data->processed
+            ));
             $loop->stop();
         });
         $loop->run();
     });
 }
 
-$loop->addSignal(SIGINT, function () use ($processes, $loop) {
+// Terminate all processes by sending an interupt signal to them
+$terminateProcesses = function () use ($processes, $loop) {
     foreach ($processes as $pid) {
         posix_kill($pid, SIGINT);
         $status = 0;
@@ -102,7 +108,12 @@ $loop->addSignal(SIGINT, function () use ($processes, $loop) {
     }
 
     $loop->stop();
-});
+};
+
+// SIGUSR2 used by nodemon to reload (check SIGTERM and SIGINT as well)
+$loop->addSignal(SIGUSR2, $terminateProcesses);
+$loop->addSignal(SIGINT, $terminateProcesses);
+$loop->addSignal(SIGTERM, $terminateProcesses);
 
 $loop->run();
 
