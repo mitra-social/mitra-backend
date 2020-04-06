@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Mitra\ActivityPub\Client;
 
+use HttpSignatures\Algorithm;
+use HttpSignatures\HeaderList;
+use HttpSignatures\Key;
+use HttpSignatures\Signer;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -39,25 +43,18 @@ final class ActivityPubClient
      */
     private $activityPubDtoPopulator;
 
-    /**
-     * @var HttpSignature
-     */
-    private $httpSignature;
-
     public function __construct(
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         EncoderInterface $encoder,
         DecoderInterface $decoder,
-        ActivityPubDtoPopulator $activityPubDtoPopulator,
-        HttpSignature $httpSignature
+        ActivityPubDtoPopulator $activityPubDtoPopulator
     ) {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->decoder = $decoder;
         $this->encoder = $encoder;
         $this->activityPubDtoPopulator = $activityPubDtoPopulator;
-        $this->httpSignature = $httpSignature;
     }
 
     /**
@@ -83,7 +80,11 @@ final class ActivityPubClient
 
     public function signRequest(RequestInterface $request, string $privateKey, string $publicKeyUrl): RequestInterface
     {
-        return $this->httpSignature->sign($request, $privateKey, $publicKeyUrl);
+        return (new Signer(
+            new Key($publicKeyUrl, $privateKey),
+            Algorithm::create('rsa-sha256'),
+            new HeaderList(['(request-target)', 'Host', 'Date', 'Accept'])
+        ))->sign($request);
     }
 
     /**

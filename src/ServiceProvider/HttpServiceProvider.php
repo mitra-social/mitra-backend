@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use HttpSignatures\Signer;
 use HttpSignatures\Verifier;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Http\Message\ResponseFactory;

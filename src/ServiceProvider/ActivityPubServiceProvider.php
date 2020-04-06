@@ -66,8 +66,7 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
                 $container[RequestFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[DecoderInterface::class],
-                $container[ActivityPubDtoPopulator::class],
-                new HttpSignature()
+                $container[ActivityPubDtoPopulator::class]
             );
         };
     }
