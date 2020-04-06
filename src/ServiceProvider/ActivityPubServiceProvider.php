@@ -17,6 +17,7 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 final class ActivityPubServiceProvider implements ServiceProviderInterface
 {
@@ -65,7 +66,8 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
                 $container[RequestFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[DecoderInterface::class],
-                $container[ActivityPubDtoPopulator::class]
+                $container[ActivityPubDtoPopulator::class],
+                $container[LoggerInterface::class]
             );
         };
     }
