@@ -116,8 +116,8 @@ final class FollowCommandHandler
 
         $this->logger->info('Persist subscription to database! Wuhuu!');
 
-        $this->entityManager->persist($subscription);
-        //$this->entityManager->flush();
+        // TODO $this->entityManager->persist($subscription);
+        // TODO $this->entityManager->flush();
     }
 
     /**
