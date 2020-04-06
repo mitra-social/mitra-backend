@@ -76,6 +76,8 @@ final class UndoCommandHandler
         $undo = $command->getUndoDto();
         $to = $this->getLinkOrObject($undo->to);
 
+        Assert::notNull($to);
+
         $externalUser = null;
 
         if (null !== $objectId = $this->getIdFromObject($to)) {
