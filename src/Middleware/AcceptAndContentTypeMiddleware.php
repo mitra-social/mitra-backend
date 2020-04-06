@@ -47,7 +47,7 @@ final class AcceptAndContentTypeMiddleware
             return $response;
         }
 
-        $request = $request->withAttribute('accept', $mediaType->getValue());
+        $request = $request->withAttribute('accept', $mediaType->getType());
 
         if ($request->getBody()->getSize() > 0 && in_array($request->getMethod(), ['POST', 'PUT', 'PATCH'], true)) {
             if ('' === $contentType = $request->getHeaderLine('Content-Type')) {
