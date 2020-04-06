@@ -57,9 +57,9 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
             'https://www.w3.org/ns/activitystreams',
             'https://w3id.org/security/v1'
         ];
-        $userResponseDto->userId = $entity->getId();
+        /*$userResponseDto->userId = $entity->getId();
         $userResponseDto->email = $entity->getEmail();
-        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
+        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');*/
 
         $userUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
             $this->baseUri,
