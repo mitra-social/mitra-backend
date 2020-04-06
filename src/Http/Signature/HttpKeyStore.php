@@ -53,10 +53,6 @@ final class HttpKeyStore implements KeyStoreInterface
             );
         }
 
-        $publicKey = $decodedResponse['publicKey']['publicKeyPem'];
-
-        echo 'Successfully fetched public key from ' , $keyId;
-
-        return new Key($keyId, $publicKey);
+        return new Key($keyId, $decodedResponse['publicKey']['publicKeyPem']);
     }
 }

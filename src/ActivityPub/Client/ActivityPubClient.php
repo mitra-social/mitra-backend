@@ -109,7 +109,7 @@ final class ActivityPubClient
                 $request,
                 null,
                 sprintf(
-                    'Request (%s %s) to remote server failed: %s',
+                    'Request `%s %s` to remote server failed: %s',
                     $request->getMethod(),
                     (string) $request->getUri(),
                     $e->getMessage()
@@ -124,7 +124,9 @@ final class ActivityPubClient
                 $request,
                 $response,
                 sprintf(
-                    'Requested was answered with HTTP response code `%d` by the remote server',
+                    'Request `%s %s` to remote server was answered with HTTP status code `%s`',
+                    $request->getMethod(),
+                    (string) $request->getUri(),
                     $response->getStatusCode()
                 ),
                 2
