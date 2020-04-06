@@ -7,7 +7,6 @@ namespace Mitra\ServiceProvider;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Http\Message\ResponseFactory;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Logger\RequestContext;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;

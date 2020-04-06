@@ -80,9 +80,16 @@ final class HttpSignature
 
         $signature = $rsa->sign($plaintext);
 
+        $headersNormalized = ['(request-target)'];
+
+        foreach ($headers as $header) {
+            $headersNormalized[] = strtolower($header);
+        }
+
         return $request->withHeader('Signature', sprintf(
-            'keyId="%s",headers="(request-target) host date",signature="%s"',
+            'keyId="%s",headers="%s",algorithm="rsa-sha256",signature="%s"',
             $publicKeyUrl,
+            implode(' ', $headersNormalized),
             base64_encode($signature)
         ));
     }

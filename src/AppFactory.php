@@ -7,6 +7,7 @@ namespace Mitra;
 use Mitra\Env\Env;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
+use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Mitra\Routes\PrivateRouteProvider;
 use Mitra\Routes\PublicRouterProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
@@ -32,6 +33,7 @@ final class AppFactory
         /** @var ContainerInterface $container */
         $container = $app->getContainer();
 
+        $app->add(ValidateHttpSignatureMiddleware::class);
         $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
 
