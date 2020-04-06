@@ -37,22 +37,10 @@ $loop = ReactEventLoopFactory::create();
 
 /** @var RequestContext $requestContext */
 $requestContext = $app->getContainer()->get(RequestContext::class);
-/** @var LoggerInterface $logger */
-$logger = $app->getContainer()->get(LoggerInterface::class);
 
 $server = new ReactHttpServer(function (ServerRequestInterface $request) use ($app, $requestContext, $logger, $data) {
     $data->processed++;
     $requestContext->setRequest($request);
-
-    $logger->info(sprintf(
-        'Incoming request %s %s',
-        $request->getMethod(),
-        (string) $request->getUri()
-    ), [
-        'request.headers' => $request->getHeaders(),
-        'request.method' => $request->getMethod(),
-        'request.path' => (string) $request->getUri(),
-    ]);
 
     $response = $app->handle($request);
 

@@ -35,7 +35,6 @@
     "kriswallsmith/buzz": "^1.1",
     "webmozart/assert": "^1.7.0",
     "willdurand/negotiation": "^2.3",
-    "react/child-process": "^0.6.1",
     "liamdennehy/http-signatures-php": "^10.0"
   },
   "require-dev": {
