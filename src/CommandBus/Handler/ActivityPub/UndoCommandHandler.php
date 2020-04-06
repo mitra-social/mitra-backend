@@ -74,24 +74,17 @@ final class UndoCommandHandler
         /** @var InternalUser $commandActorUser */
 
         $undo = $command->getUndoDto();
-        $object = $this->getLinkOrObject($undo->object);
+        $to = $this->getLinkOrObject($undo->to);
 
         $externalUser = null;
 
-        if (null !== $objectId = $this->getIdFromObject($object)) {
+        if (null !== $objectId = $this->getIdFromObject($to)) {
             $externalUser = $this->externalUserRepository->findOneByExternalId(hash('sha256', $objectId));
         }
 
         if (null === $externalUser) {
-            $externalUser = $this->createExternalUser($object);
+            $externalUser = $this->createExternalUser($to);
         }
-
-        $subscription = new Subscription(
-            Uuid::uuid4()->toString(),
-            $command->getActor(),
-            $externalUser->getActor(),
-            new \DateTime()
-        );
 
         $undo->actor = $this->entityToDtoMapper->map($commandActor, PersonDto::class);
 
@@ -114,11 +107,6 @@ final class UndoCommandHandler
 
             $this->logger->error($e->getMessage(), $context);
         }
-
-        exit;
-
-        $this->entityManager->persist($subscription);
-        //$this->entityManager->flush();
     }
 
     /**
