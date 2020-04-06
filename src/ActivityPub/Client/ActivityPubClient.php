@@ -149,7 +149,7 @@ final class ActivityPubClient
             return null;
         }
 
-        $contentTypeHeader = $request->getHeaderLine('Content-Type');
+        $contentTypeHeader = $response->getHeaderLine('Content-Type');
 
         $negotiator = new EncodingNegotiator();
         /** @var AcceptEncoding $mediaType */
