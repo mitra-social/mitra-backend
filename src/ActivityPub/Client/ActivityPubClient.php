@@ -11,6 +11,8 @@ use HttpSignatures\Signer;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Negotiation\AcceptEncoding;
+use Negotiation\EncodingNegotiator;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -147,10 +149,23 @@ final class ActivityPubClient
             return null;
         }
 
-        $mediaType = $response->getHeaderLine('Content-Type');
+        $contentTypeHeader = $request->getHeaderLine('Content-Type');
+
+        $negotiator = new EncodingNegotiator();
+        /** @var AcceptEncoding $mediaType */
+        $mediaType = $negotiator->getBest($contentTypeHeader, ['application/json', 'application/activity+json']);
+
+        if (null === $mediaType) {
+            throw new ActivityPubClientException(
+                $request,
+                $response,
+                sprintf('Content-Type `%s` of response from remote server not supported', $contentTypeHeader),
+                5
+            );
+        }
 
         try {
-            $decodedBody = $this->decoder->decode($responseBody, $mediaType);
+            $decodedBody = $this->decoder->decode($responseBody, $mediaType->getType());
         } catch (\JsonException $e) {
             throw new ActivityPubClientException($request, $response, sprintf(
                 'Could not decode body from remote serve response: %s (body: %s, content-type: %s)',
