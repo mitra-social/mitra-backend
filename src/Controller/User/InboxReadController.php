@@ -36,7 +36,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Webmozart\Assert\Assert;
 
-final class InboxController
+final class InboxReadController
 {
 
     private const ITEMS_PER_PAGE_LIMIT = 25;

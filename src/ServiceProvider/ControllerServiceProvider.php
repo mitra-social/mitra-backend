@@ -6,11 +6,12 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Controller\User\InboxController;
+use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
+use Mitra\Controller\User\InboxWriteController;
 use Mitra\Controller\User\OutboxController;
 use Mitra\Controller\User\ReadUserController;
 use Mitra\Controller\Webfinger\WebfingerController;
@@ -27,6 +28,7 @@ use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\UriFactoryInterface;
+use Psr\Log\LoggerInterface;
 use Slim\Routing\RouteCollector;
 
 final class ControllerServiceProvider implements ServiceProviderInterface
@@ -71,8 +73,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[InboxController::class] = static function (Container $container): InboxController {
-            return new InboxController(
+        $container[InboxReadController::class] = static function (Container $container): InboxReadController {
+            return new InboxReadController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[InternalUserRepository::class],
@@ -102,6 +104,13 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[InternalUserRepository::class],
                 $container[RouteCollector::class],
                 $container[UriFactoryInterface::class]->createUri($container['baseUrl'])
+            );
+        };
+
+        $container[InboxWriteController::class] = static function (Container $container): InboxWriteController {
+            return new InboxWriteController(
+                $container[ResponseFactoryInterface::class],
+                $container[LoggerInterface::class]
             );
         };
 

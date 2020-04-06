@@ -15,6 +15,7 @@ use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Log\LoggerInterface;
 
 final class ActivityPubClient
 {
@@ -43,18 +44,25 @@ final class ActivityPubClient
      */
     private $activityPubDtoPopulator;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         EncoderInterface $encoder,
         DecoderInterface $decoder,
-        ActivityPubDtoPopulator $activityPubDtoPopulator
+        ActivityPubDtoPopulator $activityPubDtoPopulator,
+        LoggerInterface $logger
     ) {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->decoder = $decoder;
         $this->encoder = $encoder;
         $this->activityPubDtoPopulator = $activityPubDtoPopulator;
+        $this->logger = $logger;
     }
 
     /**
@@ -133,7 +141,15 @@ final class ActivityPubClient
             );
         }
 
-        $decodedBody = $this->decoder->decode((string) $response->getBody(), 'application/json');
+        try {
+            $decodedBody = $this->decoder->decode((string)$response->getBody(), 'application/json');
+        } catch (\JsonException $e) {
+            throw new ActivityPubClientException($request, $response, sprintf(
+                'Could not decode body from remote serve response: %s (body: %s)',
+                $e->getMessage(),
+                (string) $response->getBody()
+            ), 3, $e);
+        }
 
         return $this->activityPubDtoPopulator->populate($decodedBody);
     }
