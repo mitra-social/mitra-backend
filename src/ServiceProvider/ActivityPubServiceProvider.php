@@ -9,7 +9,6 @@ use ActivityPhp\Type\TypeResolver;
 use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClient;
-use Mitra\ActivityPub\Client\HttpSignature;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Serialization\Decode\DecoderInterface;

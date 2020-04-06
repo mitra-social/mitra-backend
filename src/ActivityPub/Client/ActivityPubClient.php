@@ -80,6 +80,14 @@ final class ActivityPubClient
 
     public function signRequest(RequestInterface $request, string $privateKey, string $publicKeyUrl): RequestInterface
     {
+        if (!$request->hasHeader('Host')) {
+            $request = $request->withHeader('Host', $request->getUri()->getHost());
+        }
+
+        if (!$request->hasHeader('Date')) {
+            $request = $request->withHeader('Date', (new \DateTimeImmutable())->format(\DateTime::RFC7231));
+        }
+
         return (new Signer(
             new Key($publicKeyUrl, $privateKey),
             Algorithm::create('rsa-sha256'),
