@@ -155,21 +155,17 @@ final class ActivityPubClient
 
         $responseBody = (string) $response->getBody();
 
+        $this->logger->info(sprintf(
+            'Received response body for request: %s %s -> %d -> %s',
+            $request->getMethod(),
+            $response->getStatusCode(),
+            (string) $request->getUri(),
+            '' !== $responseBody ? $responseBody : '<empty>'
+        ));
+
         if ('' === $responseBody) {
-            $this->logger->info(sprintf(
-                'Received response body for request: %s %s -> <empty>',
-                $request->getMethod(),
-                (string) $request->getUri()
-            ));
             return null;
         }
-
-        $this->logger->info(sprintf(
-            'Received response body for request: %s %s -> %s',
-            $request->getMethod(),
-            (string) $request->getUri(),
-            (string) $response->getBody()
-        ));
 
         $contentTypeHeader = $response->getHeaderLine('Content-Type');
 
