@@ -158,8 +158,8 @@ final class ActivityPubClient
         $this->logger->info(sprintf(
             'Received response body for request: %s %s -> %d -> %s',
             $request->getMethod(),
-            $response->getStatusCode(),
             (string) $request->getUri(),
+            $response->getStatusCode(),
             '' !== $responseBody ? $responseBody : '<empty>'
         ));
 
