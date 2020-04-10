@@ -122,7 +122,12 @@ final class OutboxController
                 $this->commandBus->handle(new AssignActorCommand($outboxUser->getActor(), $objectDto));
             }
 
-            $this->commandBus->handle($this->getCommandForObject($outboxUser->getActor(), $objectDto));
+            $objectCommand = $this->getCommandForObject($outboxUser->getActor(), $objectDto);
+
+            if (null !== $objectCommand) {
+                $this->commandBus->handle($objectCommand);
+            }
+            
             $this->commandBus->handle(new SendObjectToRecipientsCommand($outboxUser, $objectDto));
 
             return $this->responseFactory->createResponse(204);
@@ -135,7 +140,7 @@ final class OutboxController
         }
     }
 
-    private function getCommandForObject(Actor $outboxActor, object $object): object
+    private function getCommandForObject(Actor $outboxActor, object $object): ?object
     {
         if ($object instanceof FollowDto) {
             return new FollowCommand($outboxActor, $object);
@@ -143,6 +148,6 @@ final class OutboxController
             return new UndoCommand($outboxActor, $object);
         }
 
-        throw new \RuntimeException(sprintf('Type `%s` is currently not supported', $object->type));
+        return null;
     }
 }
