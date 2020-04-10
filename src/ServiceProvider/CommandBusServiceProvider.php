@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\ServiceProvider;
 
 use League\Tactician\CommandBus;
+use League\Tactician\Doctrine\ORM\TransactionMiddleware;
 use League\Tactician\Handler\CommandHandlerMiddleware;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\RemoteObjectResolver;
@@ -39,7 +40,9 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 new TacticianMapByStaticClassList($container['mappings']['command_handlers'])
             );
 
-            return new TacticianCommandBus(new CommandBus($handlerMiddleware));
+            $transactionMiddleware = new TransactionMiddleware($container['doctrine.orm.em']);
+
+            return new TacticianCommandBus(new CommandBus($transactionMiddleware, $handlerMiddleware));
         };
     }
 

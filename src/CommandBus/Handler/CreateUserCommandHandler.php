@@ -37,7 +37,6 @@ final class CreateUserCommandHandler
         $this->seedKeyPair($user);
 
         $this->entityManager->persist($user);
-        $this->entityManager->flush();
     }
 
     private function hashPassword(InternalUser $user): void
