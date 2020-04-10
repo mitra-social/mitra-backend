@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Mitra\ActivityPub\Client\ActivityPubClient;
-use Mitra\ActivityPub\Client\ActivityPubClientException;
-use Mitra\ActivityPub\Type\ActorInterface;
+use Mitra\ActivityPub\RemoteObjectResolver;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
-use Mitra\Dto\EntityToDtoMapper;
-use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\Actor\Actor;
@@ -35,31 +32,22 @@ final class FollowCommandHandler
     private $entityManager;
 
     /**
-     * @var ActivityPubClient
-     */
-    private $activityPubClient;
-
-    /**
-     * @var EntityToDtoMapper
-     */
-    private $entityToDtoMapper;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
+    /**
+     * @var RemoteObjectResolver
+     */
+    private $remoteObjectResolver;
+
     public function __construct(
         ExternalUserRepository $externalUserRepository,
         EntityManagerInterface $entityManager,
-        ActivityPubClient $activityPubClient,
-        EntityToDtoMapper $entityToDtoMapper,
         LoggerInterface $logger
     ) {
         $this->externalUserRepository = $externalUserRepository;
         $this->entityManager = $entityManager;
-        $this->activityPubClient = $activityPubClient;
-        $this->entityToDtoMapper = $entityToDtoMapper;
         $this->logger = $logger;
     }
 
@@ -73,203 +61,70 @@ final class FollowCommandHandler
         /** @var InternalUser $commandActorUser */
 
         $follow = $command->getFollowDto();
-        $object = $this->getLinkOrObject($follow->object);
 
-        $externalUser = null;
-
-        if (null !== $objectId = $this->getIdFromObject($object)) {
-            $externalUser = $this->externalUserRepository->findOneByExternalId(hash('sha256', $objectId));
-        }
-
-        if (null === $externalUser) {
-            $externalUser = $this->createExternalUser($object);
-        }
-
-        $subscription = new Subscription(
-            Uuid::uuid4()->toString(),
-            $command->getActor(),
-            $externalUser->getActor(),
-            new \DateTime()
-        );
-
-        $follow->actor = $this->entityToDtoMapper->map($commandActor, PersonDto::class);
-
-        try {
-            $followRequest = $this->activityPubClient->signRequest(
-                $this->activityPubClient->createRequest('POST', $externalUser->getInbox(), $follow),
-                $commandActorUser->getPrivateKey(),
-                $follow->actor->id . '#main-key'
-            );
-
-            $response = $this->activityPubClient->sendRequest($followRequest);
-
-            print_r($response);
-        } catch (ActivityPubClientException $e) {
-            $context = [];
-
-            if (null !== $response = $e->getResponse()) {
-                $context['responseBody'] = (string) $response->getBody();
-            }
-
-            $this->logger->error($e->getMessage(), $context);
+        if (null === $objectExternalUser = $this->getExternalUser($follow->object)) {
+            throw new \RuntimeException('Could not resolve `$object`');
         }
 
         $this->logger->info('Persist subscription to database! Wuhuu!');
 
-        // TODO $this->entityManager->persist($subscription);
-        // TODO $this->entityManager->flush();
+        $subscription = new Subscription(
+            Uuid::uuid4()->toString(),
+            $command->getActor(),
+            $objectExternalUser->getActor(),
+            new \DateTime()
+        );
+
+        $this->entityManager->persist($subscription);
+        $this->entityManager->flush();
     }
 
     /**
-     * Tries to extract the object id out of all the possible values
-     * @param object|LinkDto|ObjectDto $object
-     * @return string|null
+     * @param string|ObjectDto|LinkDto $object
+     * @return null|ExternalUser
+     * @throws \Mitra\ActivityPub\Resolver\RemoteObjectResolverException
      */
-    private function getIdFromObject(object $object): ?string
+    private function getExternalUser($object): ?ExternalUser
     {
-        if ($object instanceof LinkDto) {
-            return $object->id;
+        Assert::notNull($object);
+
+        $externalId = null;
+
+        if (is_string($object)) {
+            $externalId = $object;
+        } elseif ($object instanceof LinkDto) {
+            $externalId = $object->href;
         } elseif ($object instanceof ObjectDto) {
-            return $object->id;
+            $externalId = $object->id;
         }
 
-        return null;
-    }
+        if (null !== $externalUser = $this->externalUserRepository->findOneByExternalId($externalId)) {
+            return $externalUser;
+        }
 
-    private function createExternalUser($object): ExternalUser
-    {
-        $actorData = $this->fetchUserData($object);
+        if (null === $resolvedObject = $this->remoteObjectResolver->resolve($object)) {
+            return null;
+        }
+
+        Assert::isInstanceOf($resolvedObject, ActorInterface::class, 'Currently only following actors is supported');
+
+        /** @var ActorInterface $resolvedObject */
 
         $externalUser = new ExternalUser(
             Uuid::uuid4()->toString(),
-            $actorData['id'],
-            hash('sha256', $actorData['id']),
-            $actorData['preferredUsername'],
-            $actorData['inbox'],
-            $actorData['outbox']
+            $resolvedObject->getId(),
+            hash('sha256', $resolvedObject->getId()),
+            $resolvedObject->getPreferredUsername(),
+            $resolvedObject->getInbox(),
+            $resolvedObject->getOutbox()
         );
 
         $actor = new Actor($externalUser);
-        $actor->setName($actorData['name']);
-        $actor->setIcon($actorData['icon']);
+        $actor->setName($resolvedObject->getName());
+        //$actor->setIcon($resolvedObject->getIcon()); could be array... which one to choose then?
 
         $externalUser->setActor($actor);
 
         return $externalUser;
-    }
-
-    private function normalizeProperty($object, $propertyName): ?string
-    {
-        if (!property_exists($object, $propertyName) || null === $object->$propertyName) {
-            return null;
-        }
-
-        $propertyValue = $object->$propertyName;
-
-        if (is_string($propertyValue)) {
-            return $propertyValue;
-        }
-
-        if ($propertyValue instanceof LinkDto) {
-            return $propertyValue->href;
-        }
-
-        return null;
-    }
-
-    /**
-     * @param ObjectDto|object $object
-     * @return array
-     */
-    private function fetchUserData(object $object): array
-    {
-        $propertiesLocal = [
-            'id' => null,
-            'preferredUsername' => null,
-            'inbox' => null,
-            'outbox' => null,
-            'name' => null,
-            'icon' => null,
-            'following' => null,
-            'followers' => null,
-            'url' => null,
-        ];
-
-        if ($object instanceof ObjectDto) {
-            $propertiesLocal = [
-                'id' => $this->normalizeProperty($object, 'id'),
-                'preferredUsername' => $this->normalizeProperty($object, 'preferredUsername'),
-                'inbox' => $this->normalizeProperty($object, 'inbox'),
-                'outbox' => $this->normalizeProperty($object, 'outbox'),
-                'name' => $this->normalizeProperty($object, 'name'),
-                'icon' => $this->normalizeProperty($object, 'icon'),
-                'following' => $this->normalizeProperty($object, 'following'),
-                'followers' => $this->normalizeProperty($object, 'followers'),
-                'url' => $this->normalizeProperty($object, 'url'),
-            ];
-        }
-
-        $userUrl = $this->getObjectUrl($object) ?? $object->id;
-
-        if (null === $userUrl) {
-            return $propertiesLocal;
-        }
-
-        $propertiesRemote = [];
-
-        try {
-            /** @var ActorInterface $response */
-            $response = $this->activityPubClient->sendRequest(
-                $this->activityPubClient->createRequest('GET', $userUrl)
-            );
-
-            $propertiesRemote = [
-                'id' => $this->normalizeProperty($response, 'id'),
-                'preferredUsername' => $this->normalizeProperty($response, 'preferredUsername'),
-                'inbox' => $this->normalizeProperty($response, 'inbox'),
-                'outbox' => $this->normalizeProperty($response, 'outbox'),
-                'name' => $this->normalizeProperty($response, 'name'),
-                'icon' => $this->normalizeProperty($response, 'icon'),
-                'following' => $this->normalizeProperty($response, 'following'),
-                'followers' => $this->normalizeProperty($response, 'followers'),
-                'url' => $this->normalizeProperty($response, 'url'),
-            ];
-        } catch (\Exception $e) {
-            $this->logger->error(sprintf('Could not get remote object from url `%s`: %s', $userUrl, $e->getMessage()));
-        }
-
-        return array_filter($propertiesRemote) + $propertiesLocal;
-    }
-
-    /**
-     * @param null|string|LinkDto|ObjectDto $value
-     * @return object
-     */
-    private function getLinkOrObject($value): ?object
-    {
-        if (is_string($value)) {
-            $link = new LinkDto();
-            $link->href = $value;
-            
-            return $link;
-        }
-        
-        return $value;
-    }
-
-    private function getObjectUrl(object $object): ?string
-    {
-        if ($object instanceof LinkDto) {
-            return $object->href;
-        }
-
-        if ($object instanceof ObjectDto) {
-            if (null !== $object->url) {
-                $firstUrl = is_array($object->url) ? array_shift($object->url) : $object->url;
-                return is_object($firstUrl) ? $this->getObjectUrl($firstUrl) : $firstUrl;
-            }
-        }
-
-        return null;
     }
 }

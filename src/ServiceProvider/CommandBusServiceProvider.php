@@ -7,15 +7,17 @@ namespace Mitra\ServiceProvider;
 use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandHandlerMiddleware;
 use Mitra\ActivityPub\Client\ActivityPubClient;
+use Mitra\ActivityPub\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\CommandBus\Handler\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\FollowCommandHandler;
+use Mitra\CommandBus\Handler\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\UndoCommandHandler;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\CommandBus\TacticianCommandBus;
 use Mitra\CommandBus\TacticianMapByStaticClassList;
-use Mitra\Dto\DtoToEntityMapper;
-use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Repository\ExternalUserRepository;
+use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -47,12 +49,27 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             return new CreateUserCommandHandler($container['doctrine.orm.em']);
         };
 
+        $container[AssignActorCommandHandler::class] = static function (
+            Container $container
+        ): AssignActorCommandHandler {
+            return new AssignActorCommandHandler($container[UriGenerator::class]);
+        };
+
+        $container[SendObjectToRecipientsCommandHandler::class] = static function (
+            Container $container
+        ): SendObjectToRecipientsCommandHandler {
+            return new SendObjectToRecipientsCommandHandler(
+                $container[ActivityPubClient::class],
+                $container[RemoteObjectResolver::class],
+                $container[UriGenerator::class],
+                $container[LoggerInterface::class]
+            );
+        };
+
         $container[FollowCommandHandler::class] = static function (Container $container): FollowCommandHandler {
             return new FollowCommandHandler(
                 $container[ExternalUserRepository::class],
                 $container['doctrine.orm.em'],
-                $container[ActivityPubClient::class],
-                $container[EntityToDtoMapper::class],
                 $container[LoggerInterface::class]
             );
         };
@@ -60,10 +77,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
         $container[UndoCommandHandler::class] = static function (Container $container): UndoCommandHandler {
             return new UndoCommandHandler(
                 $container[ExternalUserRepository::class],
-                $container['doctrine.orm.em'],
-                $container[ActivityPubClient::class],
-                $container[EntityToDtoMapper::class],
-                $container[LoggerInterface::class]
+                $container['doctrine.orm.em']
             );
         };
     }

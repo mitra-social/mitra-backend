@@ -69,67 +69,28 @@ trait ActorTrait
      */
     public $publicKey;
 
-    /**
-     * @return string|null
-     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getInbox(): string
+    {
+        return $this->inbox;
+    }
+
+    public function getOutbox(): string
+    {
+        return $this->outbox;
+    }
+
     public function getPreferredUsername(): ?string
     {
         return $this->preferredUsername;
     }
 
-    /**
-     * @return LinkDto|string
-     */
-    public function getInbox()
+    public function getName(): ?string
     {
-        return $this->inbox;
-    }
-
-    /**
-     * @return LinkDto|string
-     */
-    public function getOutbox()
-    {
-        return $this->outbox;
-    }
-
-    /**
-     * @return LinkDto|string|null
-     */
-    public function getFollowing()
-    {
-        return $this->following;
-    }
-
-    /**
-     * @return LinkDto|string|null
-     */
-    public function getFollowers()
-    {
-        return $this->followers;
-    }
-
-    /**
-     * @return LinkDto|string|null
-     */
-    public function getLiked()
-    {
-        return $this->liked;
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getStreams(): ?array
-    {
-        return $this->streams;
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getEndpoints(): ?array
-    {
-        return $this->endpoints;
+        return $this->name;
     }
 }

@@ -9,7 +9,9 @@ use HttpSignatures\HeaderList;
 use HttpSignatures\Key;
 use HttpSignatures\Signer;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Serialization\Decode\DecoderInterface;
+use Mitra\Serialization\Encode\EncoderException;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Negotiation\AcceptEncoding;
 use Negotiation\EncodingNegotiator;
@@ -17,7 +19,9 @@ use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Webmozart\Assert\Assert;
 
 final class ActivityPubClient
 {
@@ -72,7 +76,7 @@ final class ActivityPubClient
      * @param string $url
      * @param object|null $content
      * @return RequestInterface
-     * @throws \Mitra\Serialization\Encode\EncoderException
+     * @throws ActivityPubClientException
      */
     public function createRequest(string $method, string $url, ?object $content = null): RequestInterface
     {
@@ -81,9 +85,19 @@ final class ActivityPubClient
             ->withHeader('User-Agent', 'mitra-social/0.1');
 
         if (null !== $content) {
-            $encodedType = $this->encoder->encode($content, 'application/json');
-            $request = $request->withHeader('Content-Type', 'application/activity+json');
-            $request->getBody()->write($encodedType);
+            try {
+                $encodedType = $this->encoder->encode($content, 'application/json');
+                $request = $request->withHeader('Content-Type', 'application/activity+json');
+                $request->getBody()->write($encodedType);
+            } catch (EncoderException $e) {
+                throw new ActivityPubClientException(
+                    null,
+                    null,
+                    sprintf('Could not encode request body: %s', $e->getMessage()),
+                    6,
+                    $e
+                );
+            }
         }
 
         return $request;
@@ -108,10 +122,10 @@ final class ActivityPubClient
 
     /**
      * @param RequestInterface $request
-     * @return object
+     * @return ActivityPubClientResponse
      * @throws ActivityPubClientException
      */
-    public function sendRequest(RequestInterface $request): ?object
+    public function sendRequest(RequestInterface $request): ActivityPubClientResponse
     {
         $requestBody = (string) $request->getBody();
 
@@ -164,7 +178,7 @@ final class ActivityPubClient
         ));
 
         if ('' === $responseBody) {
-            return null;
+            return new ActivityPubClientResponse($response, null);
         }
 
         $contentTypeHeader = $response->getHeaderLine('Content-Type');
@@ -193,6 +207,12 @@ final class ActivityPubClient
             ), 3, $e);
         }
 
-        return $this->activityPubDtoPopulator->populate($decodedBody);
+        $object = $this->activityPubDtoPopulator->populate($decodedBody);
+
+        Assert::isInstanceOf($object, ObjectDto::class);
+
+        /** @var ObjectDto $object */
+
+        return new ActivityPubClientResponse($response, $object);
     }
 }

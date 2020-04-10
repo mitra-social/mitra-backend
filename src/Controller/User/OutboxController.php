@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
+use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
@@ -13,6 +15,7 @@ use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoTransformer;
+use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
@@ -115,7 +118,12 @@ final class OutboxController
         }
 
         try {
-            $this->commandBus->handle($this->getCommandFromObject($outboxUser->getActor(), $objectDto));
+            if ($objectDto instanceof AbstractActivity) {
+                $this->commandBus->handle(new AssignActorCommand($outboxUser->getActor(), $objectDto));
+            }
+
+            $this->commandBus->handle($this->getCommandForObject($outboxUser->getActor(), $objectDto));
+            $this->commandBus->handle(new SendObjectToRecipientsCommand($outboxUser, $objectDto));
 
             return $this->responseFactory->createResponse(204);
         } catch (\Exception $e) {
@@ -127,7 +135,7 @@ final class OutboxController
         }
     }
 
-    private function getCommandFromObject(Actor $outboxActor, object $object): object
+    private function getCommandForObject(Actor $outboxActor, object $object): object
     {
         if ($object instanceof FollowDto) {
             return new FollowCommand($outboxActor, $object);
