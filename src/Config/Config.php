@@ -31,6 +31,7 @@ use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
+use Mitra\Entity\Subscription;
 use Mitra\Entity\User\AbstractUser;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
@@ -40,6 +41,7 @@ use Mitra\Mapping\Orm\ActivityStreamContentOrmMapping;
 use Mitra\Mapping\Orm\Actor\ActorOrmMapping;
 use Mitra\Mapping\Orm\Actor\OrganizationOrmMapping;
 use Mitra\Mapping\Orm\Actor\PersonOrmMapping;
+use Mitra\Mapping\Orm\SubscriptionOrmMapping;
 use Mitra\Mapping\Orm\User\AbstractUserOrmMapping;
 use Mitra\Mapping\Orm\User\ExternalUserOrmMapping;
 use Mitra\Mapping\Orm\User\InternalUserOrmMapping;
@@ -133,6 +135,7 @@ final class Config implements ConfigInterface
                     Actor::class => ActorOrmMapping::class,
                     Person::class => PersonOrmMapping::class,
                     Organization::class => OrganizationOrmMapping::class,
+                    Subscription::class => SubscriptionOrmMapping::class,
                 ],
                 'validation' => [
                     CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,

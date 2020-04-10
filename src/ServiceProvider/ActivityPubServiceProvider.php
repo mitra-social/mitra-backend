@@ -9,7 +9,7 @@ use ActivityPhp\Type\TypeResolver;
 use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClient;
-use Mitra\CommandBus\Handler\CreateUserCommandHandler;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -70,12 +70,9 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
                 $container[LoggerInterface::class]
             );
         };
-    }
 
-    private function registerHandlers(Container $container): void
-    {
-        $container[CreateUserCommandHandler::class] = function () use ($container): CreateUserCommandHandler {
-            return new CreateUserCommandHandler($container['doctrine.orm.em']);
+        $container[RemoteObjectResolver::class] = static function (Container $container): RemoteObjectResolver {
+            return new RemoteObjectResolver($container[ActivityPubClient::class]);
         };
     }
 }

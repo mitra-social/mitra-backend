@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Command\ActivityPub;
 
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
-use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\User\InternalUser;
 
 /**
@@ -25,6 +24,7 @@ final class SendObjectToRecipientsCommand
 
     public function __construct(InternalUser $sender, ObjectDto $object)
     {
+        $this->sender = $sender;
         $this->object = $object;
     }
 

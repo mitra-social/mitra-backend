@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\ActivityPub;
+namespace Mitra\ActivityPub\Resolver;
 
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientException;
@@ -63,7 +63,7 @@ final class RemoteObjectResolver
         try {
             return $this->activityPubClient->sendRequest(
                 $this->activityPubClient->createRequest('GET', $url)
-            );
+            )->getReceivedObject();
         } catch (ActivityPubClientException $e) {
             throw new RemoteObjectResolverException(
                 sprintf('Could not resolve remote object with url `%s`: %s', $url, $e->getMessage()),

@@ -6,7 +6,7 @@ namespace Mitra\CommandBus\Handler\ActivityPub;
 
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientException;
-use Mitra\ActivityPub\RemoteObjectResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolverException;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;

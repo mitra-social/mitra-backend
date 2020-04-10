@@ -8,7 +8,7 @@ use League\Tactician\CommandBus;
 use League\Tactician\Doctrine\ORM\TransactionMiddleware;
 use League\Tactician\Handler\CommandHandlerMiddleware;
 use Mitra\ActivityPub\Client\ActivityPubClient;
-use Mitra\ActivityPub\RemoteObjectResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\Handler\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\FollowCommandHandler;
@@ -73,6 +73,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             return new FollowCommandHandler(
                 $container[ExternalUserRepository::class],
                 $container['doctrine.orm.em'],
+                $container[RemoteObjectResolver::class],
                 $container[LoggerInterface::class]
             );
         };

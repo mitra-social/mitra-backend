@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Slim\CallableResolver;
 use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
@@ -40,6 +42,15 @@ final class SlimServiceProvider implements ServiceProviderInterface
                 null,
                 $container['routerCacheFile']
             );
+        };
+
+        $container[UriGenerator::class] = static function (Container $container): UriGenerator {
+            /** @var UriFactoryInterface $uriFactory */
+            $uriFactory = $container[UriFactoryInterface::class];
+            /** @var RouteCollectorInterface $routeCollector */
+            $routeCollector = $container[RouteCollector::class];
+
+            return new UriGenerator($uriFactory->createUri($container['baseUrl']), $routeCollector->getRouteParser());
         };
     }
 }

@@ -26,34 +26,27 @@ class Subscription
     /**
      * @var \DateTime
      */
-    private $start;
+    private $startDate;
 
     /**
      * @var \DateTime|null
      */
-    private $end;
+    private $endDate;
 
-    /**
-     * Subscription constructor.
-     * @param string $id
-     * @param Actor $subscribingActor
-     * @param Actor $subscribedActor
-     * @param \DateTime $start
-     */
-    public function __construct(string $id, Actor $subscribingActor, Actor $subscribedActor, \DateTime $start)
+    public function __construct(string $id, Actor $subscribingActor, Actor $subscribedActor, \DateTime $startDate)
     {
         $this->id = $id;
         $this->subscribingActor = $subscribingActor;
         $this->subscribedActor = $subscribedActor;
-        $this->start = $start;
+        $this->startDate = $startDate;
     }
 
     /**
-     * @param \DateTime|null $end
+     * @param \DateTime|null $endDate
      */
-    public function setEnd(?\DateTime $end): void
+    public function setEndDate(?\DateTime $endDate): void
     {
-        $this->end = $end;
+        $this->endDate = $endDate;
     }
 
     /**
@@ -83,16 +76,16 @@ class Subscription
     /**
      * @return \DateTime
      */
-    public function getStart(): \DateTime
+    public function getStartDate(): \DateTime
     {
-        return $this->start;
+        return $this->startDate;
     }
 
     /**
      * @return \DateTime|null
      */
-    public function getEnd(): ?\DateTime
+    public function getEndDate(): ?\DateTime
     {
-        return $this->end;
+        return $this->endDate;
     }
 }

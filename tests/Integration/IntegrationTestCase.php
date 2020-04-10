@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
+use Integration\TestServiceProvider;
 use Mitra\AppFactory;
 use Mitra\Env\Env;
 use Mitra\Env\Reader\DelegateReader;
 use Mitra\Env\Reader\EnvVarReader;
 use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
-use Mitra\Logger\RequestContext;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use PHPUnit\Framework\TestCase;
+use Pimple\Container;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -55,9 +56,17 @@ abstract class IntegrationTestCase extends TestCase
         );
 
         self::$app = (new AppFactory())->create($env);
-        self::$container = self::$app->getContainer();
+
         self::$uriFactory = new UriFactory();
         self::$requestFactory = new ServerRequestFactory(null, self::$uriFactory);
+
+        $container = self::$app->getContainer();
+
+        if ($container instanceof Container) {
+            $container->register(new TestServiceProvider());
+        }
+
+        self::$container = $container;
     }
 
     protected function createRequest(

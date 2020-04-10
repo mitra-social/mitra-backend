@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Tests\Integration\Controller\Me;
+namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
-use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 
@@ -14,18 +13,6 @@ use Mitra\Tests\Integration\IntegrationTestCase;
 final class InboxControllerTest extends IntegrationTestCase
 {
     use CreateUserTrait;
-
-    /**
-     * @var CommandBusInterface
-     */
-    private $commandBus;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->commandBus = $this->getContainer()->get(CommandBusInterface::class);
-    }
 
     public function testReturnsForbiddenIfNotLoggedIn(): void
     {

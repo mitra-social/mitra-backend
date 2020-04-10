@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Mitra\ActivityPub\RemoteObjectResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
@@ -44,10 +44,12 @@ final class FollowCommandHandler
     public function __construct(
         ExternalUserRepository $externalUserRepository,
         EntityManagerInterface $entityManager,
+        RemoteObjectResolver $remoteObjectResolver,
         LoggerInterface $logger
     ) {
         $this->externalUserRepository = $externalUserRepository;
         $this->entityManager = $entityManager;
+        $this->remoteObjectResolver = $remoteObjectResolver;
         $this->logger = $logger;
     }
 
@@ -75,8 +77,8 @@ final class FollowCommandHandler
             new \DateTime()
         );
 
+        $this->entityManager->persist($objectExternalUser);
         $this->entityManager->persist($subscription);
-        $this->entityManager->flush();
     }
 
     /**
@@ -106,7 +108,7 @@ final class FollowCommandHandler
             return null;
         }
 
-        Assert::isInstanceOf($resolvedObject, ActorInterface::class, 'Currently only following actors is supported');
+        Assert::isInstanceOf($resolvedObject, ActorInterface::class);
 
         /** @var ActorInterface $resolvedObject */
 
