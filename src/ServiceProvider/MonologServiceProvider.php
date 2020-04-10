@@ -27,9 +27,13 @@ final class MonologServiceProvider implements ServiceProviderInterface
             $requestContext = $container[RequestContext::class];
 
             $logger->pushProcessor(function ($record) use ($requestContext) {
-                $requestIdHeader = $requestContext->getRequest()->getHeaderLine('X-Request-Id');
+                $currentRequest = $requestContext->getRequest();
 
-                $record['extra']['request_id'] = '' !== $requestIdHeader ? $requestIdHeader : null;
+                if (null !== $currentRequest) {
+                    $requestIdHeader = $currentRequest->getHeaderLine('X-Request-Id');
+
+                    $record['extra']['request_id'] = '' !== $requestIdHeader ? $requestIdHeader : null;
+                }
 
                 return $record;
             });

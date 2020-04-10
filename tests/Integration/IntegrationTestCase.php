@@ -11,6 +11,7 @@ use Mitra\Env\Reader\DelegateReader;
 use Mitra\Env\Reader\EnvVarReader;
 use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
+use Mitra\Logger\RequestContext;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;

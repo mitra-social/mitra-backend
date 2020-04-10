@@ -160,7 +160,7 @@ final class Config implements ConfigInterface
             ],
             'monolog.name' => 'default',
             'monolog.handlers' => [
-                'php://stderr' => Logger::INFO,
+                sprintf('%s/application.log', $dirs['logs']) => Logger::DEBUG,
             ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
@@ -168,8 +168,7 @@ final class Config implements ConfigInterface
         if ('dev' === $appEnv) {
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
             $config['monolog.handlers'] = [
-                'php://stderr' => Logger::DEBUG,
-                $dirs['logs'] . '/application.log' => Logger::DEBUG,
+                sprintf('%s/application.log', $dirs['logs']) => Logger::DEBUG,
             ];
         }
 
