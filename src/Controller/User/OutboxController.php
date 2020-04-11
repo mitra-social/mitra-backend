@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Doctrine\Common\Util\Debug;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
@@ -118,10 +119,10 @@ final class OutboxController
             if (null !== $objectCommand) {
                 $this->commandBus->handle($objectCommand);
             }
-            
+
             $this->commandBus->handle(new SendObjectToRecipientsCommand($outboxUser, $objectDto));
 
-            return $this->responseFactory->createResponse(204);
+            return $this->responseFactory->createResponse(201);
         } catch (\Exception $e) {
             $response = $this->responseFactory->createResponse(500)->withHeader('Content-Type', 'text/plain');
 

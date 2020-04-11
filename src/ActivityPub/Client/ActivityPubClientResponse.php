@@ -12,30 +12,25 @@ final class ActivityPubClientResponse
     /**
      * @var ResponseInterface
      */
-    private $response;
+    private $httpResponse;
 
     /**
      * @var ObjectDto|null
      */
     private $receivedObject;
 
-    /**
-     * ActivityPubClientResponse constructor.
-     * @param ResponseInterface $response
-     * @param ObjectDto|null $receivedObject
-     */
-    public function __construct(ResponseInterface $response, ?ObjectDto $receivedObject)
+    public function __construct(ResponseInterface $httpResponse, ?ObjectDto $receivedObject)
     {
-        $this->response = $response;
+        $this->httpResponse = $httpResponse;
         $this->receivedObject = $receivedObject;
     }
 
     /**
      * @return ResponseInterface
      */
-    public function getResponse(): ResponseInterface
+    public function getHttpResponse(): ResponseInterface
     {
-        return $this->response;
+        return $this->httpResponse;
     }
 
     /**

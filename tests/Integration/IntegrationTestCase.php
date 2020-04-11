@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
-use Integration\TestServiceProvider;
+use Mitra\AppContainer;
 use Mitra\AppFactory;
 use Mitra\Env\Env;
 use Mitra\Env\Reader\DelegateReader;
@@ -36,7 +36,7 @@ abstract class IntegrationTestCase extends TestCase
     protected static $requestFactory;
 
     /**
-     * @var ContainerInterface
+     * @var Container
      */
     protected static $container;
 
@@ -55,18 +55,12 @@ abstract class IntegrationTestCase extends TestCase
             new ArrayCachePool()
         );
 
-        self::$app = (new AppFactory())->create($env);
+        self::$container = AppContainer::init($env);
+
+        self::$app = (new AppFactory())->create(self::$container);
 
         self::$uriFactory = new UriFactory();
         self::$requestFactory = new ServerRequestFactory(null, self::$uriFactory);
-
-        $container = self::$app->getContainer();
-
-        if ($container instanceof Container) {
-            $container->register(new TestServiceProvider());
-        }
-
-        self::$container = $container;
     }
 
     protected function createRequest(
@@ -109,6 +103,6 @@ abstract class IntegrationTestCase extends TestCase
 
     protected function getContainer(): ContainerInterface
     {
-        return self::$container;
+        return self::$container[ContainerInterface::class];
     }
 }

@@ -26,7 +26,8 @@ $env = Env::immutable(
 $appEnv = $env->get('APP_ENV') ?? 'prod';
 $port = $env->get('APP_PORT') ?? 8080;
 
-$app = (new AppFactory())->create($env);
+$container = AppContainer::init($env);
+$app = (new AppFactory())->create($container);
 
 $data = (object)[
     'processed' => 0,

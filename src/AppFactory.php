@@ -15,6 +15,7 @@ use Mitra\ServiceProvider\ErrorHandlerServiceProvider;
 use Mitra\ServiceProvider\MiddlewareServiceProvider;
 use Mitra\ServiceProvider\SlimServiceProvider;
 use Mitra\Slim\ErrorHandler\HttpErrorHandler;
+use Pimple\Container;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\CallableResolver;
@@ -26,12 +27,12 @@ use Tuupola\Middleware\JwtAuthentication;
 final class AppFactory
 {
     /**
-     * @param Env $env
+     * @param Container $container
      * @return App
      */
-    public function create(Env $env): App
+    public function create(Container $container): App
     {
-        $app = $this->createApp($env);
+        $app = $this->createApp($container);
 
         /** @var ContainerInterface $container */
         $container = $app->getContainer();
@@ -51,12 +52,10 @@ final class AppFactory
     }
 
     /**
-     * @param Env $env
      * @return App
      */
-    private function createApp(Env $env): App
+    private function createApp(Container $container): App
     {
-        $container = AppContainer::init($env);
         $container
             ->register(new SlimServiceProvider())
             ->register(new MiddlewareServiceProvider())

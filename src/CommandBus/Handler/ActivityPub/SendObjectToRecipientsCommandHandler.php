@@ -13,6 +13,7 @@ use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Slim\UriGenerator;
 use Psr\Log\LoggerInterface;
+use Webmozart\Assert\Assert;
 
 final class SendObjectToRecipientsCommandHandler
 {
@@ -60,18 +61,18 @@ final class SendObjectToRecipientsCommandHandler
 
         try {
             foreach ($inboxUrls as $inboxUrl) {
-                $followRequest = $this->activityPubClient->signRequest(
+                $request = $this->activityPubClient->signRequest(
                     $this->activityPubClient->createRequest('POST', $inboxUrl, $object),
                     $sender->getPrivateKey(),
                     $senderPublicKeyUrl
                 );
 
-                $response = $this->activityPubClient->sendRequest($followRequest);
-                $responseBody = (string) $response->getResponse()->getBody();
+                $response = $this->activityPubClient->sendRequest($request);
+                $responseBody = (string) $response->getHttpResponse()->getBody();
 
                 $this->logger->info(sprintf(
                     'Received response from recipient: %d (body: %s)',
-                    $response->getResponse()->getStatusCode(),
+                    $response->getHttpResponse()->getStatusCode(),
                     '' !== $responseBody ? $responseBody : '<empty>'
                 ));
             }
@@ -86,6 +87,8 @@ final class SendObjectToRecipientsCommandHandler
                 sprintf('Could not send to recipient\'s inbox (url: %s): %s', $inboxUrl, $e->getMessage()),
                 $context
             );
+
+            throw $e;
         }
     }
 
@@ -107,7 +110,7 @@ final class SendObjectToRecipientsCommandHandler
             }
         }
 
-        return $toInboxUrls;
+        return array_filter($toInboxUrls);
     }
 
     /**

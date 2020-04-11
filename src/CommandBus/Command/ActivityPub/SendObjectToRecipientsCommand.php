@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Command\ActivityPub;
 
+use Doctrine\Common\Util\Debug;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\User\InternalUser;
 
