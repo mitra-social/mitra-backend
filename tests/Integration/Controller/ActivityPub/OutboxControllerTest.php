@@ -11,6 +11,7 @@ use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
+use Mitra\Tests\Integration\ActivityPubClientMockTrait;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -21,22 +22,17 @@ use Psr\Http\Message\RequestFactoryInterface;
 final class OutboxControllerTest extends IntegrationTestCase
 {
     use CreateUserTrait;
+    use ActivityPubClientMockTrait;
 
     public function testSuccessfulFollow(): void
     {
         $followingUser = $this->createUser();
-        $token = $this->createTokenForUser($followingUser);
 
         /** @var ResponseFactoryInterface $responseFactory */
         $responseFactory = $this->getContainer()->get(ResponseFactoryInterface::class);
 
         /** @var RequestFactoryInterface $requestFactory */
         $requestFactory = $this->getContainer()->get(RequestFactoryInterface::class);
-
-        $activityPubClientMock = $this->getMockBuilder(ActivityPubClient::class)
-            ->disableOriginalConstructor()
-            ->setMethodsExcept()
-            ->getMock();
 
         $actor = new PersonDto();
         $actor->id = sprintf('https://localhost/users/%s', $followingUser->getUsername());
@@ -58,38 +54,37 @@ final class OutboxControllerTest extends IntegrationTestCase
         $request2 = $requestFactory->createRequest('GET', $externalUserId);
         $request3 = $requestFactory->createRequest('POST', $objectAndTo->inbox);
 
+        $activityPubClientMock = $this->getActivityPubClientMock([
+            [
+                $request1,
+                $objectAndToResponse,
+                null
+            ],
+            [
+                $request2,
+                $objectAndToResponse,
+                null
+            ],
+            [
+                $request3,
+                new ActivityPubClientResponse($responseFactory->createResponse(201), null),
+                $this->callback(function ($value) use ($actor, $externalUserId) {
+                    return $value instanceof FollowDto
+                        && $value->actor = $actor->id
+                        && $value->object = $externalUserId
+                        && $value->to = $externalUserId;
+                })
+            ],
+        ]);
+
         $activityPubClientMock->expects(self::once())->method('signRequest')->with($request3)->willReturn($request3);
-
-        $activityPubClientMock->expects(self::exactly(3))->method('createRequest')
-            ->withConsecutive(
-                [$request1->getMethod(), (string) $request1->getUri(), null],
-                [$request2->getMethod(), (string) $request2->getUri(), null],
-                [$request3->getMethod(), (string) $request3->getUri(), $this->callback(
-                    function ($value) use ($actor, $externalUserId) {
-                        return $value instanceof FollowDto
-                            && $value->actor = $actor->id
-                            && $value->object = $externalUserId
-                            && $value->to = $externalUserId;
-                    }
-                )]
-            )
-            ->willReturnOnConsecutiveCalls($request1, $request2, $request3);
-
-        $activityPubClientMock->expects(self::exactly(3))->method('sendRequest')
-            ->withConsecutive(
-                [$request1],
-                [$request2],
-                [$request3]
-            )->willReturnOnConsecutiveCalls(
-                $objectAndToResponse,
-                $objectAndToResponse,
-                new ActivityPubClientResponse($responseFactory->createResponse(201), null)
-            );
 
         $this->getContainer()->set(ActivityPubClient::class, $activityPubClientMock);
 
         $body = '{"@context": "https://www.w3.org/ns/activitystreams","type": "Follow", ' .
             '"to": "' . $externalUserId . '", "object": "' . $externalUserId . '"}';
+
+        $token = $this->createTokenForUser($followingUser);
 
         $request = $this->createRequest('POST', sprintf('/user/%s/outbox', $followingUser->getUsername()), $body, [
             'Authorization' => sprintf('Bearer %s', $token)
