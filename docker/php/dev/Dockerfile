@@ -10,7 +10,7 @@ RUN apk --no-cache upgrade && \
 # NODE: install nodemon
 RUN npm install -g nodemon --no-optional
 
-COPY dev/files/php/ /phpIni
+COPY dev/files/php/ /usr/local/etc/php/conf.d/
 COPY prod/files/bin/ /usr/local/bin/
 
 # PHP: Install php extensions

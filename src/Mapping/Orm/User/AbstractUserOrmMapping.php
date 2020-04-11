@@ -18,7 +18,7 @@ final class AbstractUserOrmMapping implements ClassMapMappingInterface
      * @return void
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
         $metadata->setPrimaryTable(['name' => '`user`']);
         $metadata->setInheritanceType(ClassMetadata::INHERITANCE_TYPE_JOINED);
@@ -54,7 +54,7 @@ final class AbstractUserOrmMapping implements ClassMapMappingInterface
             'fieldName' => 'actor',
             'targetEntity' => Actor::class,
             'mappedBy' => 'user',
-            'cascade' => ['persist', 'remove'],
+            'cascade' => ['all'],
         ]);
     }
 }

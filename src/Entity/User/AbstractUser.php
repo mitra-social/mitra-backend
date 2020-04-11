@@ -58,4 +58,9 @@ abstract class AbstractUser
     {
         $this->publicKey = $publicKey;
     }
+
+    public function __toString()
+    {
+        return $this->id;
+    }
 }

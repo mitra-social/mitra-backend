@@ -36,6 +36,7 @@ final class CreateUserCommandHandler
         $this->hashPassword($user);
         $this->seedKeyPair($user);
 
+        $this->entityManager->persist($user->getActor());
         $this->entityManager->persist($user);
     }
 

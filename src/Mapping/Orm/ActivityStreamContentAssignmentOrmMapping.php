@@ -19,7 +19,7 @@ final class ActivityStreamContentAssignmentOrmMapping implements ClassMapMapping
      * @return void
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
         $metadata->setPrimaryTable(['name' => 'activity_stream_content_assignment']);
         $metadata->setCustomRepositoryClass(ActivityStreamContentAssignmentRepository::class);
@@ -39,7 +39,7 @@ final class ActivityStreamContentAssignmentOrmMapping implements ClassMapMapping
             'joinColumns' => [
                 [
                     'name' => 'actor_id',
-                    'referencedColumnName' => 'id',
+                    'referencedColumnName' => 'user_id',
                     'nullable' => false,
                 ],
             ],

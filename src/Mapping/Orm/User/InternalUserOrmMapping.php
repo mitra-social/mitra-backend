@@ -17,7 +17,7 @@ final class InternalUserOrmMapping implements ClassMapMappingInterface
      * @return void
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
         $metadata->setPrimaryTable(['name' => 'user_internal']);
 

@@ -7,7 +7,6 @@ namespace Mitra\Mapping\Orm;
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Mitra\Entity\Actor\Actor;
-use Mitra\Entity\User\AbstractUser;
 
 final class SubscriptionOrmMapping implements ClassMapMappingInterface
 {
@@ -17,7 +16,7 @@ final class SubscriptionOrmMapping implements ClassMapMappingInterface
      * @return void
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
         $metadata->setPrimaryTable(['name' => 'subscription']);
 
@@ -46,12 +45,11 @@ final class SubscriptionOrmMapping implements ClassMapMappingInterface
 
         $metadata->mapManyToOne([
             'fieldName' => 'subscribingActor',
-            'columnName' => 'subscribing_actor',
             'targetEntity' => Actor::class,
             'joinColumns' => [
                 [
-                    'name' => 'subscribing_actor',
-                    'referencedColumnName' => 'id',
+                    'name' => 'subscribing_actor_id',
+                    'referencedColumnName' => 'user_id',
                     'nullable' => false,
                 ],
             ],
@@ -59,12 +57,12 @@ final class SubscriptionOrmMapping implements ClassMapMappingInterface
 
         $metadata->mapManyToOne([
             'fieldName' => 'subscribedActor',
-            'columnName' => 'subscribed_actor',
             'targetEntity' => Actor::class,
+            'inversedBy' => 'actor',
             'joinColumns' => [
                 [
-                    'name' => 'subscribed_actor',
-                    'referencedColumnName' => 'id',
+                    'name' => 'subscribed_actor_id',
+                    'referencedColumnName' => 'user_id',
                     'nullable' => false,
                 ],
             ],

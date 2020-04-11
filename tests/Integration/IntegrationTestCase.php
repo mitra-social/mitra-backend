@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
+use Mitra\Tests\Helper\Container\PimpleTestContainer;
 use Mitra\AppContainer;
 use Mitra\AppFactory;
 use Mitra\Env\Env;
@@ -13,9 +14,8 @@ use Mitra\Env\Reader\EnvVarReader;
 use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
+use Mitra\Tests\Helper\Container\TestContainerInterface;
 use PHPUnit\Framework\TestCase;
-use Pimple\Container;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
@@ -36,7 +36,7 @@ abstract class IntegrationTestCase extends TestCase
     protected static $requestFactory;
 
     /**
-     * @var Container
+     * @var TestContainerInterface
      */
     protected static $container;
 
@@ -55,9 +55,10 @@ abstract class IntegrationTestCase extends TestCase
             new ArrayCachePool()
         );
 
-        self::$container = AppContainer::init($env);
+        $container = AppContainer::init($env);
 
-        self::$app = (new AppFactory())->create(self::$container);
+        self::$container = new PimpleTestContainer($container);
+        self::$app = (new AppFactory())->create($container);
 
         self::$uriFactory = new UriFactory();
         self::$requestFactory = new ServerRequestFactory(null, self::$uriFactory);
@@ -90,19 +91,13 @@ abstract class IntegrationTestCase extends TestCase
         return self::$app->handle($request);
     }
 
-
-    /**
-     * @param integer           $expectedStatusCode
-     * @param ResponseInterface $response
-     * @return void
-     */
     protected static function assertStatusCode(int $expectedStatusCode, ResponseInterface $response): void
     {
         self::assertThat($response, new ResponseStatusCodeConstraint($expectedStatusCode));
     }
 
-    protected function getContainer(): ContainerInterface
+    protected function getContainer(): TestContainerInterface
     {
-        return self::$container[ContainerInterface::class];
+        return self::$container;
     }
 }
