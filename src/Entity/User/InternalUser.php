@@ -32,7 +32,7 @@ class InternalUser extends AbstractUser implements TimestampableInterface
     private $plaintextPassword;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $privateKey;
 
@@ -49,9 +49,6 @@ class InternalUser extends AbstractUser implements TimestampableInterface
         return $this->email;
     }
 
-    /**
-     * @return string
-     */
     public function getUsername(): string
     {
         return $this->username;
@@ -62,17 +59,11 @@ class InternalUser extends AbstractUser implements TimestampableInterface
         return $this->hashedPassword;
     }
 
-    /**
-     * @param string $hashedPassword
-     */
     public function setHashedPassword(string $hashedPassword): void
     {
         $this->hashedPassword = $hashedPassword;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPlaintextPassword(): ?string
     {
         return $this->plaintextPassword;
@@ -83,19 +74,20 @@ class InternalUser extends AbstractUser implements TimestampableInterface
         $this->plaintextPassword = $plaintextPassword;
     }
 
-    /**
-     * @return string
-     */
-    public function getPrivateKey(): string
+    public function getPrivateKey(): ?string
     {
         return $this->privateKey;
     }
 
-    /**
-     * @param string $privateKey
-     */
-    public function setPrivateKey(string $privateKey): void
+    public function setKeyPair(string $publicKey, string $privateKey): void
     {
+        $this->publicKey = $publicKey;
         $this->privateKey = $privateKey;
+    }
+
+    public function clearKeyPair(): void
+    {
+        $this->publicKey = null;
+        $this->privateKey = null;
     }
 }

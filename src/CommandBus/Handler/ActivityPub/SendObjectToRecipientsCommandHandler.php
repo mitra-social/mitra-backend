@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Handler\ActivityPub;
 
-use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientException;
+use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolverException;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
@@ -13,12 +13,11 @@ use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Slim\UriGenerator;
 use Psr\Log\LoggerInterface;
-use Webmozart\Assert\Assert;
 
 final class SendObjectToRecipientsCommandHandler
 {
     /**
-     * @var ActivityPubClient
+     * @var ActivityPubClientInterface
      */
     private $activityPubClient;
 
@@ -38,7 +37,7 @@ final class SendObjectToRecipientsCommandHandler
     private $logger;
 
     public function __construct(
-        ActivityPubClient $activityPubClient,
+        ActivityPubClientInterface $activityPubClient,
         RemoteObjectResolver $remoteObjectResolver,
         UriGenerator $uriGenerator,
         LoggerInterface $logger

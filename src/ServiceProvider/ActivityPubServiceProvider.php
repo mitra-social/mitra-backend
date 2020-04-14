@@ -9,6 +9,7 @@ use ActivityPhp\Type\TypeResolver;
 use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClient;
+use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Serialization\Decode\DecoderInterface;
@@ -60,7 +61,9 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[ActivityPubClient::class] = static function (Container $container): ActivityPubClient {
+        $container[ActivityPubClientInterface::class] = static function (
+            Container $container
+        ): ActivityPubClientInterface {
             return new ActivityPubClient(
                 $container['api_http_client'],
                 $container[RequestFactoryInterface::class],
@@ -72,7 +75,7 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
         };
 
         $container[RemoteObjectResolver::class] = static function (Container $container): RemoteObjectResolver {
-            return new RemoteObjectResolver($container[ActivityPubClient::class]);
+            return new RemoteObjectResolver($container[ActivityPubClientInterface::class]);
         };
     }
 }

@@ -130,4 +130,12 @@ class ExternalUser extends AbstractUser
     {
         return $this->preferredUsername;
     }
+
+    /**
+     * @param string|null $publicKey
+     */
+    public function setPublicKey(?string $publicKey): void
+    {
+        $this->publicKey = $publicKey;
+    }
 }

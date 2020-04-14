@@ -34,9 +34,11 @@ final class CreateUserCommandHandler
         $user->setCreatedAt(new \DateTime());
 
         $this->hashPassword($user);
-        $this->seedKeyPair($user);
 
-        $this->entityManager->persist($user->getActor());
+        if (null === $user->getPrivateKey()) {
+            $this->seedKeyPair($user);
+        }
+
         $this->entityManager->persist($user);
     }
 
@@ -59,11 +61,11 @@ final class CreateUserCommandHandler
 
         // Get private key
         openssl_pkey_export($res, $privKey);
-        $user->setPrivateKey($privKey);
-        unset($privKey);
 
         // Get public key
         $pubKey = openssl_pkey_get_details($res);
-        $user->setPublicKey($pubKey['key']);
+
+        $user->setKeyPair($pubKey['key'], $privKey);
+        unset($privKey);
     }
 }

@@ -4,47 +4,42 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration;
 
-use Mitra\ActivityPub\Client\ActivityPubClient;
+use Mitra\Tests\Helper\Constraint\RequestConstraint;
 use PHPUnit\Framework\MockObject\MockBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * @method MockBuilder getMockBuilder(string $className)
  */
-trait ActivityPubClientMockTrait
+trait ClientMockTrait
 {
     /**
      * @param array $requestsAndResponses
-     * @return ActivityPubClient|MockObject
+     * @return ClientInterface|MockObject
      */
-    protected function getActivityPubClientMock(array $requestsAndResponses): ActivityPubClient
+    protected function getClientMock(array $requestsAndResponses): ClientInterface
     {
-        $activityPubClientMock = $this->getMockBuilder(ActivityPubClient::class)
+        $activityPubClientMock = $this->getMockBuilder(ClientInterface::class)
             ->disableOriginalConstructor()
             ->setMethodsExcept()
             ->getMock();
 
-        $createRequestParams = [];
-        $requestReturnValues = [];
         $requestArguments = [];
         $responseReturnValues = [];
 
         $requestResponsesCount = count($requestsAndResponses);
 
         foreach ($requestsAndResponses as $requestAndResponse) {
-            list($request, $response, $objectParameter) = $requestAndResponse;
+            list($request, $response) = $requestAndResponse;
 
-            $createRequestParams[] = [
-                $request->getMethod(), (string) $request->getUri(), $objectParameter
-            ];
-            $requestReturnValues[] = $request;
-            $requestArguments[] = [$request];
+            /** @var RequestInterface $request */
+
+            $requestArguments[] = [new RequestConstraint($request)];
+
             $responseReturnValues[] = $response;
         }
-
-        $activityPubClientMock->expects(self::exactly($requestResponsesCount))->method('createRequest')
-            ->withConsecutive(...$createRequestParams)
-            ->willReturnOnConsecutiveCalls(...$requestReturnValues);
 
         $activityPubClientMock->expects(self::exactly($requestResponsesCount))->method('sendRequest')
             ->withConsecutive(...$requestArguments)->willReturnOnConsecutiveCalls(...$responseReturnValues);

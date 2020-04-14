@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\ActivityPub\Resolver;
 
-use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientException;
-use Mitra\ActivityPub\Resolver\RemoteObjectResolverException;
+use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 
@@ -14,11 +13,11 @@ final class RemoteObjectResolver
 {
 
     /**
-     * @var ActivityPubClient
+     * @var ActivityPubClientInterface
      */
     private $activityPubClient;
 
-    public function __construct(ActivityPubClient $activityPubClient)
+    public function __construct(ActivityPubClientInterface $activityPubClient)
     {
         $this->activityPubClient = $activityPubClient;
     }

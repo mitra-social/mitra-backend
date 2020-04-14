@@ -7,7 +7,7 @@ namespace Mitra\ServiceProvider;
 use League\Tactician\CommandBus;
 use League\Tactician\Doctrine\ORM\TransactionMiddleware;
 use League\Tactician\Handler\CommandHandlerMiddleware;
-use Mitra\ActivityPub\Client\ActivityPubClient;
+use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\Handler\ActivityPub\AssignActorCommandHandler;
@@ -62,7 +62,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): SendObjectToRecipientsCommandHandler {
             return new SendObjectToRecipientsCommandHandler(
-                $container[ActivityPubClient::class],
+                $container[ActivityPubClientInterface::class],
                 $container[RemoteObjectResolver::class],
                 $container[UriGenerator::class],
                 $container[LoggerInterface::class]

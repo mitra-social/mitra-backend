@@ -22,7 +22,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 use Webmozart\Assert\Assert;
 
-/*final */class ActivityPubClient
+final class ActivityPubClient implements ActivityPubClientInterface
 {
     /**
      * @var ClientInterface

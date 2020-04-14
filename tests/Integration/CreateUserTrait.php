@@ -3,11 +3,16 @@
 namespace Mitra\Tests\Integration;
 
 use Firebase\JWT\JWT;
+use HttpSignatures\Algorithm;
+use HttpSignatures\HeaderList;
+use HttpSignatures\Key;
+use HttpSignatures\Signer;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\InternalUser;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -23,11 +28,7 @@ trait CreateUserTrait
 
         $user = new InternalUser($userId, $username, $username . '@example.com');
         $user->setPlaintextPassword($plaintextPassword);
-
-        $keyPair = $this->generateKeyPair();
-
-        $user->setPrivateKey($keyPair['private']);
-        $user->setPublicKey($keyPair['public']);
+        $this->seedKeyPair($user);
 
         $actor = new Person($user);
 
@@ -43,18 +44,23 @@ trait CreateUserTrait
         return JWT::encode(['userId' => $user->getId()], $this->getContainer()->get('jwt.secret'));
     }
 
-    private function generateKeyPair(): array
+    protected function signRequest(InternalUser $user, RequestInterface $request): RequestInterface
     {
-        // Create the keypair
-        $res = openssl_pkey_new();
+        return (new Signer(
+            new Key(sprintf('http://localhost:1337/user/%s', $user->getUsername()), $user->getPrivateKey()),
+            Algorithm::create('rsa-sha256'),
+            new HeaderList(['(request-target)', 'Host', 'Accept'])
+        ))->sign($request);
+    }
 
+    private function seedKeyPair(InternalUser $user): void
+    {
         // Get private key
-        openssl_pkey_export($res, $privKey);
+        $privKey = file_get_contents(__DIR__ . '/../../fixtures/resources/john.doe-private-key');
 
         // Get public key
-        $pubKey = openssl_pkey_get_details($res);
-        $pubKey = $pubKey["key"];
+        $pubKey = file_get_contents(__DIR__ . '/../../fixtures/resources/john.doe-public-key');
 
-        return ['public' => $pubKey, 'private' => $privKey];
+        $user->setKeyPair($pubKey, $privKey);
     }
 }

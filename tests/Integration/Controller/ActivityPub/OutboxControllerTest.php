@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
-use Mitra\ActivityPub\Client\ActivityPubClient;
-use Mitra\ActivityPub\Client\ActivityPubClientResponse;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
-use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
-use Mitra\Tests\Integration\ActivityPubClientMockTrait;
+use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Tests\Integration\ClientMockTrait;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -22,7 +20,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 final class OutboxControllerTest extends IntegrationTestCase
 {
     use CreateUserTrait;
-    use ActivityPubClientMockTrait;
+    use ClientMockTrait;
 
     public function testSuccessfulFollow(): void
     {
@@ -34,52 +32,68 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var RequestFactoryInterface $requestFactory */
         $requestFactory = $this->getContainer()->get(RequestFactoryInterface::class);
 
-        $actor = new PersonDto();
-        $actor->id = sprintf('https://localhost/users/%s', $followingUser->getUsername());
-        $actor->preferredUsername = $followingUser->getUsername();
-        $actor->name = $followingUser->getActor()->getName();
-        $actor->inbox = sprintf('https://localhost/users/%s/inbox', $followingUser->getUsername());
-        $actor->outbox = sprintf('https://localhost/users/%s/outbox', $followingUser->getUsername());
-
-        $externalUserId = 'https://example.com/users/pascalmyself';
+        $actorId = sprintf('http://localhost:1337/user/%s', $followingUser->getUsername());
+        $externalUserId = 'https://example.com/user/pascalmyself';
 
         $objectAndTo = new PersonDto();
         $objectAndTo->id = $externalUserId;
         $objectAndTo->inbox = $externalUserId . '/inbox';
         $objectAndTo->outbox = $externalUserId . '/outbox';
 
-        $objectAndToResponse = new ActivityPubClientResponse($responseFactory->createResponse(200), $objectAndTo);
+        $objectAndToResponseBody = sprintf(
+            '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s"}',
+            $externalUserId,
+            $objectAndTo->inbox,
+            $objectAndTo->outbox
+        );
+
+        $objectAndToResponse = $responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'application/activity+json');
+
+        $objectAndToResponse->getBody()->write($objectAndToResponseBody);
 
         $request1 = $requestFactory->createRequest('GET', $externalUserId);
         $request2 = $requestFactory->createRequest('GET', $externalUserId);
-        $request3 = $requestFactory->createRequest('POST', $objectAndTo->inbox);
+        $request3 = $requestFactory->createRequest('POST', $objectAndTo->inbox)
+            ->withHeader('Host', 'example.com')
+            ->withHeader('Accept', 'application/activity+json')
+            ->withHeader(
+                'Signature',
+                'keyId="' . $actorId . '#main-key",' .
+                'algorithm="rsa-sha256",headers="(request-target) host accept",' .
+                'signature="toOsXSVYLn9sQjP4NcTxBkPGsWcMuwZ37Oe7p7whBZ4w3lFr8YyVsGj8n/6DUmLllsyzn1F+OTqk5C/Gip4UwZ525O' .
+                'BaWAvLxDqnlpPi3/e3e26dLG4fTnCgFb/yNBsTYxJ9uvS4PLVREQi1hsbw08DuTve37KrghmvwlmfErqeUCWduDiB+DeEkIAvEl5O' .
+                'bMNSWq8nFMmAerickyggmNREnRU3lkK0OzhmbBop/0OmnLByhDL4eJiAcSg7IRUY+mUKq7vazgQqE50lYP1FdEul7t0cImwXCqIUJ' .
+                '9jqFAY5v7wkJNExW5pnwleb9j2bFQZeXAcHWvM6bD5gvzjX/ZA=="'
+            );
 
-        $activityPubClientMock = $this->getActivityPubClientMock([
+        /** @var EncoderInterface $encoder */
+        $encoder = $this->getContainer()->get(EncoderInterface::class);
+
+        $request3->getBody()->write($encoder->encode([
+            "@context" => "https://www.w3.org/ns/activitystreams",
+            "type" => "Follow",
+            "object" => $objectAndTo->id,
+            "actor" => $actorId,
+            "to" => $objectAndTo->id,
+        ], 'application/json'));
+
+        $apiHttpClientMock = $this->getClientMock([
             [
                 $request1,
                 $objectAndToResponse,
-                null
             ],
             [
                 $request2,
                 $objectAndToResponse,
-                null
             ],
             [
                 $request3,
-                new ActivityPubClientResponse($responseFactory->createResponse(201), null),
-                $this->callback(function ($value) use ($actor, $externalUserId) {
-                    return $value instanceof FollowDto
-                        && $value->actor = $actor->id
-                        && $value->object = $externalUserId
-                        && $value->to = $externalUserId;
-                })
+                $responseFactory->createResponse(201),
             ],
         ]);
 
-        $activityPubClientMock->expects(self::once())->method('signRequest')->with($request3)->willReturn($request3);
-
-        $this->getContainer()->set(ActivityPubClient::class, $activityPubClientMock);
+        $this->getContainer()->get('api_http_client')->setMock($apiHttpClientMock);
 
         $body = '{"@context": "https://www.w3.org/ns/activitystreams","type": "Follow", ' .
             '"to": "' . $externalUserId . '", "object": "' . $externalUserId . '"}';
