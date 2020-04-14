@@ -56,16 +56,9 @@ final class OutboxControllerTest extends IntegrationTestCase
         $request2 = $requestFactory->createRequest('GET', $externalUserId);
         $request3 = $requestFactory->createRequest('POST', $objectAndTo->inbox)
             ->withHeader('Host', 'example.com')
-            ->withHeader('Accept', 'application/activity+json')
-            ->withHeader(
-                'Signature',
-                'keyId="' . $actorId . '#main-key",' .
-                'algorithm="rsa-sha256",headers="(request-target) host accept",' .
-                'signature="toOsXSVYLn9sQjP4NcTxBkPGsWcMuwZ37Oe7p7whBZ4w3lFr8YyVsGj8n/6DUmLllsyzn1F+OTqk5C/Gip4UwZ525O' .
-                'BaWAvLxDqnlpPi3/e3e26dLG4fTnCgFb/yNBsTYxJ9uvS4PLVREQi1hsbw08DuTve37KrghmvwlmfErqeUCWduDiB+DeEkIAvEl5O' .
-                'bMNSWq8nFMmAerickyggmNREnRU3lkK0OzhmbBop/0OmnLByhDL4eJiAcSg7IRUY+mUKq7vazgQqE50lYP1FdEul7t0cImwXCqIUJ' .
-                '9jqFAY5v7wkJNExW5pnwleb9j2bFQZeXAcHWvM6bD5gvzjX/ZA=="'
-            );
+            ->withHeader('Accept', 'application/activity+json');
+
+        $request3 = $this->signRequest($followingUser, $request3);
 
         /** @var EncoderInterface $encoder */
         $encoder = $this->getContainer()->get(EncoderInterface::class);

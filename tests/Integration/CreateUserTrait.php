@@ -28,7 +28,6 @@ trait CreateUserTrait
 
         $user = new InternalUser($userId, $username, $username . '@example.com');
         $user->setPlaintextPassword($plaintextPassword);
-        $this->seedKeyPair($user);
 
         $actor = new Person($user);
 
@@ -47,20 +46,9 @@ trait CreateUserTrait
     protected function signRequest(InternalUser $user, RequestInterface $request): RequestInterface
     {
         return (new Signer(
-            new Key(sprintf('http://localhost:1337/user/%s', $user->getUsername()), $user->getPrivateKey()),
+            new Key(sprintf('http://localhost:1337/user/%s#main-key', $user->getUsername()), $user->getPrivateKey()),
             Algorithm::create('rsa-sha256'),
             new HeaderList(['(request-target)', 'Host', 'Accept'])
         ))->sign($request);
-    }
-
-    private function seedKeyPair(InternalUser $user): void
-    {
-        // Get private key
-        $privKey = file_get_contents(__DIR__ . '/../../fixtures/resources/john.doe-private-key');
-
-        // Get public key
-        $pubKey = file_get_contents(__DIR__ . '/../../fixtures/resources/john.doe-public-key');
-
-        $user->setKeyPair($pubKey, $privKey);
     }
 }
