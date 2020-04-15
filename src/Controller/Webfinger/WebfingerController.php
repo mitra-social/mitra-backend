@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace Mitra\Controller\Webfinger;
 
 use ActivityPhp\Server;
-use Doctrine\ORM\EntityRepository;
-use FastRoute\RouteCollector;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
-use Slim\Interfaces\RouteCollectorInterface;
 
 final class WebfingerController
 {
@@ -35,27 +32,20 @@ final class WebfingerController
     private $userRepository;
 
     /**
-     * @var RouteCollector
+     * @var UriGenerator
      */
-    private $routeCollector;
-
-    /**
-     * @var UriInterface
-     */
-    private $baseUri;
+    private $uriGenerator;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         InternalUserRepository $userRepository,
-        RouteCollectorInterface $routeCollector,
-        UriInterface $baseUri
+        UriGenerator $uriGenerator
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->userRepository = $userRepository;
-        $this->routeCollector = $routeCollector;
-        $this->baseUri = $baseUri;
+        $this->uriGenerator = $uriGenerator;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -87,8 +77,7 @@ final class WebfingerController
             return $this->responseFactory->createResponse(404);
         }
 
-        $userUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $this->baseUri,
+        $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',
             ['preferredUsername' => $user->getUsername()]
         );

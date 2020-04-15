@@ -52,7 +52,6 @@ final class InternalUserRepository
             return null;
         }
 
-        /** @var InternalUser|null $authenticatedUser */
         return $this->findById($decodedToken['userId']);
     }
 }

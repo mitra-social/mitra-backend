@@ -11,10 +11,10 @@ final class JsonDecoder implements DecoderInterface
     /**
      * @param string $data
      * @param string $mimeType
-     * @return array<mixed>
+     * @return mixed
      * @throws UnsupportedMimeTypeException
      */
-    public function decode(string $data, string $mimeType): array
+    public function decode(string $data, string $mimeType)
     {
         if (!$this->supports($mimeType)) {
             throw new UnsupportedMimeTypeException($mimeType);

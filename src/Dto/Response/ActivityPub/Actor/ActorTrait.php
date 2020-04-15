@@ -65,7 +65,7 @@ trait ActorTrait
     public $endpoints;
 
     /**
-     * @var null|string
+     * @var null|array<string, string>
      */
     public $publicKey;
 
@@ -76,12 +76,12 @@ trait ActorTrait
 
     public function getInbox(): string
     {
-        return $this->inbox;
+        return (string) $this->inbox;
     }
 
     public function getOutbox(): string
     {
-        return $this->outbox;
+        return (string) $this->outbox;
     }
 
     public function getPreferredUsername(): ?string

@@ -21,7 +21,7 @@ final class AssignActorCommandHandler
         $this->uriGenerator = $uriGenerator;
     }
 
-    public function __invoke(AssignActorCommand $command)
+    public function __invoke(AssignActorCommand $command): void
     {
         $actorUser = $command->getActor()->getUser();
 

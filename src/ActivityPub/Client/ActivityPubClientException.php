@@ -23,8 +23,8 @@ final class ActivityPubClientException extends \Exception
     public function __construct(
         ?RequestInterface $request,
         ?ResponseInterface $response,
-        $message = '',
-        $code = 0,
+        string $message = '',
+        int $code = 0,
         Throwable $previous = null
     ) {
         parent::__construct($message, $code, $previous);
@@ -36,7 +36,7 @@ final class ActivityPubClientException extends \Exception
     /**
      * @return null|RequestInterface
      */
-    public function getRequest(): RequestInterface
+    public function getRequest(): ?RequestInterface
     {
         return $this->request;
     }

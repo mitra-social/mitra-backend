@@ -33,7 +33,7 @@ final class AcceptAndContentTypeMiddleware
         }
 
         $negotiator = new EncodingNegotiator();
-        /** @var AcceptEncoding $mediaType */
+        /** @var AcceptEncoding|null $mediaType */
         $mediaType = $negotiator->getBest($acceptHeader, [$defaultMimeType, 'application/activity+json']);
 
         if (null === $mediaType) {

@@ -48,7 +48,7 @@ final class SendObjectToRecipientsCommandHandler
         $this->logger = $logger;
     }
 
-    public function __invoke(SendObjectToRecipientsCommand $command)
+    public function __invoke(SendObjectToRecipientsCommand $command): void
     {
         $object = $command->getObject();
         $sender = $command->getSender();
@@ -58,8 +58,8 @@ final class SendObjectToRecipientsCommandHandler
         ]) . '#main-key';
         $inboxUrls = $this->getInboxUrls($object);
 
-        try {
-            foreach ($inboxUrls as $inboxUrl) {
+        foreach ($inboxUrls as $inboxUrl) {
+            try {
                 $request = $this->activityPubClient->signRequest(
                     $this->activityPubClient->createRequest('POST', $inboxUrl, $object),
                     $sender->getPrivateKey(),
@@ -74,27 +74,27 @@ final class SendObjectToRecipientsCommandHandler
                     $response->getHttpResponse()->getStatusCode(),
                     '' !== $responseBody ? $responseBody : '<empty>'
                 ));
+            } catch (ActivityPubClientException $e) {
+                $context = [];
+
+                if (null !== $response = $e->getResponse()) {
+                    $context['responseBody'] = (string) $response->getBody();
+                }
+
+                $this->logger->error(
+                    sprintf('Could not send to recipient\'s inbox (url: %s): %s', $inboxUrl, $e->getMessage()),
+                    $context
+                );
+
+                throw $e;
             }
-        } catch (ActivityPubClientException $e) {
-            $context = [];
-
-            if (null !== $response = $e->getResponse()) {
-                $context['responseBody'] = (string) $response->getBody();
-            }
-
-            $this->logger->error(
-                sprintf('Could not send to recipient\'s inbox (url: %s): %s', $inboxUrl, $e->getMessage()),
-                $context
-            );
-
-            throw $e;
         }
     }
 
     /**
      * TODO also check bto, cc, bcc properties of the object
      * @param ObjectDto $object
-     * @return array
+     * @return array<string>
      * @throws \Mitra\ActivityPub\Resolver\RemoteObjectResolverException
      */
     private function getInboxUrls(ObjectDto $object): array
@@ -127,5 +127,7 @@ final class SendObjectToRecipientsCommandHandler
         } catch (RemoteObjectResolverException $e) {
             $this->logger->notice(sprintf('Could not resolve recipient: %s', $e->getMessage()));
         }
+
+        return null;
     }
 }

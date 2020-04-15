@@ -12,11 +12,7 @@ use Psr\Http\Client\ClientInterface;
 
 final class HttpClientServiceProvider implements ServiceProviderInterface
 {
-
-    /**
-     * @inheritDoc
-     */
-    public function register(Container $container)
+    public function register(Container $container): void
     {
         $container['api_http_client'] = static function (Container $container): ClientInterface {
             return new Curl(

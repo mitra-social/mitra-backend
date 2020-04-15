@@ -47,7 +47,6 @@ class DataToDtoPopulator implements DataToDtoPopulatorInterface
 
     /**
      * @param array<mixed> $data
-     * @param object|null $dto
      * @return object
      */
     public function populate(array $data): object

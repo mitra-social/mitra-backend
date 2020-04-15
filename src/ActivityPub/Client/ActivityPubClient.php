@@ -183,7 +183,7 @@ final class ActivityPubClient implements ActivityPubClientInterface
         $contentTypeHeader = $response->getHeaderLine('Content-Type');
 
         $negotiator = new EncodingNegotiator();
-        /** @var AcceptEncoding $mediaType */
+        /** @var AcceptEncoding|null $mediaType */
         $mediaType = $negotiator->getBest($contentTypeHeader, ['application/json', 'application/activity+json']);
 
         if (null === $mediaType) {
@@ -202,7 +202,7 @@ final class ActivityPubClient implements ActivityPubClientInterface
                 'Could not decode body from remote serve response: %s (body: %s, content-type: %s)',
                 $e->getMessage(),
                 (string) $response->getBody(),
-                $mediaType
+                $mediaType->getType()
             ), 3, $e);
         }
 

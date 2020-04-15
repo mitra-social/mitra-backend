@@ -13,6 +13,7 @@ use Mitra\Validator\Symfony\Constraint\AllIfArray;
 use Mitra\Validator\Symfony\Constraint\NotBlank;
 use Mitra\Validator\Symfony\Constraint\Valid;
 use Mitra\Validator\Symfony\ValidationMappingInterface;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\Choice;
 use Symfony\Component\Validator\Constraints\Date;
@@ -23,12 +24,7 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class ObjectDtoValidationMapping implements ValidationMappingInterface
 {
-
-    /**
-     * @param ClassMetadata $metadata
-     * @return void
-     */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
         $imageOrLinkConstraints = [
             new Type(['array', 'string', ImageDto::class, LinkDto::class]),
@@ -123,7 +119,9 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
         ;
     }
 
-
+    /**
+     * @return array<Constraint>
+     */
     protected static function getObjectOrLinkConstraints(): array
     {
         return [
@@ -132,6 +130,9 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
         ];
     }
 
+    /**
+     * @return array<Constraint>
+     */
     protected static function getMultipleObjectOrLinkConstraints(): array
     {
         return [
@@ -144,6 +145,9 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
         ];
     }
 
+    /**
+     * @return array<Constraint>
+     */
     protected static function getMultipleLinkConstraints(): array
     {
         return [

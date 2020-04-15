@@ -25,6 +25,9 @@ use Mitra\Dto\Response\ActivityStreams\VideoDto;
 
 final class ActivityStreamTypeToDtoClassMapping
 {
+    /**
+     * @var array<string, string>
+     */
     private static $map = [
         // Objects
         'Object' => ObjectDto::class,

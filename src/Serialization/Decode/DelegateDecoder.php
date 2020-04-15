@@ -15,10 +15,12 @@ final class DelegateDecoder implements DecoderInterface
     private $decoders = [];
 
     /**
-     * @inheritDoc
+     * @param string $data
+     * @param string $mimeType
+     * @return mixed
      * @throws UnsupportedMimeTypeException
      */
-    public function decode(string $data, string $mimeType): array
+    public function decode(string $data, string $mimeType)
     {
         foreach ($this->decoders as $decoder) {
             if ($decoder->supports($mimeType)) {

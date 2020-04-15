@@ -57,13 +57,21 @@ final class CreateUserCommandHandler
     private function seedKeyPair(InternalUser $user): void
     {
         // Create the keypair
-        $res = openssl_pkey_new();
+        if (false === $res = openssl_pkey_new()) {
+            throw new \RuntimeException(
+                sprintf('Could not generate key pair for user `%s` (id: %s)', $user->getUsername(), $user->getId())
+            );
+        }
 
         // Get private key
         openssl_pkey_export($res, $privKey);
 
         // Get public key
-        $pubKey = openssl_pkey_get_details($res);
+        if (false === $pubKey = openssl_pkey_get_details($res)) {
+            throw new \RuntimeException(
+                sprintf('Could not receive public key for user `%s` (id: %s)', $user->getUsername(), $user->getId())
+            );
+        }
 
         $user->setKeyPair($pubKey['key'], $privKey);
         unset($privKey);

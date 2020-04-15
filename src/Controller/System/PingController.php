@@ -35,7 +35,7 @@ final class PingController
             sprintf('scheme: %s', $request->getUri()->getScheme()),
         ];
 
-        if (null !== $forwardedProto = $request->getHeaderLine('X-Forwarded-Proto')) {
+        if ('' !== $forwardedProto = $request->getHeaderLine('X-Forwarded-Proto')) {
             $data[] = sprintf('originalScheme: %s', $forwardedProto);
         }
 

@@ -24,6 +24,7 @@ use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGenerator;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -102,8 +103,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[InternalUserRepository::class],
-                $container[RouteCollector::class],
-                $container[UriFactoryInterface::class]->createUri($container['baseUrl'])
+                $container[UriGenerator::class]
             );
         };
 

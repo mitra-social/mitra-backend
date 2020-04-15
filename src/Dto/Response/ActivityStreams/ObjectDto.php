@@ -17,7 +17,7 @@ class ObjectDto implements TypeInterface
     public $id;
 
     /**
-     * @var null|string
+     * @var null|string|array<int,string>
      */
     public $context;
 

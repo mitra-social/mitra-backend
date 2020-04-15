@@ -28,6 +28,7 @@ use Mitra\Mapping\Dto\Response\UserResponseDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationListDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationDtoMapping;
 use Mitra\Serialization\Decode\DecoderInterface;
+use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -138,13 +139,8 @@ final class DtoServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[PersonDtoMapping::class] = static function (
-            Container $container
-        ) use ($uriFactory): PersonDtoMapping {
-            return new PersonDtoMapping(
-                $container[RouteCollector::class],
-                $uriFactory->createUri($container['baseUrl'])
-            );
+        $container[PersonDtoMapping::class] = static function (Container $container): PersonDtoMapping {
+            return new PersonDtoMapping($container[UriGenerator::class]);
         };
     }
 }

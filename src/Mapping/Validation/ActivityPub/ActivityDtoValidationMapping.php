@@ -13,7 +13,7 @@ final class ActivityDtoValidationMapping extends AbstractActivityDtoValidationMa
      * @param ClassMetadata $metadata
      * @return void
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
         parent::configureMapping($metadata);
 

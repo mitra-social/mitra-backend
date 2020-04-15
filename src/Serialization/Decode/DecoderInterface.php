@@ -9,10 +9,10 @@ interface DecoderInterface
     /**
      * @param string $data
      * @param string $mimeType
-     * @return array<mixed>
+     * @return mixed
      * @throw UnsupportedMimeTypeException
      */
-    public function decode(string $data, string $mimeType): array;
+    public function decode(string $data, string $mimeType);
 
     public function supports(string $mimeType): bool;
 }

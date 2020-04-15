@@ -25,6 +25,12 @@ final class UriGenerator
         $this->routeParser = $routeParser;
     }
 
+    /**
+     * @param string $routeName
+     * @param array<string, string|int|double> $data
+     * @param array<string, string|int|double> $queryParams
+     * @return string
+     */
     public function fullUrlFor(string $routeName, array $data = [], array $queryParams = []): string
     {
         return $this->routeParser->fullUrlFor($this->baseUrl, $routeName, $data, $queryParams);
