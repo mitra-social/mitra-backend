@@ -8,6 +8,7 @@ use League\Tactician\CommandBus;
 use League\Tactician\Doctrine\ORM\TransactionMiddleware;
 use League\Tactician\Handler\CommandHandlerMiddleware;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\Handler\ActivityPub\AssignActorCommandHandler;
@@ -18,6 +19,7 @@ use Mitra\CommandBus\Handler\CreateUserCommandHandler;
 use Mitra\CommandBus\TacticianCommandBus;
 use Mitra\CommandBus\TacticianMapByStaticClassList;
 use Mitra\Repository\ExternalUserRepository;
+use Mitra\Repository\SubscriptionRepository;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -71,17 +73,16 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
 
         $container[FollowCommandHandler::class] = static function (Container $container): FollowCommandHandler {
             return new FollowCommandHandler(
-                $container[ExternalUserRepository::class],
                 $container['doctrine.orm.em'],
-                $container[RemoteObjectResolver::class],
-                $container[LoggerInterface::class]
+                $container[ExternalUserResolver::class],
             );
         };
 
         $container[UndoCommandHandler::class] = static function (Container $container): UndoCommandHandler {
             return new UndoCommandHandler(
-                $container[ExternalUserRepository::class],
-                $container['doctrine.orm.em']
+                $container[ExternalUserResolver::class],
+                $container['doctrine.orm.em'],
+                $container[SubscriptionRepository::class]
             );
         };
     }

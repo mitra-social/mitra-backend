@@ -5,27 +5,38 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
+use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Entity\User\InternalUser;
-use Mitra\Repository\ExternalUserRepository;
+use Mitra\Repository\SubscriptionRepository;
 use Webmozart\Assert\Assert;
 
 final class UndoCommandHandler
 {
     /**
-     * @var ExternalUserRepository
-     */
-    private $externalUserRepository;
-
-    /**
      * @var EntityManagerInterface
      */
     private $entityManager;
 
-    public function __construct(ExternalUserRepository $externalUserRepository, EntityManagerInterface $entityManager)
-    {
-        $this->externalUserRepository = $externalUserRepository;
+    /**
+     * @var ExternalUserResolver
+     */
+    private $externalUserResolver;
+
+    /**
+     * @var SubscriptionRepository
+     */
+    private $subscriptionRepository;
+
+    public function __construct(
+        ExternalUserResolver $externalUserResolver,
+        EntityManagerInterface $entityManager,
+        SubscriptionRepository $subscriptionRepository
+    ) {
+        $this->externalUserResolver = $externalUserResolver;
         $this->entityManager = $entityManager;
+        $this->subscriptionRepository = $subscriptionRepository;
     }
 
     public function __invoke(UndoCommand $command): void
@@ -39,8 +50,20 @@ final class UndoCommandHandler
 
         $undo = $command->getUndoDto();
 
-        // TODO remove database record from follow table if object is follow object
-        /*if ($undo->object instanceof FollowDto) {
-        }*/
+        if ($undo->object instanceof FollowDto) {
+            $followObject = $undo->object;
+
+            if (null === $objectExternalUser = $this->externalUserResolver->resolve($followObject->object)) {
+                throw new \RuntimeException('Could not resolve `$object`');
+            }
+
+            $subscription = $this->subscriptionRepository->findByActors($commandActor, $objectExternalUser->getActor());
+
+            if (null === $subscription) {
+                return;
+            }
+
+            $this->entityManager->remove($subscription);
+        }
     }
 }

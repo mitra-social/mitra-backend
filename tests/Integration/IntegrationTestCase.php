@@ -37,7 +37,7 @@ abstract class IntegrationTestCase extends TestCase
     /**
      * @var ServerRequestFactory
      */
-    protected static $requestFactory;
+    private static $serverRequestFactory;
 
     /**
      * @var TestContainerInterface
@@ -66,7 +66,7 @@ abstract class IntegrationTestCase extends TestCase
         self::$app = (new AppFactory())->create($container);
 
         self::$uriFactory = new UriFactory();
-        self::$requestFactory = new ServerRequestFactory(null, self::$uriFactory);
+        self::$serverRequestFactory = new ServerRequestFactory(null, self::$uriFactory);
     }
 
     protected function createRequest(
@@ -76,7 +76,7 @@ abstract class IntegrationTestCase extends TestCase
         array $headers = []
     ): ServerRequestInterface {
         $uri = self::$uriFactory->createUri($path)->withScheme('http')->withHost('localhost');
-        $request = self::$requestFactory->createServerRequest($method, $uri);
+        $request = self::$serverRequestFactory->createServerRequest($method, $uri);
 
         $request = $request->withHeader('Content-Type', 'application/json')->withHeader('Accept', 'application/json');
 

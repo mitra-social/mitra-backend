@@ -10,8 +10,10 @@ use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Repository\ExternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Pimple\Container;
@@ -76,6 +78,13 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
 
         $container[RemoteObjectResolver::class] = static function (Container $container): RemoteObjectResolver {
             return new RemoteObjectResolver($container[ActivityPubClientInterface::class]);
+        };
+
+        $container[ExternalUserResolver::class] = static function (Container $container): ExternalUserResolver {
+            return new ExternalUserResolver(
+                $container[RemoteObjectResolver::class],
+                $container[ExternalUserRepository::class]
+            );
         };
     }
 }

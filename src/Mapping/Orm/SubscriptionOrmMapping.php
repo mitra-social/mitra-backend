@@ -58,7 +58,6 @@ final class SubscriptionOrmMapping implements ClassMapMappingInterface
         $metadata->mapManyToOne([
             'fieldName' => 'subscribedActor',
             'targetEntity' => Actor::class,
-            'inversedBy' => 'actor',
             'joinColumns' => [
                 [
                     'name' => 'subscribed_actor_id',
