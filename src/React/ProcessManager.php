@@ -62,7 +62,6 @@ final class ProcessManager
             $this->socket->pause();
 
             $this->processes[] = $this->fork(function () {
-                $this->processData = new Process(posix_getpid());
                 $this->socket->resume();
                 // Terminate process if SIGINT received (see line 103)
                 $this->loop->addSignal(SIGINT, function () {
@@ -135,6 +134,7 @@ final class ProcessManager
             return $pid;
         } else {
             posix_setsid();
+            $this->processData = new Process(posix_getpid());
             $child();
             exit(0);
         }
