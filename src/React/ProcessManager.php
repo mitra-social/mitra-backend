@@ -23,7 +23,7 @@ final class ProcessManager
     /**
      * @var int
      */
-    private $processNumber;
+    private $maxProcesses;
 
     /**
      * @var array<int>
@@ -45,11 +45,11 @@ final class ProcessManager
      */
     private $processInterruptCallable;
 
-    public function __construct(ServerInterface $socket, LoopInterface $loop, int $processNumber)
+    public function __construct(ServerInterface $socket, LoopInterface $loop, int $maxProcesses)
     {
         $this->socket = $socket;
         $this->loop = $loop;
-        $this->processNumber = $processNumber;
+        $this->maxProcesses = $maxProcesses;
     }
 
     public function run()
@@ -58,7 +58,7 @@ final class ProcessManager
             throw new \RuntimeException('Process manager is already running');
         }
 
-        for ($i = 1; $i <= $this->processNumber; $i++) {
+        for ($i = 1; $i <= $this->maxProcesses; $i++) {
             $this->socket->pause();
 
             $this->processes[] = $this->fork(function () {
@@ -99,9 +99,9 @@ final class ProcessManager
     /**
      * @return int
      */
-    public function getProcessNumber(): int
+    public function getMaxProcesses(): int
     {
-        return $this->processNumber;
+        return $this->maxProcesses;
     }
 
     /**
