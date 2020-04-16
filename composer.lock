@@ -2042,12 +2042,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mitra-social/reactphp-process-manager.git",
-                "reference": "05a7ac5d0cfb85f7144711f77ebc5ffd5b8771ef"
+                "reference": "71abac76e7825ca2fb2a9a3c5d239db771537690"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mitra-social/reactphp-process-manager/zipball/05a7ac5d0cfb85f7144711f77ebc5ffd5b8771ef",
-                "reference": "05a7ac5d0cfb85f7144711f77ebc5ffd5b8771ef",
+                "url": "https://api.github.com/repos/mitra-social/reactphp-process-manager/zipball/71abac76e7825ca2fb2a9a3c5d239db771537690",
+                "reference": "71abac76e7825ca2fb2a9a3c5d239db771537690",
                 "shasum": ""
             },
             "require": {
@@ -2069,7 +2069,7 @@
             "license": [
                 "MIT"
             ],
-            "time": "2020-04-16T20:35:33+00:00"
+            "time": "2020-04-16T21:02:05+00:00"
         },
         {
             "name": "monolog/monolog",
