@@ -33,7 +33,7 @@ $port = $env->get('APP_PORT') ?? 8080;
 $container = AppContainer::init($env);
 $app = (new AppFactory())->create($container);
 
-$loop = ReactEventLoopFactory::create();//
+$loop = ReactEventLoopFactory::create();
 $socket = new ReactSocketServer(sprintf('0.0.0.0:%s', $port), $loop);
 
 $processManager = new ReactProcessManager(
@@ -47,12 +47,12 @@ $processManager = new ReactProcessManager(
     }
 );
 
-$processManager->setProcessInterruptCallable(function (Process $processData): void {
-    fwrite(STDERR, sprintf(
+$processManager->setProcessInterruptCallable(function (Process $process): void {
+    printf(
         'Process %d finished running, processed %d requests' . PHP_EOL,
-        $processData->getPid(),
-        $processData['processedRequests']
-    ));
+        $process->getPid(),
+        $process['processedRequests']
+    );
 });
 
 /** @var RequestContext $requestContext */
@@ -67,11 +67,6 @@ $server = new ReactHttpServer(
         }
 
         $processData['processedRequests'] += 1;
-        fwrite(STDERR, sprintf(
-            'Processed request (pid: %d), processed %d requests' . PHP_EOL,
-            $processData->getPid(),
-            $processData['processedRequests']
-        ));
 
         $requestContext->setRequest($request);
         $response = $app->handle($request);
