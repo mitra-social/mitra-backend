@@ -9,6 +9,7 @@ use Mitra\Env\Reader\EnvVarReader;
 use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Logger\RequestContext;
+use Mitra\React\Process;
 use Mitra\React\ProcessManager;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Response as ReactResponse;
@@ -38,33 +39,33 @@ $requestContext = $app->getContainer()->get(RequestContext::class);
 
 $processManager = new ProcessManager($socket, $loop, 3);
 
-$processManager->setProcessInterruptCallable(function ($processData): void {
+$processManager->setProcessInterruptCallable(function (Process $processData): void {
     fwrite(STDERR, sprintf(
         'Process %d finished running, processed %d requests' . PHP_EOL,
-        $processData->pid,
-        $processData->processedRequests
+        $processData->getPid(),
+        $processData['processedRequests']
     ));
 });
 
 $server = new ReactHttpServer(
     function (ServerRequestInterface $request) use ($app, $requestContext, $processManager) {
-        $processData = $processManager->getProcessData();
+        $processData = $processManager->getCurrentProcess();
 
-        if (!isset($processData->processedRequests)) {
-            $processData->processedRequests = 0;
+        if (!isset($processData['processedRequests'])) {
+            $processData['processedRequests'] = 0;
         }
 
-        $processData->processedRequests++;
+        $processData['processedRequests'] += 1;
         fwrite(STDERR, sprintf(
             'Processed request (pid: %d), processed %d requests' . PHP_EOL,
-            $processData->pid,
-            $processData->processedRequests
+            $processData->getPid(),
+            $processData['processedRequests']
         ));
 
         $requestContext->setRequest($request);
         $response = $app->handle($request);
 
-        $response = $response->withHeader('X-Process-Id', $processData->pid);
+        $response = $response->withHeader('X-Process-Id', $processData->getPid());
 
         return new ReactResponse(
             $response->getStatusCode(),

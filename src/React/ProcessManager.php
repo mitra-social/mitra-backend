@@ -36,7 +36,7 @@ final class ProcessManager
     private $running = false;
 
     /**
-     * @var object
+     * @var Process
      */
     private $processData;
 
@@ -58,26 +58,11 @@ final class ProcessManager
             throw new \RuntimeException('Process manager is already running');
         }
 
-        $fork = function (callable $child) {
-            $pid = pcntl_fork();
-            if ($pid === -1) {
-                throw new \RuntimeException('Cant fork a process');
-            } elseif ($pid > 0) {
-                return $pid;
-            } else {
-                posix_setsid();
-                $child();
-                exit(0);
-            }
-        };
-
-        $this->processData = new \stdClass();
-
         for ($i = 1; $i <= $this->processNumber; $i++) {
             $this->socket->pause();
 
-            $this->processes[] = $fork(function () {
-                $this->processData->pid = posix_getpid();
+            $this->processes[] = $this->fork(function () {
+                $this->processData = new Process(posix_getpid());
                 $this->socket->resume();
                 // Terminate process if SIGINT received (see line 103)
                 $this->loop->addSignal(SIGINT, function () {
@@ -91,7 +76,7 @@ final class ProcessManager
             });
         }
 
-        // Terminate all processes by sending an interupt signal to them..
+        // Terminate all processes by sending an interrupt signal to them..
         $terminateProcesses = function () {
             foreach ($this->processes as $pid) {
                 posix_kill($pid, SIGINT);
@@ -102,7 +87,7 @@ final class ProcessManager
             $this->loop->stop();
         };
 
-        // SIGUSR2 used by nodemon to reload (check SIGTERM and SIGINT as well)
+        // Terminate child processes on various signals
         $this->loop->addSignal(SIGUSR2, $terminateProcesses);
         $this->loop->addSignal(SIGINT, $terminateProcesses);
         $this->loop->addSignal(SIGTERM, $terminateProcesses);
@@ -128,14 +113,9 @@ final class ProcessManager
         return $this->running;
     }
 
-    public function getProcessData(): object
+    public function getCurrentProcess(): Process
     {
         return $this->processData;
-    }
-
-    public function getActiveProcessId(): int
-    {
-        return posix_getpid();
     }
 
     /**
@@ -144,5 +124,19 @@ final class ProcessManager
     public function setProcessInterruptCallable(?callable $processInterruptCallable): void
     {
         $this->processInterruptCallable = $processInterruptCallable;
+    }
+
+    private function fork(callable $child)
+    {
+        $pid = pcntl_fork();
+        if ($pid === -1) {
+            throw new \RuntimeException('Cant fork a process');
+        } elseif ($pid > 0) {
+            return $pid;
+        } else {
+            posix_setsid();
+            $child();
+            exit(0);
+        }
     }
 }
