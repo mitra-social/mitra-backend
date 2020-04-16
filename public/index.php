@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mitra;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
@@ -9,8 +11,8 @@ use Mitra\Env\Reader\EnvVarReader;
 use Mitra\Env\Reader\GetenvReader;
 use Mitra\Env\Writer\NullWriter;
 use Mitra\Logger\RequestContext;
-use Mitra\React\Process;
-use Mitra\React\ProcessManager;
+use Mitra\React\ProcessManager\Process;
+use Mitra\React\ProcessManager\ReactProcessManager;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Response as ReactResponse;
 use React\Http\Server as ReactHttpServer;
@@ -31,13 +33,19 @@ $port = $env->get('APP_PORT') ?? 8080;
 $container = AppContainer::init($env);
 $app = (new AppFactory())->create($container);
 
-$loop = ReactEventLoopFactory::create();
+$loop = ReactEventLoopFactory::create();//
 $socket = new ReactSocketServer(sprintf('0.0.0.0:%s', $port), $loop);
 
-/** @var RequestContext $requestContext */
-$requestContext = $app->getContainer()->get(RequestContext::class);
-
-$processManager = new ProcessManager($socket, $loop, 3);
+$processManager = new ReactProcessManager(
+    3,
+    $loop,
+    function () use ($socket) {
+        $socket->resume();
+    },
+    function () use ($socket) {
+        $socket->pause();
+    }
+);
 
 $processManager->setProcessInterruptCallable(function (Process $processData): void {
     fwrite(STDERR, sprintf(
@@ -46,6 +54,9 @@ $processManager->setProcessInterruptCallable(function (Process $processData): vo
         $processData['processedRequests']
     ));
 });
+
+/** @var RequestContext $requestContext */
+$requestContext = $app->getContainer()->get(RequestContext::class);
 
 $server = new ReactHttpServer(
     function (ServerRequestInterface $request) use ($app, $requestContext, $processManager) {
@@ -77,6 +88,6 @@ $server = new ReactHttpServer(
 
 $server->listen($socket);
 
-$processManager->run();
-
 echo sprintf("Server (%s) running at http://0.0.0.0:%s\n", $appEnv, $port);
+
+$processManager->run();

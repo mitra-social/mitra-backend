@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "194cde88a1ea610daab2151b43367874",
+    "content-hash": "06a4456817698f5cfcb34bde4e79b55d",
     "packages": [
         {
             "name": "cache/adapter-common",
@@ -2037,6 +2037,41 @@
             "time": "2020-02-24T12:34:38+00:00"
         },
         {
+            "name": "mitra-social/reactphp-process-manager",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mitra-social/reactphp-process-manager.git",
+                "reference": "05a7ac5d0cfb85f7144711f77ebc5ffd5b8771ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mitra-social/reactphp-process-manager/zipball/05a7ac5d0cfb85f7144711f77ebc5ffd5b8771ef",
+                "reference": "05a7ac5d0cfb85f7144711f77ebc5ffd5b8771ef",
+                "shasum": ""
+            },
+            "require": {
+                "ext-pcntl": "*",
+                "ext-posix": "*",
+                "php": ">=7.1",
+                "react/event-loop": "^1.0"
+            },
+            "require-dev": {
+                "react/http": "^0.8.0",
+                "react/socket": "^1.4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mitra\\React\\ProcessManager\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "time": "2020-04-16T20:35:33+00:00"
+        },
+        {
             "name": "monolog/monolog",
             "version": "2.0.2",
             "source": {
@@ -3833,16 +3868,16 @@
         },
         {
             "name": "slim/slim",
-            "version": "4.4.0",
+            "version": "4.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/slimphp/Slim.git",
-                "reference": "207acac048652a35d4762a737d59e317aedc02df"
+                "reference": "5613cbb521081ed676d5d7eb3e44f2b80a818c24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/slimphp/Slim/zipball/207acac048652a35d4762a737d59e317aedc02df",
-                "reference": "207acac048652a35d4762a737d59e317aedc02df",
+                "url": "https://api.github.com/repos/slimphp/Slim/zipball/5613cbb521081ed676d5d7eb3e44f2b80a818c24",
+                "reference": "5613cbb521081ed676d5d7eb3e44f2b80a818c24",
                 "shasum": ""
             },
             "require": {
@@ -3853,7 +3888,8 @@
                 "psr/http-factory": "^1.0",
                 "psr/http-message": "^1.0",
                 "psr/http-server-handler": "^1.0",
-                "psr/http-server-middleware": "^1.0"
+                "psr/http-server-middleware": "^1.0",
+                "psr/log": "^1.1"
             },
             "require-dev": {
                 "adriansuter/php-autoload-override": "^1.0",
@@ -3866,8 +3902,8 @@
                 "phpspec/prophecy": "^1.10",
                 "phpstan/phpstan": "^0.11.5",
                 "phpunit/phpunit": "^8.5",
-                "slim/http": "^0.7",
-                "slim/psr7": "^0.3",
+                "slim/http": "^1.0",
+                "slim/psr7": "^1.0",
                 "squizlabs/php_codesniffer": "^3.5"
             },
             "suggest": {
@@ -3921,7 +3957,7 @@
                 "micro",
                 "router"
             ],
-            "time": "2020-01-05T03:51:47+00:00"
+            "time": "2020-04-14T20:49:48+00:00"
         },
         {
             "name": "symfony/console",
@@ -7273,6 +7309,7 @@
         "league/tactician": 20,
         "league/tactician-doctrine": 20,
         "mitra-social/php-env": 20,
+        "mitra-social/reactphp-process-manager": 20,
         "tuupola/slim-jwt-auth": 20,
         "phpstan/phpstan-webmozart-assert": 20
     },

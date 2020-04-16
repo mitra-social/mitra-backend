@@ -5,7 +5,8 @@
     {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/php-env.git"},
     {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/activitypub.git"},
     {"type": "vcs", "no-api": true, "url": "https://github.com/TiMESPLiNTER/phpstan-webmozart-assert.git"},
-    {"type": "vcs", "no-api": true, "url": "https://github.com/TiMESPLiNTER/slim-jwt-auth.git"}
+    {"type": "vcs", "no-api": true, "url": "https://github.com/TiMESPLiNTER/slim-jwt-auth.git"},
+    {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/reactphp-process-manager.git"}
   ],
   "require": {
     "php": ">=7.3",
@@ -23,6 +24,7 @@
     "league/tactician": "dev-master@dev",
     "league/tactician-doctrine": "dev-master@dev",
     "mitra-social/php-env": "dev-master@dev",
+    "mitra-social/reactphp-process-manager": "dev-master@dev",
     "monolog/monolog": "^2.0.2",
     "pimple/pimple": "^3.2.3",
     "ramsey/uuid": "^3.9.2",
