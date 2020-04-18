@@ -48,7 +48,7 @@ final class OutboxControllerTest extends IntegrationTestCase
     {
         $followingUser = $this->createUser();
 
-        $actorId = sprintf('http://localhost:1337/user/%s', $followingUser->getUsername());
+        $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
 
         $objectAndTo = new PersonDto();
@@ -136,7 +136,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         // Prepare
         $followingUser = $this->createUser();
 
-        $actorId = sprintf('http://localhost:1337/user/%s', $followingUser->getUsername());
+        $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
 
         $objectAndTo = new PersonDto();

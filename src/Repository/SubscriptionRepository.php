@@ -24,10 +24,10 @@ final class SubscriptionRepository
     {
         $qb = $this->entityRepository->createQueryBuilder('s');
         $qb
-            ->where('s.subscribingActor = :subscribingActor')
-            ->andWhere('s.subscribedActor = :subscribedActor')
-            ->setParameter('subscribingActor', $subscribingActor)
-            ->setParameter('subscribedActor', $subscribedActor);
+            ->where('s.subscribingActor = :subscribingActorId')
+            ->andWhere('s.subscribedActor = :subscribedActorId')
+            ->setParameter('subscribingActorId', $subscribingActor->getUser()->getId())
+            ->setParameter('subscribedActorId', $subscribedActor->getUser()->getId());
 
         return $qb->getQuery()->getOneOrNullResult();
     }

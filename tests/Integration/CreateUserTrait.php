@@ -46,7 +46,7 @@ trait CreateUserTrait
     protected function signRequest(InternalUser $user, RequestInterface $request): RequestInterface
     {
         return (new Signer(
-            new Key(sprintf('http://localhost:1337/user/%s#main-key', $user->getUsername()), $user->getPrivateKey()),
+            new Key(sprintf('http://test.localhost/user/%s#main-key', $user->getUsername()), $user->getPrivateKey()),
             Algorithm::create('rsa-sha256'),
             new HeaderList(['(request-target)', 'Host', 'Accept'])
         ))->sign($request);

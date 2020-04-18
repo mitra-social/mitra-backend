@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Mitra\Config;
 
-use ActivityPhp\Type\Extended\Activity\Follow;
 use ActivityPhp\Type\Extended\Object\Image;
 use Chubbyphp\Config\ConfigInterface;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
@@ -24,7 +23,6 @@ use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
-use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
@@ -107,15 +105,21 @@ final class Config implements ConfigInterface
         $appEnv = $this->getEnv();
         $dirs = $this->getDirectories();
 
+        $envVarValues = $this->getRequiredEnvVariables([
+            self::ENV_APP_DEBUG,
+            self::ENV_DATABASE_URL,
+            self::ENV_BASE_URL,
+        ]);
+
         $config = [
             'env' => $appEnv,
-            'baseUrl' => $this->env->get(self::ENV_BASE_URL),
-            'debug' => (bool) $this->env->get(self::ENV_APP_DEBUG),
+            'baseUrl' => $envVarValues[self::ENV_BASE_URL],
+            'debug' => (bool) $envVarValues[self::ENV_APP_DEBUG],
             'rootDir' => $this->rootDir,
             'routerCacheFile' => null,
             'doctrine.dbal.db.options' => [
                 'connection' => [
-                    'url' => $this->env->get(self::ENV_DATABASE_URL),
+                    'url' => $envVarValues[self::ENV_DATABASE_URL],
                     'charset' => 'utf8'
                 ],
             ],
@@ -194,5 +198,24 @@ final class Config implements ConfigInterface
     public function getEnv(): string
     {
         return $this->env->get(self::ENV_APP_ENV);
+    }
+
+    private function getRequiredEnvVariables(array $requiredEnvVariableNames): array
+    {
+        $envVarValues = [];
+
+        foreach ($requiredEnvVariableNames as $envVariableName) {
+            if (null !== $value = $this->env->get($envVariableName)) {
+                $envVarValues[$envVariableName] = $value;
+            }
+        }
+
+        if (count($missingEnvVars = array_diff($requiredEnvVariableNames, array_keys($envVarValues))) > 0) {
+            throw new \InvalidArgumentException(
+                sprintf('Environment variables `%s` not set', implode('`, `', $missingEnvVars))
+            );
+        }
+
+        return $envVarValues;
     }
 }

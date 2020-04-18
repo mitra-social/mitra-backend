@@ -49,6 +49,7 @@ help:
 	#   clean                     Cleans the coverage and the vendor directory
 	#   code-style                Check codestyle using phpcs
 	#   coverage                  Generate code coverage (html, clover)
+	#   fixtures-load             Load fixtures
 	#   help                      You're looking at it!
 	#   test (default)            Run all the tests with phpunit
 	#   test-unit                 Run all unit tests with phpunit
