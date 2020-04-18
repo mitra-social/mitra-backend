@@ -23,4 +23,31 @@ trait CollectionPageTrait
      * @var null|LinkDto|string
      */
     public $next;
+
+    /**
+     * @param string|LinkDto $reference
+     * @return void
+     */
+    public function setPartOf($reference): void
+    {
+        $this->partOf = $reference;
+    }
+
+    /**
+     * @param string|LinkDto $reference
+     * @return void
+     */
+    public function setPrev($reference): void
+    {
+        $this->prev = $reference;
+    }
+
+    /**
+     * @param string|LinkDto $reference
+     * @return void
+     */
+    public function setNext($reference): void
+    {
+        $this->next = $reference;
+    }
 }

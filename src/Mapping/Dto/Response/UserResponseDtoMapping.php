@@ -8,26 +8,18 @@ use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
-use Slim\Interfaces\RouteCollectorInterface;
+use Mitra\Slim\UriGenerator;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 {
     /**
-     * @var RouteCollectorInterface
+     * @var UriGenerator
      */
-    private $routeCollector;
+    private $uriGenerator;
 
-    /**
-     * @var UriInterface
-     */
-    private $baseUri;
-
-    public function __construct(RouteCollectorInterface $routeCollector, UriInterface $baseUri)
+    public function __construct(UriGenerator $uriGenerator)
     {
-        $this->routeCollector = $routeCollector;
-        $this->baseUri = $baseUri;
+        $this->uriGenerator = $uriGenerator;
     }
 
     public static function getDtoClass(): string
@@ -61,24 +53,25 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
         $userResponseDto->email = $entity->getEmail();
         $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');*/
 
-        $userUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $this->baseUri,
+        $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',
-            ['preferredUsername' => $entity->getUsername()]
+            ['username' => $entity->getUsername()]
         );
 
         // ActivityPub
         $userResponseDto->id = $userUrl;
         $userResponseDto->preferredUsername = $entity->getUsername();
-        $userResponseDto->inbox = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $this->baseUri,
+        $userResponseDto->inbox = $this->uriGenerator->fullUrlFor(
             'user-inbox-read',
-            ['preferredUsername' => $entity->getUsername()]
+            ['username' => $entity->getUsername()]
         );
-        $userResponseDto->outbox = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $this->baseUri,
+        $userResponseDto->outbox = $this->uriGenerator->fullUrlFor(
             'user-outbox-read',
-            ['preferredUsername' => $entity->getUsername()]
+            ['username' => $entity->getUsername()]
+        );
+        $userResponseDto->following = $this->uriGenerator->fullUrlFor(
+            'user-following',
+            ['username' => $entity->getUsername()]
         );
         $userResponseDto->url = $userUrl;
         $userResponseDto->publicKey = [

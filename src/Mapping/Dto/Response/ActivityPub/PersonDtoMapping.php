@@ -53,16 +53,16 @@ final class PersonDtoMapping implements EntityToDtoMappingInterface
         if ($user instanceof InternalUser) {
             $preferredUsername = $user->getUsername();
             $userUrl = $this->uriGenerator->fullUrlFor('user-read', [
-                'preferredUsername' => $preferredUsername
+                'username' => $preferredUsername
             ]);
 
             $personDto->id = $userUrl;
             $personDto->preferredUsername = $preferredUsername;
             $personDto->inbox = $this->uriGenerator->fullUrlFor('user-inbox-read', [
-                'preferredUsername' => $preferredUsername
+                'username' => $preferredUsername
             ]);
             $personDto->outbox = $this->uriGenerator->fullUrlFor('user-outbox-read', [
-                'preferredUsername' => $preferredUsername
+                'username' => $preferredUsername
             ]);
             $personDto->url = $userUrl;
         } elseif ($user instanceof ExternalUser) {

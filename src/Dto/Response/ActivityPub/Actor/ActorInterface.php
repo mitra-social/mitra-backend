@@ -15,4 +15,6 @@ interface ActorInterface
     public function getPreferredUsername(): ?string;
 
     public function getName(): ?string;
+
+    public function getType(): string;
 }

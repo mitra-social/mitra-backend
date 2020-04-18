@@ -8,7 +8,7 @@ use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\InboxWriteController;
-use Mitra\Controller\User\ReadUserController;
+use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 
@@ -19,8 +19,8 @@ final class PublicRouterProvider implements RouteProviderInterface
         $group->get('/ping', PingController::class)->setName('ping');
         $group->post('/token', TokenController::class)->setName('token');
         $group->post('/user', CreateUserController::class)->setName('user-create');
-        $group->get('/user/{preferredUsername}', ReadUserController::class)->setName('user-read');
-        $group->post('/user/{preferredUsername}/inbox', InboxWriteController::class)->setName('user-inbox-write');
+        $group->get('/user/{username}', UserReadController::class)->setName('user-read');
+        $group->post('/user/{username}/inbox', InboxWriteController::class)->setName('user-inbox-write');
         $group->get('/.well-known/webfinger', WebfingerController::class)->setName('webfinger');
     }
 }

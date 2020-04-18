@@ -8,6 +8,8 @@ use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\Actor\Organization;
+use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Repository\ExternalUserRepository;
 use Ramsey\Uuid\Uuid;
@@ -62,8 +64,6 @@ final class ExternalUserResolver
 
         Assert::isInstanceOf($resolvedObject, ActorInterface::class);
 
-        /** @var ActorInterface $resolvedObject */
-
         $externalUser = new ExternalUser(
             Uuid::uuid4()->toString(),
             $resolvedObject->getId(),
@@ -73,7 +73,14 @@ final class ExternalUserResolver
             $resolvedObject->getOutbox()
         );
 
-        $actor = new Actor($externalUser);
+        if ('Person' === $resolvedObject->type) {
+            $actor = new Person($externalUser);
+        } elseif ('Organization' === $resolvedObject->type) {
+            $actor = new Organization($externalUser);
+        } else {
+            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->type));
+        }
+
         $actor->setName($resolvedObject->getName());
         //$actor->setIcon($resolvedObject->getIcon()); could be array... which one to choose then?
 

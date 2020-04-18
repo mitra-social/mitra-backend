@@ -24,10 +24,10 @@ final class RemoteObjectResolver
 
     /**
      * @param mixed $value
-     * @return null|object
+     * @return null|ObjectDto
      * @throws RemoteObjectResolverException
      */
-    public function resolve($value): ?object
+    public function resolve($value): ?ObjectDto
     {
         $url = null;
 
@@ -54,10 +54,10 @@ final class RemoteObjectResolver
 
     /**
      * @param string $url
-     * @return object|null
+     * @return ObjectDto|null
      * @throws RemoteObjectResolverException
      */
-    private function fetchRemoteValueByUrl(string $url): ?object
+    private function fetchRemoteValueByUrl(string $url): ?ObjectDto
     {
         try {
             return $this->activityPubClient->sendRequest(

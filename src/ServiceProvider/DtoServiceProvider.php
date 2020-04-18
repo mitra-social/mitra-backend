@@ -32,8 +32,6 @@ use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\UriFactoryInterface;
-use Slim\Routing\RouteCollector;
 
 final class DtoServiceProvider implements ServiceProviderInterface
 {
@@ -119,9 +117,6 @@ final class DtoServiceProvider implements ServiceProviderInterface
 
     private function registerEntityToDtoMappings(Container $container): void
     {
-        /** @var UriFactoryInterface $uriFactory */
-        $uriFactory = $container[UriFactoryInterface::class];
-
         $container[ViolationDtoMapping::class] = static function (): ViolationDtoMapping {
             return new ViolationDtoMapping();
         };
@@ -130,13 +125,8 @@ final class DtoServiceProvider implements ServiceProviderInterface
             return new ViolationListDtoMapping($container[ViolationDtoMapping::class]);
         };
 
-        $container[UserResponseDtoMapping::class] = static function (
-            Container $container
-        ) use ($uriFactory): UserResponseDtoMapping {
-            return new UserResponseDtoMapping(
-                $container[RouteCollector::class],
-                $uriFactory->createUri($container['baseUrl'])
-            );
+        $container[UserResponseDtoMapping::class] = static function (Container $container): UserResponseDtoMapping {
+            return new UserResponseDtoMapping($container[UriGenerator::class]);
         };
 
         $container[PersonDtoMapping::class] = static function (Container $container): PersonDtoMapping {

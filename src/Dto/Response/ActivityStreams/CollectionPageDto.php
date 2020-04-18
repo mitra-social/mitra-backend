@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityStreams;
 
-final class OrderedCollectionPageDto extends OrderedCollectionDto implements CollectionPageInterface
+final class CollectionPageDto extends CollectionDto implements CollectionPageInterface
 {
     use CollectionPageTrait;
 
     /**
      * @var string
      */
-    public $type = 'OrderedCollectionPage';
+    public $type = 'CollectionPage';
 
     /**
      * @var int

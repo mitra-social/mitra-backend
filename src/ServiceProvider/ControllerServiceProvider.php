@@ -6,6 +6,7 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\Controller\User\FollowingListController;
 use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
@@ -13,7 +14,7 @@ use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\InboxWriteController;
 use Mitra\Controller\User\OutboxController;
-use Mitra\Controller\User\ReadUserController;
+use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\DtoToEntityMapper;
@@ -22,15 +23,14 @@ use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Repository\SubscriptionRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\UriGenerator;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Psr\Http\Message\UriFactoryInterface;
 use Psr\Log\LoggerInterface;
-use Slim\Routing\RouteCollector;
 
 final class ControllerServiceProvider implements ServiceProviderInterface
 {
@@ -66,8 +66,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[ReadUserController::class] = static function (Container $container): ReadUserController {
-            return new ReadUserController(
+        $container[UserReadController::class] = static function (Container $container): UserReadController {
+            return new UserReadController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[InternalUserRepository::class]
@@ -80,7 +80,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
-                $container[RouteCollector::class],
+                $container[UriGenerator::class],
                 $container[DataToDtoTransformer::class]
             );
         };
@@ -111,6 +111,16 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new InboxWriteController(
                 $container[ResponseFactoryInterface::class],
                 $container[LoggerInterface::class]
+            );
+        };
+
+        $container[FollowingListController::class] = static function (Container $container): FollowingListController {
+            return new FollowingListController(
+                $container[SubscriptionRepository::class],
+                $container[InternalUserRepository::class],
+                $container[UriGenerator::class],
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class]
             );
         };
 

@@ -91,7 +91,7 @@ final class OutboxController
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
-        $username = $request->getAttribute('preferredUsername');
+        $username = $request->getAttribute('username');
         $decodedRequestBody = $this->decoder->decode((string) $request->getBody(), $accept);
 
         if (null === $outboxUser = $this->internalUserRepository->findByUsername($username)) {

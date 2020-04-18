@@ -79,7 +79,7 @@ final class WebfingerController
 
         $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',
-            ['preferredUsername' => $user->getUsername()]
+            ['username' => $user->getUsername()]
         );
 
         $webfinger = new Server\Http\WebFinger(['subject' => $resource, 'aliases' => [], 'links' => [
