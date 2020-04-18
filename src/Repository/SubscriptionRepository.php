@@ -26,8 +26,8 @@ final class SubscriptionRepository
         $qb
             ->where('s.subscribingActor = :subscribingActorId')
             ->andWhere('s.subscribedActor = :subscribedActorId')
-            ->setParameter('subscribingActorId', $subscribingActor->getUser()->getId())
-            ->setParameter('subscribedActorId', $subscribedActor->getUser()->getId());
+            ->setParameter('subscribingActorId', $subscribingActor->getUser())
+            ->setParameter('subscribedActorId', $subscribedActor->getUser());
 
         return $qb->getQuery()->getOneOrNullResult();
     }
