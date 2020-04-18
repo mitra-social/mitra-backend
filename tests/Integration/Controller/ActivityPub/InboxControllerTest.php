@@ -54,8 +54,8 @@ final class InboxControllerTest extends IntegrationTestCase
             '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'OrderedCollection',
             'totalItems' => 0,
-            'first' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getUsername()),
-            'last' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getUsername()),
+            'first' => sprintf('http://test.localhost/user/%s/inbox?page=0', $user->getUsername()),
+            'last' => sprintf('http://test.localhost/user/%s/inbox?page=0', $user->getUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);
@@ -79,7 +79,7 @@ final class InboxControllerTest extends IntegrationTestCase
             'type' => 'OrderedCollectionPage',
             'totalItems' => 0,
             'orderedItems' => [],
-            'partOf' => sprintf('http://localhost/user/%s/inbox', $user->getUsername()),
+            'partOf' => sprintf('http://test.localhost/user/%s/inbox', $user->getUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);

@@ -103,6 +103,6 @@ $loop->addSignal(SIGUSR2, $terminateProcesses);
 $loop->addSignal(SIGINT, $terminateProcesses);
 $loop->addSignal(SIGTERM, $terminateProcesses);
 
-$loop->run();
-
 echo sprintf("Server (%s) running at http://0.0.0.0:%s\n", $appEnv, $port);
+
+$loop->run();

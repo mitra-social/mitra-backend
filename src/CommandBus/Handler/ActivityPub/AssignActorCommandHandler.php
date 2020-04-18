@@ -30,7 +30,7 @@ final class AssignActorCommandHandler
         /** @var InternalUser $actorUser */
 
         $command->getActivity()->actor = $this->uriGenerator->fullUrlFor('user-read', [
-            'preferredUsername' => $actorUser->getUsername()
+            'username' => $actorUser->getUsername()
         ]);
     }
 }

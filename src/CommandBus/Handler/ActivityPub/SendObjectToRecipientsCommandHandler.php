@@ -54,7 +54,7 @@ final class SendObjectToRecipientsCommandHandler
         $sender = $command->getSender();
 
         $senderPublicKeyUrl = $this->uriGenerator->fullUrlFor('user-read', [
-            'preferredUsername' => $sender->getUsername(),
+            'username' => $sender->getUsername(),
         ]) . '#main-key';
         $inboxUrls = $this->getInboxUrls($object);
 

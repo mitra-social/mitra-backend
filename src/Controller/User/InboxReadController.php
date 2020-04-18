@@ -31,6 +31,7 @@ use Mitra\Mapping\Dto\ActivityStreamTypeToDtoClassMapping;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\RouteCollectorInterface;
@@ -62,35 +63,35 @@ final class InboxReadController
     private $encoder;
 
     /**
-     * @var RouteCollectorInterface
+     * @var UriGenerator
      */
-    private $routeCollector;
+    private $uriGenerator;
 
     /**
      * @var DataToDtoTransformer
      */
-    private $dataToDtoManager;
+    private $dataToDtoTransformer;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         InternalUserRepository $userRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
-        RouteCollectorInterface $routeCollector,
+        UriGenerator $uriGenerator,
         DataToDtoTransformer $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->internalUserRepository = $userRepository;
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->encoder = $encoder;
-        $this->routeCollector = $routeCollector;
-        $this->dataToDtoManager = $dataToDtoManager;
+        $this->uriGenerator = $uriGenerator;
+        $this->dataToDtoTransformer = $dataToDtoManager;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
-        $username = $request->getAttribute('preferredUsername');
+        $username = $request->getAttribute('username');
         $pageNo = $request->getQueryParams()['page'] ?? null;
 
         $authenticatedUser = $this->internalUserRepository->resolveFromRequest($request);
@@ -113,16 +114,14 @@ final class InboxReadController
 
         if (null === $pageNo) {
             $orderedCollectionDto = new OrderedCollectionDto();
-            $orderedCollectionDto->first = $this->routeCollector->getRouteParser()->fullUrlFor(
-                $request->getUri(),
+            $orderedCollectionDto->first = $this->uriGenerator->fullUrlFor(
                 $inboxRouteName,
-                ['preferredUsername' => $inboxUsername],
+                ['username' => $inboxUsername],
                 ['page' => 0]
             );
-            $orderedCollectionDto->last = $this->routeCollector->getRouteParser()->fullUrlFor(
-                $request->getUri(),
+            $orderedCollectionDto->last = $this->uriGenerator->fullUrlFor(
                 $inboxRouteName,
-                ['preferredUsername' => $inboxUsername],
+                ['username' => $inboxUsername],
                 ['page' => $lastPageNo]
             );
         } else {
@@ -132,29 +131,26 @@ final class InboxReadController
                 return $this->responseFactory->createResponse(404);
             }
 
-            $inboxUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
-                $request->getUri(),
+            $inboxUrl = $this->uriGenerator->fullUrlFor(
                 $inboxRouteName,
-                ['preferredUsername' => $inboxUsername]
+                ['username' => $inboxUsername]
             );
 
             $orderedCollectionDto = new OrderedCollectionPageDto();
             $orderedCollectionDto->partOf = $inboxUrl;
 
             if ($pageNo > 0) {
-                $orderedCollectionDto->prev = $this->routeCollector->getRouteParser()->fullUrlFor(
-                    $request->getUri(),
+                $orderedCollectionDto->prev = $this->uriGenerator->fullUrlFor(
                     'user-inbox',
-                    ['preferredUsername' => $inboxUsername],
+                    ['username' => $inboxUsername],
                     ['page' => $pageNo - 1]
                 );
             }
 
             if ($pageNo < $lastPageNo) {
-                $orderedCollectionDto->next = $this->routeCollector->getRouteParser()->fullUrlFor(
-                    $request->getUri(),
+                $orderedCollectionDto->next = $this->uriGenerator->fullUrlFor(
                     'user-inbox',
-                    ['preferredUsername' => $inboxUsername],
+                    ['username' => $inboxUsername],
                     ['page' => $pageNo + 1]
                 );
             }
@@ -203,7 +199,7 @@ final class InboxReadController
 
             unset($object['@context']);
 
-            $dtoItems[] = $this->dataToDtoManager->populate(
+            $dtoItems[] = $this->dataToDtoTransformer->populate(
                 ActivityStreamTypeToDtoClassMapping::map($content->getType()),
                 $object
             );
