@@ -42,6 +42,20 @@ final class FollowingControllerTest extends IntegrationTestCase
         self::assertStatusCode(404, $response);
     }
 
+    public function testReturnsForbiddenForDifferentUser(): void
+    {
+        $user1 = $this->createUser();
+        $user2 = $this->createUser();
+        $token = $this->createTokenForUser($user1);
+
+        $request = $this->createRequest('GET', sprintf('/user/%s/following', $user2->getUsername()), null, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(401, $response);
+    }
+
     public function testReturnsFollowingActorsAsCollection(): void
     {
         $user = $this->createUser();
