@@ -24,67 +24,53 @@ class Subscription
     private $subscribedActor;
 
     /**
-     * @var \DateTime
+     * @var \DateTimeInterface
      */
     private $startDate;
 
     /**
-     * @var \DateTime|null
+     * @var \DateTimeInterface|null
      */
     private $endDate;
 
-    public function __construct(string $id, Actor $subscribingActor, Actor $subscribedActor, \DateTime $startDate)
-    {
+    public function __construct(
+        string $id,
+        Actor $subscribingActor,
+        Actor $subscribedActor,
+        \DateTimeInterface $startDate
+    ) {
         $this->id = $id;
         $this->subscribingActor = $subscribingActor;
         $this->subscribedActor = $subscribedActor;
         $this->startDate = $startDate;
     }
 
-    /**
-     * @param \DateTime|null $endDate
-     */
     public function setEndDate(?\DateTime $endDate): void
     {
         $this->endDate = $endDate;
     }
 
-    /**
-     * @return string
-     */
     public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @return Actor
-     */
     public function getSubscribingActor(): Actor
     {
         return $this->subscribingActor;
     }
 
-    /**
-     * @return Actor
-     */
     public function getSubscribedActor(): Actor
     {
         return $this->subscribedActor;
     }
 
-    /**
-     * @return \DateTime
-     */
-    public function getStartDate(): \DateTime
+    public function getStartDate(): \DateTimeInterface
     {
         return $this->startDate;
     }
 
-    /**
-     * @return \DateTime|null
-     */
-    public function getEndDate(): ?\DateTime
+    public function getEndDate(): ?\DateTimeInterface
     {
         return $this->endDate;
     }

@@ -63,9 +63,6 @@ final class ExternalUserResolver
         }
 
         Assert::isInstanceOf($resolvedObject, ActorInterface::class);
-        Assert::isInstanceOf($resolvedObject, ObjectDto::class);
-
-        /** @var ActorInterface $resolvedObject */
 
         $externalUser = new ExternalUser(
             Uuid::uuid4()->toString(),

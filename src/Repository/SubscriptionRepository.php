@@ -33,7 +33,7 @@ final class SubscriptionRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
-    public function getFollowingCountForActor(Actor $actor)
+    public function getFollowingCountForActor(Actor $actor): int
     {
         $qb = $this->entityRepository->createQueryBuilder('s');
         $qb
