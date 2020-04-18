@@ -200,6 +200,10 @@ final class Config implements ConfigInterface
         return $this->env->get(self::ENV_APP_ENV);
     }
 
+    /**
+     * @param array<string> $requiredEnvVariableNames
+     * @return array<string, string>
+     */
     private function getRequiredEnvVariables(array $requiredEnvVariableNames): array
     {
         $envVarValues = [];
