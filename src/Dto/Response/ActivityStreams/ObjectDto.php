@@ -9,7 +9,7 @@ namespace Mitra\Dto\Response\ActivityStreams;
  * defined in the Activity Vocabulary, including other Core types such as Activity, IntransitiveActivity, Collection
  * and OrderedCollection.
  */
-class ObjectDto implements TypeInterface
+class ObjectDto implements TypeInterface, ObjectInterface
 {
     /**
      * @var null|string
@@ -184,5 +184,10 @@ class ObjectDto implements TypeInterface
         }, ARRAY_FILTER_USE_BOTH);
 
         return $data;
+    }
+
+    public function setContext($context): void
+    {
+        $this->context = $context;
     }
 }

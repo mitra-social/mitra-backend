@@ -7,10 +7,12 @@ namespace Mitra\Controller\User;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\CollectionDto;
+use Mitra\Dto\Response\ActivityStreams\CollectionInterface;
 use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\CollectionPageInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionInterface;
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\TypeInterface;
 use Mitra\Entity\Actor\Actor;
@@ -51,11 +53,6 @@ abstract class AbstractCollectionController
      */
     private $encoder;
 
-    /**
-     * @var callable
-     */
-    private $accessChecker;
-
     public function __construct(
         InternalUserRepository $internalUserRepository,
         UriGenerator $uriGenerator,
@@ -94,16 +91,16 @@ abstract class AbstractCollectionController
 
         if (null === $pageNo) {
             $collectionDto = $this->getCollectionDto();
-            $collectionDto->first = $this->uriGenerator->fullUrlFor(
+            $collectionDto->setFirst($this->uriGenerator->fullUrlFor(
                 $collectionRouteName,
                 ['username' => $requestedUsername],
                 ['page' => 0]
-            );
-            $collectionDto->last = $this->uriGenerator->fullUrlFor(
+            ));
+            $collectionDto->setLast($this->uriGenerator->fullUrlFor(
                 $collectionRouteName,
                 ['username' => $requestedUsername],
                 ['page' => $lastPageNo]
-            );
+            ));
         } else {
             $pageNo = (int) $pageNo;
 
@@ -112,36 +109,36 @@ abstract class AbstractCollectionController
             }
 
             $collectionDto = $this->getCollectionPageDto();
-            $collectionDto->partOf = $this->uriGenerator->fullUrlFor(
+            $collectionDto->setPartOf($this->uriGenerator->fullUrlFor(
                 $collectionRouteName,
                 ['username' => $requestedUsername]
-            );
+            ));
 
             if ($pageNo > 0) {
-                $collectionDto->prev = $this->uriGenerator->fullUrlFor(
+                $collectionDto->setPrev($this->uriGenerator->fullUrlFor(
                     $collectionRouteName,
                     ['username' => $requestedUsername],
                     ['page' => $pageNo - 1]
-                );
+                ));
             }
 
             if ($pageNo < $lastPageNo) {
-                $collectionDto->next = $this->uriGenerator->fullUrlFor(
+                $collectionDto->setNext($this->uriGenerator->fullUrlFor(
                     $collectionRouteName,
                     ['username' => $requestedUsername],
                     ['page' => $pageNo + 1]
-                );
+                ));
             }
 
-            if ($collectionDto instanceof OrderedCollectionPageDto) {
-                $collectionDto->orderedItems = $this->getItems($requestedActor, $pageNo);
+            if ($collectionDto instanceof OrderedCollectionInterface) {
+                $collectionDto->setOrderedItems($this->getItems($requestedActor, $pageNo));
             } else {
-                $collectionDto->items = $this->getItems($requestedActor, $pageNo);
+                $collectionDto->setItems($this->getItems($requestedActor, $pageNo));
             }
         }
 
-        $collectionDto->context = TypeInterface::CONTEXT_ACTIVITY_STREAMS;
-        $collectionDto->totalItems = $totalItems;
+        $collectionDto->setContext(TypeInterface::CONTEXT_ACTIVITY_STREAMS);
+        $collectionDto->setTotalItems($totalItems);
 
         $response = $this->responseFactory->createResponse();
 
@@ -150,11 +147,14 @@ abstract class AbstractCollectionController
         return $response;
     }
 
-    protected function getCollectionDto(): CollectionDto
+    protected function getCollectionDto(): CollectionInterface
     {
         return new CollectionDto();
     }
 
+    /**
+     * @return CollectionPageInterface
+     */
     protected function getCollectionPageDto(): CollectionPageInterface
     {
         return new CollectionPageDto();

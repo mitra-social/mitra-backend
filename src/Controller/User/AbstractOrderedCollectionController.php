@@ -7,6 +7,7 @@ namespace Mitra\Controller\User;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\CollectionDto;
+use Mitra\Dto\Response\ActivityStreams\CollectionInterface;
 use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\CollectionPageInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
@@ -30,7 +31,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 abstract class AbstractOrderedCollectionController extends AbstractCollectionController
 {
-    protected function getCollectionDto(): CollectionDto
+    protected function getCollectionDto(): CollectionInterface
     {
         return new OrderedCollectionDto();
     }
