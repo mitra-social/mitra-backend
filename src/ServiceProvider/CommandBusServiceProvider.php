@@ -75,6 +75,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             return new FollowCommandHandler(
                 $container['doctrine.orm.em'],
                 $container[ExternalUserResolver::class],
+                $container[SubscriptionRepository::class]
             );
         };
 

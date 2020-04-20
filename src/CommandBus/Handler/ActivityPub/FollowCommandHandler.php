@@ -9,6 +9,7 @@ use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\InternalUser;
+use Mitra\Repository\SubscriptionRepository;
 use Ramsey\Uuid\Uuid;
 use Webmozart\Assert\Assert;
 
@@ -24,12 +25,19 @@ final class FollowCommandHandler
      */
     private $externalUserResolver;
 
+    /**
+     * @var SubscriptionRepository
+     */
+    private $subscriptionRepository;
+
     public function __construct(
         EntityManagerInterface $entityManager,
-        ExternalUserResolver $externalUserResolver
+        ExternalUserResolver $externalUserResolver,
+        SubscriptionRepository $subscriptionRepository
     ) {
         $this->entityManager = $entityManager;
         $this->externalUserResolver = $externalUserResolver;
+        $this->subscriptionRepository = $subscriptionRepository;
     }
 
     public function __invoke(FollowCommand $command): void
@@ -47,10 +55,16 @@ final class FollowCommandHandler
             throw new \RuntimeException('Could not resolve `$object`');
         }
 
+        $externalActor = $objectExternalUser->getActor();
+
+        if (null !== $this->subscriptionRepository->findByActors($commandActor, $externalActor)) {
+            return;
+        }
+
         $subscription = new Subscription(
             Uuid::uuid4()->toString(),
-            $command->getActor(),
-            $objectExternalUser->getActor(),
+            $commandActor,
+            $externalActor,
             new \DateTime()
         );
 
