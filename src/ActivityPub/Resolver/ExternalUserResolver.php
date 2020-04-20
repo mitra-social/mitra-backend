@@ -64,10 +64,18 @@ final class ExternalUserResolver
 
         Assert::isInstanceOf($resolvedObject, ActorInterface::class);
 
+        $externalId = $resolvedObject->getId();
+
+        // Check again because maybe the provided string was not really the object id itself in the first place but
+        // just an url to fetch the actor
+        if (null !== $externalUser = $this->externalUserRepository->findOneByExternalId($externalId)) {
+            return $externalUser;
+        }
+
         $externalUser = new ExternalUser(
             Uuid::uuid4()->toString(),
-            $resolvedObject->getId(),
-            hash('sha256', $resolvedObject->getId()),
+            $externalId,
+            hash('sha256', $externalId),
             $resolvedObject->getPreferredUsername(),
             $resolvedObject->getInbox(),
             $resolvedObject->getOutbox()
