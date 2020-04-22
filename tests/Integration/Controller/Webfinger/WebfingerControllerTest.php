@@ -35,7 +35,7 @@ final class WebfingerControllerTest extends IntegrationTestCase
                 [
                     'rel' => 'self',
                     'type' => 'application/activity+json',
-                    'href' => sprintf('http://localhost/users/%s', $user->getUsername()),
+                    'href' => sprintf('http://test.localhost/user/%s', $user->getUsername()),
                 ],
             ],
         ];

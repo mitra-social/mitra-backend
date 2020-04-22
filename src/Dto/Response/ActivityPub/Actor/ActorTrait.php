@@ -52,7 +52,7 @@ trait ActorTrait
 
     /**
      * A list of supplementary Collections which may be of interest.
-     * @var array<string, string|LinkDto>
+     * @var null|array<string, string|LinkDto>
      */
     public $streams;
 
@@ -60,7 +60,42 @@ trait ActorTrait
      * A json object which maps additional (typically server/domain-wide) endpoints which may be useful either for this
      * actor or someone referencing this actor. This mapping may be nested inside the actor document as the value or may
      * be a link to a JSON-LD document with these properties.
-     * @var array<string, string|LinkDto>
+     * @var null|array<string, string|LinkDto>
      */
     public $endpoints;
+
+    /**
+     * @var null|array<string, string>
+     */
+    public $publicKey;
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getInbox(): string
+    {
+        return (string) $this->inbox;
+    }
+
+    public function getOutbox(): string
+    {
+        return (string) $this->outbox;
+    }
+
+    public function getPreferredUsername(): ?string
+    {
+        return $this->preferredUsername;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
 }

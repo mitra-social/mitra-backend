@@ -8,19 +8,18 @@ use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
-use Psr\Http\Message\ServerRequestInterface;
-use Slim\Interfaces\RouteCollectorInterface;
+use Mitra\Slim\UriGenerator;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 {
     /**
-     * @var RouteCollectorInterface
+     * @var UriGenerator
      */
-    private $routeCollector;
+    private $uriGenerator;
 
-    public function __construct(RouteCollectorInterface $routeCollector)
+    public function __construct(UriGenerator $uriGenerator)
     {
-        $this->routeCollector = $routeCollector;
+        $this->uriGenerator = $uriGenerator;
     }
 
     public static function getDtoClass(): string
@@ -35,11 +34,10 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|InternalUser $entity
-     * @param ServerRequestInterface $request
      * @return object|UserResponseDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity, ServerRequestInterface $request): object
+    public function toDto(object $entity): object
     {
         if (!$entity instanceof InternalUser) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -47,17 +45,40 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
         $userResponseDto = new UserResponseDto();
 
-        $userResponseDto->userId = $entity->getId();
+        $userResponseDto->context = [
+            'https://www.w3.org/ns/activitystreams',
+            'https://w3id.org/security/v1'
+        ];
+        /*$userResponseDto->userId = $entity->getId();
         $userResponseDto->email = $entity->getEmail();
-        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
+        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');*/
+
+        $userUrl = $this->uriGenerator->fullUrlFor(
+            'user-read',
+            ['username' => $entity->getUsername()]
+        );
 
         // ActivityPub
+        $userResponseDto->id = $userUrl;
         $userResponseDto->preferredUsername = $entity->getUsername();
-        $userResponseDto->inbox = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $request->getUri(),
-            'user-inbox',
-            ['preferredUsername' => $entity->getUsername()]
+        $userResponseDto->inbox = $this->uriGenerator->fullUrlFor(
+            'user-inbox-read',
+            ['username' => $entity->getUsername()]
         );
+        $userResponseDto->outbox = $this->uriGenerator->fullUrlFor(
+            'user-outbox-read',
+            ['username' => $entity->getUsername()]
+        );
+        $userResponseDto->following = $this->uriGenerator->fullUrlFor(
+            'user-following',
+            ['username' => $entity->getUsername()]
+        );
+        $userResponseDto->url = $userUrl;
+        $userResponseDto->publicKey = [
+            'id' => $userUrl . '#main-key',
+            'owner' =>  $userResponseDto->url,
+            'publicKeyPem' => $entity->getPublicKey(),
+        ];
 
         return $userResponseDto;
     }

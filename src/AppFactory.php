@@ -7,14 +7,19 @@ namespace Mitra;
 use Mitra\Env\Env;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
+use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Mitra\Routes\PrivateRouteProvider;
 use Mitra\Routes\PublicRouterProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
+use Mitra\ServiceProvider\ErrorHandlerServiceProvider;
 use Mitra\ServiceProvider\MiddlewareServiceProvider;
 use Mitra\ServiceProvider\SlimServiceProvider;
+use Mitra\Slim\ErrorHandler\HttpErrorHandler;
+use Pimple\Container;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\CallableResolver;
+use Slim\Exception\HttpException;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
 use Tuupola\Middleware\JwtAuthentication;
@@ -22,21 +27,23 @@ use Tuupola\Middleware\JwtAuthentication;
 final class AppFactory
 {
     /**
-     * @param Env $env
+     * @param Container $container
      * @return App
      */
-    public function create(Env $env): App
+    public function create(Container $container): App
     {
-        $app = $this->createApp($env);
+        $app = $this->createApp($container);
 
         /** @var ContainerInterface $container */
         $container = $app->getContainer();
 
+        $app->add(ValidateHttpSignatureMiddleware::class);
         $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
 
         // Needs to be last middleware to handle all the errors
-        $app->addErrorMiddleware($container->get('debug'), true, true);
+        $errorMiddleware = $app->addErrorMiddleware($container->get('debug'), true, true);
+        $errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
 
         $app->group('', new PublicRouterProvider());
         $app->group('', new PrivateRouteProvider())->add(JwtAuthentication::class);
@@ -45,16 +52,15 @@ final class AppFactory
     }
 
     /**
-     * @param Env $env
      * @return App
      */
-    private function createApp(Env $env): App
+    private function createApp(Container $container): App
     {
-        $container = AppContainer::init($env);
         $container
             ->register(new SlimServiceProvider())
             ->register(new MiddlewareServiceProvider())
             ->register(new ControllerServiceProvider())
+            ->register(new ErrorHandlerServiceProvider())
         ;
 
         return new App(

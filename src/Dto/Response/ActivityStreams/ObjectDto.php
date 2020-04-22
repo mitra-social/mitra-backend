@@ -9,7 +9,7 @@ namespace Mitra\Dto\Response\ActivityStreams;
  * defined in the Activity Vocabulary, including other Core types such as Activity, IntransitiveActivity, Collection
  * and OrderedCollection.
  */
-class ObjectDto implements TypeInterface
+class ObjectDto implements TypeInterface, ObjectInterface
 {
     /**
      * @var null|string
@@ -17,7 +17,7 @@ class ObjectDto implements TypeInterface
     public $id;
 
     /**
-     * @var null|string
+     * @var null|string|array<int,string>
      */
     public $context;
 
@@ -27,17 +27,17 @@ class ObjectDto implements TypeInterface
     public $type = 'Object';
 
     /**
-     * @var null|ObjectDto|LinkDto|array<ObjectDto|LinkDto>
+     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $attachment;
 
     /**
-     * @var null|ObjectDto|LinkDto|array<ObjectDto|LinkDto>
+     * @var null|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $attributedTo;
 
     /**
-     * @var null|ObjectDto|LinkDto|array<ObjectDto|LinkDto>
+     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $audience;
 
@@ -45,6 +45,11 @@ class ObjectDto implements TypeInterface
      * @var null|string
      */
     public $content;
+
+    /**
+     * @var null|array<string, string>
+     */
+    public $contentMap;
 
     /**
      * @var null|string
@@ -62,7 +67,7 @@ class ObjectDto implements TypeInterface
     public $endTime;
 
     /**
-     * @var null|ObjectDto|LinkDto
+     * @var null|string|ObjectDto|LinkDto
      */
     public $generator;
 
@@ -74,17 +79,17 @@ class ObjectDto implements TypeInterface
     public $icon;
 
     /**
-     * @var null|ImageDto|LinkDto|array<ImageDto|LinkDto>
+     * @var null|string|ImageDto|LinkDto|array<string|ImageDto|LinkDto>
      */
     public $image;
 
     /**
-     * @var null|ObjectDto|LinkDto|array<ObjectDto|LinkDto>
+     * @var null|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $inReplyTo;
 
     /**
-     * @var null|ObjectDto|LinkDto|array<ObjectDto|LinkDto>
+     * @var null|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $location;
 
@@ -119,7 +124,7 @@ class ObjectDto implements TypeInterface
     public $summaryMap;
 
     /**
-     * @var null|ObjectDto|LinkDto|array<ObjectDto|LinkDto>
+     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $tag;
 
@@ -129,27 +134,27 @@ class ObjectDto implements TypeInterface
     public $updated;
 
     /**
-     * @var null|string|LinkDto
+     * @var null|string|LinkDto|array<string|LinkDto>
      */
     public $url;
 
     /**
-     * @var null|ObjectDto|LinkDto
+     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $to;
 
     /**
-     * @var null|ObjectDto|LinkDto
+     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $bto;
 
     /**
-     * @var null|ObjectDto|LinkDto
+     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $cc;
 
     /**
-     * @var null|ObjectDto|LinkDto
+     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $bcc;
 
@@ -179,5 +184,10 @@ class ObjectDto implements TypeInterface
         }, ARRAY_FILTER_USE_BOTH);
 
         return $data;
+    }
+
+    public function setContext($context): void
+    {
+        $this->context = $context;
     }
 }

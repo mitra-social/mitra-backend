@@ -23,14 +23,16 @@ final class DelegateEncoder implements EncoderInterface
      */
     public function encode($data, string $mimeType): string
     {
-        if (!isset($this->encoders[$mimeType])) {
-            throw new UnsupportedMimeTypeException($mimeType);
+        foreach ($this->encoders as $encoder) {
+            if ($encoder->supports($mimeType)) {
+                return $encoder->encode(
+                    $this->deepNormalization($data),
+                    $mimeType
+                );
+            }
         }
 
-        return $this->encoders[$mimeType]->encode(
-            $this->deepNormalization($data),
-            $mimeType
-        );
+        throw new UnsupportedMimeTypeException($mimeType);
     }
 
     public function addEncoder(string $mimeType, EncoderInterface $encoder): void
@@ -68,5 +70,16 @@ final class DelegateEncoder implements EncoderInterface
     private function convertToArray(object $data): array
     {
         return get_object_vars($data);
+    }
+
+    public function supports(string $mimeType): bool
+    {
+        foreach ($this->encoders as $encoder) {
+            if ($encoder->supports($mimeType)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

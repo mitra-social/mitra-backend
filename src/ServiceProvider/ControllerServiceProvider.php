@@ -6,24 +6,31 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Controller\User\InboxController;
+use Mitra\Controller\User\FollowingListController;
+use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
-use Mitra\Controller\User\ReadUserController;
+use Mitra\Controller\User\InboxWriteController;
+use Mitra\Controller\User\OutboxController;
+use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
-use Mitra\Dto\DataToDtoManager;
+use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\DtoToEntityMapper;
-use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Repository\SubscriptionRepository;
+use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGenerator;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Slim\Routing\RouteCollector;
+use Psr\Log\LoggerInterface;
 
 final class ControllerServiceProvider implements ServiceProviderInterface
 {
@@ -44,7 +51,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[TokenProvider::class],
-                $container[RequestToDtoManager::class]
+                $container[RequestToDtoTransformer::class]
             );
         };
 
@@ -54,27 +61,40 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[CommandBusInterface::class],
-                $container[RequestToDtoManager::class],
+                $container[RequestToDtoTransformer::class],
                 $container[DtoToEntityMapper::class]
             );
         };
 
-        $container[ReadUserController::class] = static function (Container $container): ReadUserController {
-            return new ReadUserController(
+        $container[UserReadController::class] = static function (Container $container): UserReadController {
+            return new UserReadController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[InternalUserRepository::class]
             );
         };
 
-        $container[InboxController::class] = static function (Container $container): InboxController {
-            return new InboxController(
+        $container[InboxReadController::class] = static function (Container $container): InboxReadController {
+            return new InboxReadController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
-                $container[RouteCollector::class],
-                $container[DataToDtoManager::class]
+                $container[UriGenerator::class],
+                $container[DataToDtoTransformer::class]
+            );
+        };
+
+        $container[OutboxController::class] = static function (Container $container): OutboxController {
+            return new OutboxController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[CommandBusInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                $container[DecoderInterface::class],
+                $container[DtoToEntityMapper::class],
+                $container[InternalUserRepository::class]
             );
         };
 
@@ -82,7 +102,25 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new WebfingerController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[InternalUserRepository::class]
+                $container[InternalUserRepository::class],
+                $container[UriGenerator::class]
+            );
+        };
+
+        $container[InboxWriteController::class] = static function (Container $container): InboxWriteController {
+            return new InboxWriteController(
+                $container[ResponseFactoryInterface::class],
+                $container[LoggerInterface::class]
+            );
+        };
+
+        $container[FollowingListController::class] = static function (Container $container): FollowingListController {
+            return new FollowingListController(
+                $container[SubscriptionRepository::class],
+                $container[InternalUserRepository::class],
+                $container[UriGenerator::class],
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class]
             );
         };
 

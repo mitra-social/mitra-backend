@@ -34,7 +34,7 @@ final class EntityToDtoMapper
         }
     }
 
-    public function map(object $entity, string $dtoClass, ServerRequestInterface $request): object
+    public function map(object $entity, string $dtoClass): object
     {
         $entityClass = get_class($entity);
 
@@ -48,7 +48,7 @@ final class EntityToDtoMapper
 
         $mappingClass = $this->mappings[$entityClass . $dtoClass];
 
-        return $this->container->get($mappingClass)->toDto($entity, $request);
+        return $this->container->get($mappingClass)->toDto($entity);
     }
 
     /**

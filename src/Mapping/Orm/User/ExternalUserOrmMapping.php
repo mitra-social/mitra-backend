@@ -14,9 +14,14 @@ final class ExternalUserOrmMapping implements ClassMapMappingInterface
      * @return void
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
-        $metadata->setPrimaryTable(['name' => 'user_external']);
+        $metadata->setPrimaryTable([
+            'name' => 'user_external',
+            'uniqueConstraints' => [
+                'UNIQUE_EXTERNAL_USER_ID' => ['columns' => ['external_id']],
+            ],
+        ]);
 
         $metadata->mapField([
             'fieldName' => 'externalId',

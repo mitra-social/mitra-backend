@@ -11,7 +11,7 @@ use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class ReadUserController
+final class UserReadController
 {
     /**
      * @var ResponseFactoryInterface
@@ -41,7 +41,7 @@ final class ReadUserController
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
-        $preferredUsername = $request->getAttribute('preferredUsername');
+        $preferredUsername = $request->getAttribute('username');
 
         if (null === $user = $this->userRepository->findByUsername($preferredUsername)) {
             return $this->responseFactory->createResponse(404);

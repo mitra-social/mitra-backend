@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityPub\Actor;
 
-use Mitra\Dto\Response\ActivityStreams\Actor\PersonDto as ActivityStreamsPerson;
+use Mitra\Dto\Response\ActivityStreams\Actor\PersonDto as ActivityStreamsPersonDto;
 
-class PersonDto extends ActivityStreamsPerson
+class PersonDto extends ActivityStreamsPersonDto implements ActorInterface
 {
     use ActorTrait;
 }

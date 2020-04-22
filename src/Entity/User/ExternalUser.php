@@ -48,6 +48,11 @@ class ExternalUser extends AbstractUser
      */
     private $followers;
 
+    /**
+     * @var null|string
+     */
+    private $url;
+
     public function __construct(
         string $id,
         string $externalId,
@@ -105,8 +110,32 @@ class ExternalUser extends AbstractUser
         $this->followers = $followers;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param string|null $url
+     */
+    public function setUrl(?string $url): void
+    {
+        $this->url = $url;
+    }
+
     public function getPreferredUsername(): ?string
     {
         return $this->preferredUsername;
+    }
+
+    /**
+     * @param string|null $publicKey
+     */
+    public function setPublicKey(?string $publicKey): void
+    {
+        $this->publicKey = $publicKey;
     }
 }

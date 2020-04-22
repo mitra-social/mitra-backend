@@ -55,10 +55,11 @@ final class ActorOrmMapping implements ClassMapMappingInterface
             'id' => true,
             'targetEntity' => AbstractUser::class,
             'inversedBy' => 'actor',
-            'cascade' => ['persist', 'remove'],
+            'cascade' => ['all'],
             'joinColumns' => [
                 [
-                    'name' => 'id',
+                    'name' => 'user_id',
+                    'referencedColumnName' => 'id',
                     'nullable' => false,
                 ]
             ],

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityStreams;
 
-class CollectionDto extends ObjectDto
+class CollectionDto extends ObjectDto implements CollectionInterface
 {
     /**
      * @var string
@@ -39,7 +39,28 @@ class CollectionDto extends ObjectDto
 
     /**
      * Identifies the items contained in a collection. The items might be ordered or unordered.
-     * @var null|array<ObjectDto|LinkDto>
+     * @var null|array<ObjectDto|LinkDto|string>
+     * @return void
      */
     public $items;
+
+    public function setItems(?array $items): void
+    {
+        $this->items = $items;
+    }
+
+    public function setTotalItems(int $totalItems): void
+    {
+        $this->totalItems = $totalItems;
+    }
+
+    public function setFirst($reference): void
+    {
+        $this->first = $reference;
+    }
+
+    public function setLast($reference): void
+    {
+        $this->last = $reference;
+    }
 }

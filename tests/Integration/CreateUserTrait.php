@@ -3,11 +3,16 @@
 namespace Mitra\Tests\Integration;
 
 use Firebase\JWT\JWT;
+use HttpSignatures\Algorithm;
+use HttpSignatures\HeaderList;
+use HttpSignatures\Key;
+use HttpSignatures\Signer;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\InternalUser;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -36,5 +41,14 @@ trait CreateUserTrait
     protected function createTokenForUser(InternalUser $user): string
     {
         return JWT::encode(['userId' => $user->getId()], $this->getContainer()->get('jwt.secret'));
+    }
+
+    protected function signRequest(InternalUser $user, RequestInterface $request): RequestInterface
+    {
+        return (new Signer(
+            new Key(sprintf('http://test.localhost/user/%s#main-key', $user->getUsername()), $user->getPrivateKey()),
+            Algorithm::create('rsa-sha256'),
+            new HeaderList(['(request-target)', 'Host', 'Accept'])
+        ))->sign($request);
     }
 }

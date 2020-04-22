@@ -6,6 +6,7 @@ namespace Mitra\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use Mitra\Entity\User\InternalUser;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class InternalUserRepository
 {
@@ -41,5 +42,16 @@ final class InternalUserRepository
             ->setParameter('userId', $userId);
 
         return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    public function resolveFromRequest(ServerRequestInterface $request): ?InternalUser
+    {
+        $decodedToken = $request->getAttribute('token');
+
+        if (!is_array($decodedToken) || !array_key_exists('userId', $decodedToken)) {
+            return null;
+        }
+
+        return $this->findById($decodedToken['userId']);
     }
 }

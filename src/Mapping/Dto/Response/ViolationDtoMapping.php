@@ -25,11 +25,10 @@ final class ViolationDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|Violation $entity
-     * @param ServerRequestInterface $request
      * @return object|ViolationDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity, ServerRequestInterface $request): object
+    public function toDto(object $entity): object
     {
         if (!$entity instanceof Violation) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());

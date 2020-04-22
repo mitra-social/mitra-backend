@@ -7,7 +7,7 @@ namespace Mitra\Controller\System;
 use Mitra\Authentication\TokenIssueException;
 use Mitra\Authentication\TokenProvider;
 use Mitra\Dto\Request\TokenRequestDto;
-use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Dto\Response\TokenResponseDto;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -39,7 +39,7 @@ final class TokenController
     private $responseFactory;
 
     /**
-     * @var RequestToDtoManager
+     * @var RequestToDtoTransformer
      */
     private $requestToDtoManager;
 
@@ -48,14 +48,14 @@ final class TokenController
      * @param EncoderInterface $encoder
      * @param ValidatorInterface $validator
      * @param TokenProvider $tokenProvider
-     * @param RequestToDtoManager $dataToDtoManager
+     * @param RequestToDtoTransformer $dataToDtoManager
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
         TokenProvider $tokenProvider,
-        RequestToDtoManager $dataToDtoManager
+        RequestToDtoTransformer $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;

@@ -11,19 +11,19 @@ use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
+use Mitra\Slim\UriGenerator;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Interfaces\RouteCollectorInterface;
 
 final class PersonDtoMapping implements EntityToDtoMappingInterface
 {
     /**
-     * @var RouteCollectorInterface
+     * @var UriGenerator
      */
-    private $routeCollector;
+    private $uriGenerator;
 
-    public function __construct(RouteCollectorInterface $routeCollector)
+    public function __construct(UriGenerator $uriGenerator)
     {
-        $this->routeCollector = $routeCollector;
+        $this->uriGenerator = $uriGenerator;
     }
 
     public static function getDtoClass(): string
@@ -38,32 +38,33 @@ final class PersonDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|InternalUser $entity
-     * @param ServerRequestInterface $request
      * @return object|UserResponseDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity, ServerRequestInterface $request): object
+    public function toDto(object $entity): object
     {
         if (!$entity instanceof Person) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
         }
-
-        $routeParser = $this->routeCollector->getRouteParser();
-        $uri = $request->getUri();
 
         $personDto = new PersonDto();
         $user = $entity->getUser();
 
         if ($user instanceof InternalUser) {
             $preferredUsername = $user->getUsername();
-            $personDto->id = $routeParser->fullUrlFor($uri, 'user-read', ['preferredUsername' => $preferredUsername]);
+            $userUrl = $this->uriGenerator->fullUrlFor('user-read', [
+                'username' => $preferredUsername
+            ]);
+
+            $personDto->id = $userUrl;
             $personDto->preferredUsername = $preferredUsername;
-            $personDto->inbox = $routeParser->fullUrlFor($uri, 'user-inbox', [
-                'preferredUsername' => $preferredUsername
+            $personDto->inbox = $this->uriGenerator->fullUrlFor('user-inbox-read', [
+                'username' => $preferredUsername
             ]);
-            $personDto->outbox = $routeParser->fullUrlFor($uri, 'user-inbox', [
-                'preferredUsername' => $preferredUsername
+            $personDto->outbox = $this->uriGenerator->fullUrlFor('user-outbox-read', [
+                'username' => $preferredUsername
             ]);
+            $personDto->url = $userUrl;
         } elseif ($user instanceof ExternalUser) {
             $personDto->id = $user->getExternalId();
             $personDto->preferredUsername = $user->getPreferredUsername();

@@ -28,7 +28,7 @@ final class JsonEncoder implements EncoderInterface
      */
     public function encode($data, string $mimeType): string
     {
-        if ('application/json' !== $mimeType) {
+        if (!$this->supports($mimeType)) {
             throw new UnsupportedMimeTypeException($mimeType);
         }
 
@@ -41,5 +41,10 @@ final class JsonEncoder implements EncoderInterface
         } catch (\JsonException $e) {
             throw new EncoderException(sprintf('Could not encode JSON: %s', $e->getMessage()), 0, $e);
         }
+    }
+
+    public function supports(string $mimeType): bool
+    {
+        return 1 === preg_match('~^application/(?:.+\+)?json$~', $mimeType);
     }
 }

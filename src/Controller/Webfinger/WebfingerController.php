@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Mitra\Controller\Webfinger;
 
 use ActivityPhp\Server;
-use Doctrine\ORM\EntityRepository;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -32,18 +32,20 @@ final class WebfingerController
     private $userRepository;
 
     /**
-     * @param ResponseFactoryInterface $responseFactory
-     * @param EncoderInterface $encoder
-     * @param InternalUserRepository $userRepository
+     * @var UriGenerator
      */
+    private $uriGenerator;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        InternalUserRepository $userRepository
+        InternalUserRepository $userRepository,
+        UriGenerator $uriGenerator
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->userRepository = $userRepository;
+        $this->uriGenerator = $uriGenerator;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -75,11 +77,16 @@ final class WebfingerController
             return $this->responseFactory->createResponse(404);
         }
 
+        $userUrl = $this->uriGenerator->fullUrlFor(
+            'user-read',
+            ['username' => $user->getUsername()]
+        );
+
         $webfinger = new Server\Http\WebFinger(['subject' => $resource, 'aliases' => [], 'links' => [
             [
                 'rel' => 'self',
                 'type' => 'application/activity+json',
-                'href' => 'http://localhost/users/' . $user->getUsername()
+                'href' => $userUrl,
             ]
         ]]);
 

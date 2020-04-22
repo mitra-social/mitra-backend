@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Tests\Integration\Controller\Me;
+namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
-use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 
@@ -14,18 +13,6 @@ use Mitra\Tests\Integration\IntegrationTestCase;
 final class InboxControllerTest extends IntegrationTestCase
 {
     use CreateUserTrait;
-
-    /**
-     * @var CommandBusInterface
-     */
-    private $commandBus;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->commandBus = $this->getContainer()->get(CommandBusInterface::class);
-    }
 
     public function testReturnsForbiddenIfNotLoggedIn(): void
     {
@@ -50,6 +37,20 @@ final class InboxControllerTest extends IntegrationTestCase
         self::assertStatusCode(404, $response);
     }
 
+    public function testReturnsForbiddenForDifferentUser(): void
+    {
+        $user1 = $this->createUser();
+        $user2 = $this->createUser();
+        $token = $this->createTokenForUser($user1);
+
+        $request = $this->createRequest('GET', sprintf('/user/%s/inbox', $user2->getUsername()), null, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(401, $response);
+    }
+
     public function testReturnsInboxAsOrderedCollection(): void
     {
         $user = $this->createUser();
@@ -67,8 +68,8 @@ final class InboxControllerTest extends IntegrationTestCase
             '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'OrderedCollection',
             'totalItems' => 0,
-            'first' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getUsername()),
-            'last' => sprintf('http://localhost/user/%s/inbox?page=0', $user->getUsername()),
+            'first' => sprintf('http://test.localhost/user/%s/inbox?page=0', $user->getUsername()),
+            'last' => sprintf('http://test.localhost/user/%s/inbox?page=0', $user->getUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);
@@ -92,7 +93,7 @@ final class InboxControllerTest extends IntegrationTestCase
             'type' => 'OrderedCollectionPage',
             'totalItems' => 0,
             'orderedItems' => [],
-            'partOf' => sprintf('http://localhost/user/%s/inbox', $user->getUsername()),
+            'partOf' => sprintf('http://test.localhost/user/%s/inbox', $user->getUsername()),
         ];
 
         self::assertEquals($expectedPayload, $actualPayload);

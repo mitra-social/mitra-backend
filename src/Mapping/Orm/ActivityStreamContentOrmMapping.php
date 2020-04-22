@@ -17,7 +17,7 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
      * @return void
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function configureMapping(ClassMetadata $metadata)
+    public function configureMapping(ClassMetadata $metadata): void
     {
         $metadata->setPrimaryTable(['name' => 'activity_stream_content']);
 
@@ -61,7 +61,7 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
             'joinColumns' => [
                 [
                     'name' => 'attributed_to',
-                    'referencedColumnName' => 'id',
+                    'referencedColumnName' => 'user_id',
                     'nullable' => true,
                 ],
             ],

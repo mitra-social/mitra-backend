@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use HttpSignatures\Verifier;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
+use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Log\LoggerInterface;
@@ -44,6 +46,15 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
                 'secret' => $container['jwt.secret'],
                 'logger' => $container[LoggerInterface::class],
             ]);
+        };
+
+        $container[ValidateHttpSignatureMiddleware::class] = static function (
+            Container $container
+        ): ValidateHttpSignatureMiddleware {
+            return new ValidateHttpSignatureMiddleware(
+                $container[Verifier::class],
+                $container[ResponseFactoryInterface::class]
+            );
         };
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityStreams;
 
-final class OrderedCollectionPageDto extends OrderedCollectionDto
+final class OrderedCollectionPageDto extends OrderedCollectionDto implements CollectionPageInterface
 {
     use CollectionPageTrait;
 

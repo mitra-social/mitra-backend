@@ -115,4 +115,9 @@ class LinkDto implements TypeInterface
 
         return $data;
     }
+
+    public function __toString(): string
+    {
+        return $this->href;
+    }
 }
