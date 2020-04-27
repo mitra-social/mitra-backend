@@ -124,9 +124,7 @@ final class SendObjectToRecipientsCommandHandler
                 return null;
             }
 
-            if ($object instanceof ExternalUser || $object instanceof ActorInterface) {
-                return $object->getInbox();
-            }
+            return $object->getInbox();
         } catch (RemoteObjectResolverException $e) {
             $this->logger->notice(sprintf('Could not resolve recipient: %s', $e->getMessage()));
         }
