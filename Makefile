@@ -1,4 +1,4 @@
-.PHONY: clean code-style coverage help test test-unit test-integration static-analysis install-dependencies xdebug-enable xdebug-disable
+.PHONY: clean code-style coverage help test test-unit test-integration static-analysis install-dependencies xdebug-enable xdebug-disable fixtures-load
 .DEFAULT_GOAL := test
 
 PHPUNIT = DATABASE_URL=${DATABASE_URL_TEST} ./vendor/bin/phpunit -c ./phpunit.xml --no-coverage
@@ -23,7 +23,7 @@ test:
 	${PHPUNIT}
 
 test-unit:
-	${PHPSPEC}
+	${PHPSPEC} --no-coverage
 	${PHPUNIT} --group=Unit
 
 test-integration:
@@ -38,6 +38,9 @@ xdebug-enable:
 xdebug-disable:
 	php-ext-disable xdebug
 
+fixtures-load:
+	${CONSOLE} mitra:fixtures:load ./fixtures
+
 help:
 	# Usage:
 	#   make <target> [OPTION=value]
@@ -46,6 +49,7 @@ help:
 	#   clean                     Cleans the coverage and the vendor directory
 	#   code-style                Check codestyle using phpcs
 	#   coverage                  Generate code coverage (html, clover)
+	#   fixtures-load             Load fixtures
 	#   help                      You're looking at it!
 	#   test (default)            Run all the tests with phpunit
 	#   test-unit                 Run all unit tests with phpunit

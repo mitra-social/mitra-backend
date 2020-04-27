@@ -14,4 +14,6 @@ interface EncoderInterface
      * @throws EncoderException
      */
     public function encode($data, string $mimeType): string;
+
+    public function supports(string $mimeType): bool;
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Dto;
 
-final class DataToDtoPopulator
+class DataToDtoPopulator implements DataToDtoPopulatorInterface
 {
 
     /**
@@ -13,7 +13,7 @@ final class DataToDtoPopulator
     private $dtoInstantiator;
 
     /**
-     * @var array|self[]
+     * @var array<callable>
      */
     private $creatorMap = [];
 
@@ -35,10 +35,10 @@ final class DataToDtoPopulator
 
     /**
      * @param string $propertyName
-     * @param DataToDtoPopulator $creator
+     * @param callable $creator
      * @return $this
      */
-    public function map(string $propertyName, self $creator): self
+    public function map(string $propertyName, callable $creator): self
     {
         $this->creatorMap[$propertyName] = $creator;
 
@@ -47,14 +47,11 @@ final class DataToDtoPopulator
 
     /**
      * @param array<mixed> $data
-     * @param object|null $dto
      * @return object
      */
-    public function populate(array $data, object $dto = null): object
+    public function populate(array $data): object
     {
-        if (null === $dto) {
-            $dto = ($this->dtoInstantiator)();
-        }
+        $dto = ($this->dtoInstantiator)();
 
         foreach ($data as $propertyName => $value) {
             if (!isset($data[$propertyName])) {
@@ -67,7 +64,7 @@ final class DataToDtoPopulator
                 continue;
             }
 
-            $dto->$propertyName = $this->creatorMap[$propertyName]->populate($data[$propertyName]);
+            $dto->$propertyName = $this->creatorMap[$propertyName]($data[$propertyName]);
         }
 
         return $dto;

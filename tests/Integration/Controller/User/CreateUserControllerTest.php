@@ -22,7 +22,8 @@ final class CreateUserControllerTest extends IntegrationTestCase
     public function testUserGetsCreatedSuccessfully(): void
     {
         $userData = [
-            'preferredUsername' => 'john.doe',
+            'username' => 'john.doe',
+            'displayName' => 'John Doe',
             'email' => 'john.doe@example.com',
             'password' => 'foobar08',
         ];

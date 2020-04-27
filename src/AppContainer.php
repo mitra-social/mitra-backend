@@ -14,6 +14,7 @@ use Mitra\ServiceProvider\AuthenticationServiceProvider;
 use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\DtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
+use Mitra\ServiceProvider\HttpClientServiceProvider;
 use Mitra\ServiceProvider\HttpServiceProvider;
 use Mitra\ServiceProvider\MonologServiceProvider;
 use Mitra\ServiceProvider\ProxyManagerServiceProvider;
@@ -61,6 +62,7 @@ final class AppContainer
             ->register(new RepositoryServiceProvider())
             ->register(new MonologServiceProvider())
             ->register(new AuthenticationServiceProvider())
+            ->register(new HttpClientServiceProvider())
         ;
 
         return $container;

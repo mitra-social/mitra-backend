@@ -8,19 +8,23 @@ use Mitra\Serialization\UnsupportedMimeTypeException;
 
 final class JsonDecoder implements DecoderInterface
 {
-
     /**
      * @param string $data
      * @param string $mimeType
-     * @return array<mixed>
+     * @return mixed
      * @throws UnsupportedMimeTypeException
      */
-    public function decode(string $data, string $mimeType): array
+    public function decode(string $data, string $mimeType)
     {
-        if ('application/json' !== $mimeType) {
+        if (!$this->supports($mimeType)) {
             throw new UnsupportedMimeTypeException($mimeType);
         }
 
         return json_decode($data, true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    public function supports(string $mimeType): bool
+    {
+        return 1 === preg_match('~^application/(?:.+\+)?json$~', $mimeType);
     }
 }

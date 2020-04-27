@@ -1,0 +1,55 @@
+{
+  "id": "https://mastodon.social/users/pascalmyself/statuses/102476009951658003/activity",
+  "type": "Create",
+  "actor": "https://mastodon.social/users/pascalmyself",
+  "published": "2019-07-20T21:56:59Z",
+  "to": [
+    "https://www.w3.org/ns/activitystreams#Public"
+  ],
+  "cc": [
+    "https://mastodon.social/users/pascalmyself/followers",
+    "https://mastodon.social/users/pixelfed"
+  ],
+  "object": {
+    "id": "https://mastodon.social/users/pascalmyself/statuses/102476009951658003",
+    "type": "Note",
+    "summary": null,
+    "inReplyTo": null,
+    "published": "2019-07-20T21:56:59Z",
+    "url": "https://mastodon.social/@pascalmyself/102476009951658003",
+    "attributedTo": "https://mastodon.social/users/pascalmyself",
+    "to": [
+      "https://www.w3.org/ns/activitystreams#Public"
+    ],
+    "cc": [
+      "https://mastodon.social/users/pascalmyself/followers",
+      "https://mastodon.social/users/pixelfed"
+    ],
+    "sensitive": false,
+    "atomUri": "https://mastodon.social/users/pascalmyself/statuses/102476009951658003",
+    "inReplyToAtomUri": null,
+    "conversation": "tag:mastodon.social,2019-07-20:objectId=115268250:objectType=Conversation",
+    "content": "<p><span class=\"h-card\"><a href=\"https://mastodon.social/@pixelfed\" class=\"u-url mention\">@<span>pixelfed</span></a></span> how can I follow a user on another platform? For example another pixelfed instance or even a mastodon one? I can&apos;t find any remote users on my instance but just the users which are on the same server. But other users from other instances can find me and follow me on my self-hosted instance...</p>",
+    "contentMap": {
+      "en": "<p><span class=\"h-card\"><a href=\"https://mastodon.social/@pixelfed\" class=\"u-url mention\">@<span>pixelfed</span></a></span> how can I follow a user on another platform? For example another pixelfed instance or even a mastodon one? I can&apos;t find any remote users on my instance but just the users which are on the same server. But other users from other instances can find me and follow me on my self-hosted instance...</p>"
+    },
+    "attachment": [],
+    "tag": [
+      {
+        "type": "Mention",
+        "href": "https://mastodon.social/users/pixelfed",
+        "name": "@pixelfed"
+      }
+    ],
+    "replies": {
+      "id": "https://mastodon.social/users/pascalmyself/statuses/102476009951658003/replies",
+      "type": "Collection",
+      "first": {
+        "type": "CollectionPage",
+        "next": "https://mastodon.social/users/pascalmyself/statuses/102476009951658003/replies?only_other_accounts=true&page=true",
+        "partOf": "https://mastodon.social/users/pascalmyself/statuses/102476009951658003/replies",
+        "items": []
+      }
+    }
+  }
+}

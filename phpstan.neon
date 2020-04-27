@@ -1,4 +1,5 @@
 includes:
+  - vendor/phpstan/phpstan-webmozart-assert/extension.neon
   - vendor/phpstan/phpstan-strict-rules/rules.neon
   - vendor/phpstan/phpstan-deprecation-rules/rules.neon
 
@@ -8,7 +9,14 @@ parameters:
   paths:
     - src
   ignoreErrors:
-    - '#Variable property access on mixed.#'
+    -
+      message: '#Variable property access on mixed.#'
+      paths:
+        - src/Dto/Populator/ActivityPubDtoPopulator.php
+        - src/Dto/DataToDtoPopulator.php
+    -
+      message: '#Parameter \#2 \$handler of method Slim\\Middleware\\ErrorMiddleware::setErrorHandler\(\) expects callable\(\): mixed, ''.+?'' given\.#'
+      path: src/AppFactory.php
 
 rules:
   - Ergebnis\PHPStan\Rules\Expressions\NoEmptyRule

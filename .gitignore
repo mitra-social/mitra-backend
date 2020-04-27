@@ -1,4 +1,5 @@
 .idea/
-vendor/
 build/
+var/
+vendor/
 .phpunit.result.cache

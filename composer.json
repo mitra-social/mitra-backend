@@ -4,11 +4,15 @@
   "repositories": [
     {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/php-env.git"},
     {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/activitypub.git"},
-    {"type": "vcs", "no-api": true, "url": "https://github.com/mitra-social/activity-streams.git"}
+    {"type": "vcs", "no-api": true, "url": "https://github.com/TiMESPLiNTER/phpstan-webmozart-assert.git"},
+    {"type": "vcs", "no-api": true, "url": "https://github.com/TiMESPLiNTER/slim-jwt-auth.git"}
   ],
   "require": {
     "php": ">=7.3",
     "ext-json": "*",
+    "ext-openssl": "*",
+    "ext-posix": "*",
+    "ext-pcntl": "*",
     "cache/array-adapter": "^1.0",
     "chubbyphp/chubbyphp-config": "^2.1",
     "chubbyphp/chubbyphp-doctrine-db-service-provider": "^1.6.1",
@@ -16,9 +20,9 @@
     "doctrine/migrations": "^2.1.1",
     "doctrine/orm": "^2.7.1",
     "landrok/activitypub": "dev-improvements-destatized@dev",
-    "league/tactician": "2.0-rc1",
+    "league/tactician": "dev-master@dev",
+    "league/tactician-doctrine": "dev-master@dev",
     "mitra-social/php-env": "dev-master@dev",
-    "mitra-social/activity-streams": "dev-master@dev",
     "monolog/monolog": "^2.0.2",
     "pimple/pimple": "^3.2.3",
     "ramsey/uuid": "^3.9.2",
@@ -28,7 +32,11 @@
     "slim/psr7": "^1.0",
     "slim/slim": "^4.4.0",
     "symfony/validator": "^5.0.4",
-    "tuupola/slim-jwt-auth": "^3.4"
+    "tuupola/slim-jwt-auth": "dev-fix/respect-x-forwarded-proto-header@dev",
+    "kriswallsmith/buzz": "^1.1",
+    "webmozart/assert": "^1.7.0",
+    "willdurand/negotiation": "^2.3",
+    "liamdennehy/http-signatures-php": "^10.0"
   },
   "require-dev": {
     "ergebnis/phpstan-rules": "^0.14.3",
@@ -40,11 +48,18 @@
     "squizlabs/php_codesniffer": "^3.5.4",
     "friends-of-phpspec/phpspec-code-coverage": "^4.3",
     "cache/void-adapter": "^1.0",
-    "rregeer/phpunit-coverage-check": "^0.3.1"
+    "rregeer/phpunit-coverage-check": "^0.3.1",
+    "doctrine/data-fixtures": "^1.4.2",
+    "phpstan/phpstan-webmozart-assert": "dev-support-isinstanceofany@dev"
   },
   "autoload": {
     "psr-4": {
       "Mitra\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Mitra\\Fixtures\\": "fixtures/"
     }
   }
 }

@@ -8,6 +8,7 @@ use Mitra\Dto\Response\ViolationDto;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 use Mitra\Validator\Violation;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class ViolationDtoMapping implements EntityToDtoMappingInterface
 {

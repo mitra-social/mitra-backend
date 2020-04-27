@@ -10,6 +10,7 @@ use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ViolationListInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseFactoryInterface as PsrResponseFactoryInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFactoryInterface
 {
@@ -56,24 +57,28 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
 
     /**
      * @param ViolationListInterface $violationList
+     * @param ServerRequestInterface $request
      * @param string $mimeType
      * @return ResponseInterface
      */
     public function createResponseFromViolationList(
         ViolationListInterface $violationList,
+        ServerRequestInterface $request,
         string $mimeType
     ): ResponseInterface {
-        return $this->createResponseFromEntity($violationList, ViolationListDto::class, $mimeType, 400);
+        return $this->createResponseFromEntity($violationList, ViolationListDto::class, $request, $mimeType, 400);
     }
 
     public function createResponseFromEntity(
         object $entity,
         string $dtoClass,
+        ServerRequestInterface $request,
         string $mimeType,
         int $code = 200
     ): ResponseInterface {
         $dto = $this->entityToDtoMapper->map($entity, $dtoClass);
-        $response = $this->responseFactory->createResponse($code);
+        $response = $this->responseFactory->createResponse($code)
+            ->withHeader('Content-Type', $mimeType);
 
         $response->getBody()->write($this->encoder->encode($dto, $mimeType));
 

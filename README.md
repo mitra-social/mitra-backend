@@ -31,6 +31,14 @@ $ ssh-keygen
 $ cd docker && docker-compose up
 ```
 
+### Fixtures
+
+⚠️ The database will be purged before the fixtures are loaded into it
+
+```
+$ make fixtures-load
+```
+
 ### Code style
 ```
 $ make code-style

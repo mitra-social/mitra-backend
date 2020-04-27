@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Mitra\Mapping\Dto\Request;
 
 use Mitra\Dto\Request\CreateUserRequestDto;
-use Mitra\Entity\User;
+use Mitra\Entity\Actor\Person;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\DtoToEntityMappingInterface;
 use Mitra\Mapping\Dto\InvalidDtoException;
 use Ramsey\Uuid\Uuid;
@@ -19,12 +20,12 @@ final class CreateUserRequestDtoMapping implements DtoToEntityMappingInterface
 
     public static function getEntityClass(): string
     {
-        return User::class;
+        return InternalUser::class;
     }
 
     /**
      * @param object|CreateUserRequestDto $dto
-     * @return object|User
+     * @return object|InternalUser
      * @throws \Exception
      */
     public function toEntity(object $dto): object
@@ -33,9 +34,13 @@ final class CreateUserRequestDtoMapping implements DtoToEntityMappingInterface
             throw InvalidDtoException::fromDto($dto, static::getDtoClass());
         }
 
-        $user = new User(Uuid::uuid4()->toString(), $dto->preferredUsername, $dto->email);
-
+        $user = new InternalUser(Uuid::uuid4()->toString(), $dto->username, $dto->email);
         $user->setPlaintextPassword($dto->password);
+
+        $actor = new Person($user);
+        $actor->setName($dto->displayName);
+
+        $user->setActor($actor);
 
         return $user;
     }

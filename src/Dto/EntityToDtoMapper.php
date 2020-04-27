@@ -6,6 +6,7 @@ namespace Mitra\Dto;
 
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class EntityToDtoMapper
 {

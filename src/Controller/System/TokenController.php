@@ -7,7 +7,7 @@ namespace Mitra\Controller\System;
 use Mitra\Authentication\TokenIssueException;
 use Mitra\Authentication\TokenProvider;
 use Mitra\Dto\Request\TokenRequestDto;
-use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Dto\Response\TokenResponseDto;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -39,7 +39,7 @@ final class TokenController
     private $responseFactory;
 
     /**
-     * @var RequestToDtoManager
+     * @var RequestToDtoTransformer
      */
     private $requestToDtoManager;
 
@@ -48,14 +48,14 @@ final class TokenController
      * @param EncoderInterface $encoder
      * @param ValidatorInterface $validator
      * @param TokenProvider $tokenProvider
-     * @param RequestToDtoManager $dataToDtoManager
+     * @param RequestToDtoTransformer $dataToDtoManager
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
         TokenProvider $tokenProvider,
-        RequestToDtoManager $dataToDtoManager
+        RequestToDtoTransformer $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
@@ -66,15 +66,13 @@ final class TokenController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        if ('' === $mimeType = $request->getHeaderLine('Accept')) {
-            $mimeType = 'application/json';
-        }
+        $accept = $request->getAttribute('accept');
 
         /** @var TokenRequestDto $tokenRequestDto */
         $tokenRequestDto = $this->requestToDtoManager->fromRequest($request, TokenRequestDto::class);
 
         if (($violationList = $this->validator->validate($tokenRequestDto))->hasViolations()) {
-            return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
+            return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
         try {
@@ -85,7 +83,7 @@ final class TokenController
 
             $response = $this->responseFactory->createResponse(201);
 
-            $response->getBody()->write($this->encoder->encode($tokenResponseDto, $mimeType));
+            $response->getBody()->write($this->encoder->encode($tokenResponseDto, $accept));
         } catch (TokenIssueException $e) {
             $response = $this->responseFactory->createResponse(401);
         }

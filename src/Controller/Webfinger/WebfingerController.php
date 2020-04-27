@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Mitra\Controller\Webfinger;
 
 use ActivityPhp\Server;
-use Doctrine\ORM\EntityRepository;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
+use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -26,23 +27,25 @@ final class WebfingerController
     private $encoder;
 
     /**
-     * @var EntityRepository
+     * @var InternalUserRepository
      */
     private $userRepository;
 
     /**
-     * @param ResponseFactoryInterface $responseFactory
-     * @param EncoderInterface $encoder
-     * @param EntityRepository $userRepository
+     * @var UriGenerator
      */
+    private $uriGenerator;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        EntityRepository $userRepository
+        InternalUserRepository $userRepository,
+        UriGenerator $uriGenerator
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
         $this->userRepository = $userRepository;
+        $this->uriGenerator = $uriGenerator;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -67,18 +70,23 @@ final class WebfingerController
 
         $preferredUsername = $handleParts[0];
 
-        /** @var User|null $user */
-        $user = $this->userRepository->findOneBy(['preferredUsername' => $preferredUsername]);
+        /** @var InternalUser|null $user */
+        $user = $this->userRepository->findByUsername($preferredUsername);
 
         if (null === $user) {
             return $this->responseFactory->createResponse(404);
         }
 
+        $userUrl = $this->uriGenerator->fullUrlFor(
+            'user-read',
+            ['username' => $user->getUsername()]
+        );
+
         $webfinger = new Server\Http\WebFinger(['subject' => $resource, 'aliases' => [], 'links' => [
             [
                 'rel' => 'self',
                 'type' => 'application/activity+json',
-                'href' => 'http://localhost/users/' . $user->getPreferredUsername()
+                'href' => $userUrl,
             ]
         ]]);
 

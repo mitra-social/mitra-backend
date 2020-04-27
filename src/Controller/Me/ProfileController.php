@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Mitra\Controller\Me;
 
 use Mitra\Dto\Response\UserResponseDto;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Repository\UserRepository;
+use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -26,14 +26,14 @@ final class ProfileController
     private $encoder;
 
     /**
-     * @var UserRepository
+     * @var InternalUserRepository
      */
     private $userRepository;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        UserRepository $userRepository
+        InternalUserRepository $userRepository
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
@@ -42,19 +42,16 @@ final class ProfileController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        if ('' === $mimeType = $request->getHeaderLine('Accept')) {
-            $mimeType = 'application/json';
-        }
-
+        $accept = $request->getAttribute('accept');
         $userId = $request->getAttribute('token')['userId'];
 
-        /** @var User|null $user */
-        $user = $this->userRepository->find($userId);
+        /** @var InternalUser|null $user */
+        $user = $this->userRepository->findById($userId);
 
         if (null === $user) {
             return $this->responseFactory->createResponse(404);
         }
 
-        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $mimeType);
+        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $request, $accept);
     }
 }

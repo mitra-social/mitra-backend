@@ -9,6 +9,7 @@ use Mitra\Dto\Response\ViolationListDto;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 use Mitra\Validator\ViolationList;
+use Psr\Http\Message\ServerRequestInterface;
 use Webmozart\Assert\Assert;
 
 final class ViolationListDtoMapping implements EntityToDtoMappingInterface

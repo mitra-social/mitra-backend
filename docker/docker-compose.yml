@@ -25,6 +25,7 @@ services:
       DATABASE_URL: postgres://mitra:mitra@postgresql:5432/mitra
       DATABASE_URL_TEST: postgres://mitra:mitra@postgresql:5432/mitra-test
       JWT_SECRET: s3kr3T!
+      BASE_URL: 'http://localhost:1337'
     ports:
       - 1337:1337
     volumes:

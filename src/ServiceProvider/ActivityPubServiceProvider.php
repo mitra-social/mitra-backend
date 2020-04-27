@@ -8,10 +8,19 @@ use ActivityPhp\Server;
 use ActivityPhp\Type\TypeResolver;
 use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
-use Mitra\CommandBus\Handler\CreateUserCommandHandler;
+use Mitra\ActivityPub\Client\ActivityPubClient;
+use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\Resolver\ExternalUserResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
+use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Repository\ExternalUserRepository;
+use Mitra\Serialization\Decode\DecoderInterface;
+use Mitra\Serialization\Encode\EncoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 final class ActivityPubServiceProvider implements ServiceProviderInterface
 {
@@ -53,12 +62,29 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
                 $config
             );
         };
-    }
 
-    private function registerHandlers(Container $container): void
-    {
-        $container[CreateUserCommandHandler::class] = function () use ($container): CreateUserCommandHandler {
-            return new CreateUserCommandHandler($container['doctrine.orm.em']);
+        $container[ActivityPubClientInterface::class] = static function (
+            Container $container
+        ): ActivityPubClientInterface {
+            return new ActivityPubClient(
+                $container['api_http_client'],
+                $container[RequestFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[DecoderInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                $container[LoggerInterface::class]
+            );
+        };
+
+        $container[RemoteObjectResolver::class] = static function (Container $container): RemoteObjectResolver {
+            return new RemoteObjectResolver($container[ActivityPubClientInterface::class]);
+        };
+
+        $container[ExternalUserResolver::class] = static function (Container $container): ExternalUserResolver {
+            return new ExternalUserResolver(
+                $container[RemoteObjectResolver::class],
+                $container[ExternalUserRepository::class]
+            );
         };
     }
 }

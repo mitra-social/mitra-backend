@@ -14,8 +14,8 @@ RUN apk --no-cache upgrade && \
 COPY php/prod/files/bin/ /usr/local/bin/
 
 # PHP: Install php extensions
-RUN docker-php-ext-install pdo_mysql opcache > /dev/null 2>&1 && \
-    docker-php-ext-enable pdo_mysql opcache > /dev/null 2>&1
+RUN docker-php-ext-install pdo_mysql opcache posix pcntl > /dev/null 2>&1 && \
+    docker-php-ext-enable pdo_mysql opcache posix pcntl  > /dev/null 2>&1
 
 RUN adduser -u $HOST_USER_ID -D -H $HOST_USER
 

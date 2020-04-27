@@ -22,7 +22,7 @@ final class CreateUserRequestDtoValidationMapping implements ValidationMappingIn
     public function configureMapping(ClassMetadata $metadata)
     {
         $metadata
-            ->addPropertyConstraints('preferredUsername', [
+            ->addPropertyConstraints('username', [
                 new Type('string'),
                 new NotNull(),
                 new NotBlank(),
@@ -38,6 +38,11 @@ final class CreateUserRequestDtoValidationMapping implements ValidationMappingIn
                 new Type('string'),
                 new NotNull(),
                 new Length(['min' => 8])
+            ])
+            ->addPropertyConstraints('displayName', [
+                new Type('string'),
+                new NotBlank(),
+                new Length(['min' => 3])
             ])
         ;
     }

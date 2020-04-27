@@ -8,15 +8,14 @@ use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
-use Mitra\Dto\RequestToDtoManager;
+use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Dto\Response\UserResponseDto;
-use Mitra\Entity\User;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Ramsey\Uuid\Uuid;
 
 final class CreateUserController
 {
@@ -42,7 +41,7 @@ final class CreateUserController
     private $responseFactory;
 
     /**
-     * @var RequestToDtoManager
+     * @var RequestToDtoTransformer
      */
     private $requestToDtoManager;
 
@@ -51,20 +50,12 @@ final class CreateUserController
      */
     private $dtoToEntityMapper;
 
-    /**
-     * @param ResponseFactoryInterface $responseFactory
-     * @param EncoderInterface $encoder
-     * @param ValidatorInterface $validator
-     * @param CommandBusInterface $commandBus
-     * @param RequestToDtoManager $dataToDtoManager
-     * @param DtoToEntityMapper $dtoToEntityMapper
-     */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
         CommandBusInterface $commandBus,
-        RequestToDtoManager $dataToDtoManager,
+        RequestToDtoTransformer $dataToDtoManager,
         DtoToEntityMapper $dtoToEntityMapper
     ) {
         $this->responseFactory = $responseFactory;
@@ -77,22 +68,20 @@ final class CreateUserController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        if ('' === $mimeType = $request->getHeaderLine('Accept')) {
-            $mimeType = 'application/json';
-        }
+        $accept = $request->getAttribute('accept');
 
         /** @var CreateUserRequestDto $createUserRequestDto */
         $createUserRequestDto = $this->requestToDtoManager->fromRequest($request, CreateUserRequestDto::class);
 
         if (($violationList = $this->validator->validate($createUserRequestDto))->hasViolations()) {
-            return $this->responseFactory->createResponseFromViolationList($violationList, $mimeType);
+            return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
-        /** @var User $user */
-        $user = $this->dtoToEntityMapper->map($createUserRequestDto, User::class);
+        /** @var InternalUser $user */
+        $user = $this->dtoToEntityMapper->map($createUserRequestDto, InternalUser::class);
 
         $this->commandBus->handle(new CreateUserCommand($user));
 
-        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $mimeType, 201);
+        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $request, $accept, 201);
     }
 }

@@ -13,8 +13,8 @@ RUN npm install -g nodemon --no-optional
 COPY prod/files/bin/ /usr/local/bin/
 
 # PHP: Install php extensions
-RUN docker-php-ext-install pdo_pgsql opcache > /dev/null 2>&1 && \
-    docker-php-ext-enable pdo_pgsql opcache > /dev/null 2>&1
+RUN docker-php-ext-install pdo_pgsql opcache posix pcntl > /dev/null 2>&1 && \
+    docker-php-ext-enable pdo_pgsql opcache posix pcntl > /dev/null 2>&1
 
 RUN adduser -u $HOST_USER_ID -D -H $HOST_USER
 

@@ -6,6 +6,7 @@ namespace Mitra\Http\Message;
 
 use Mitra\Validator\ViolationListInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface ResponseFactoryInterface
 {
@@ -13,12 +14,14 @@ interface ResponseFactoryInterface
 
     public function createResponseFromViolationList(
         ViolationListInterface $violationList,
+        ServerRequestInterface $request,
         string $mimeType
     ): ResponseInterface;
 
     public function createResponseFromEntity(
         object $entity,
         string $dtoClass,
+        ServerRequestInterface $request,
         string $mimeType,
         int $code = 200
     ): ResponseInterface;
