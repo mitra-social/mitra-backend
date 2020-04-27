@@ -6,11 +6,12 @@ namespace Mitra\CommandBus\Handler\ActivityPub;
 
 use Mitra\ActivityPub\Client\ActivityPubClientException;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
-use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
+use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolverException;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Entity\User\ExternalUser;
 use Mitra\Slim\UriGenerator;
 use Psr\Log\LoggerInterface;
 
@@ -22,9 +23,9 @@ final class SendObjectToRecipientsCommandHandler
     private $activityPubClient;
 
     /**
-     * @var RemoteObjectResolver
+     * @var ExternalUserResolver
      */
-    private $remoteObjectResolver;
+    private $externalUserResolver;
 
     /**
      * @var UriGenerator
@@ -38,12 +39,12 @@ final class SendObjectToRecipientsCommandHandler
 
     public function __construct(
         ActivityPubClientInterface $activityPubClient,
-        RemoteObjectResolver $remoteObjectResolver,
+        ExternalUserResolver $externalUserResolver,
         UriGenerator $uriGenerator,
         LoggerInterface $logger
     ) {
         $this->activityPubClient = $activityPubClient;
-        $this->remoteObjectResolver = $remoteObjectResolver;
+        $this->externalUserResolver = $externalUserResolver;
         $this->uriGenerator = $uriGenerator;
         $this->logger = $logger;
     }
@@ -119,11 +120,13 @@ final class SendObjectToRecipientsCommandHandler
     private function resolveRemoteObjectInboxUrl($recipient): ?string
     {
         try {
-            if (null === $object = $this->remoteObjectResolver->resolve($recipient)) {
+            if (null === $object = $this->externalUserResolver->resolve($recipient)) {
                 return null;
             }
 
-            return $object instanceof ActorInterface ? $object->getInbox() : null;
+            if ($object instanceof ExternalUser || $object instanceof ActorInterface) {
+                return $object->getInbox();
+            }
         } catch (RemoteObjectResolverException $e) {
             $this->logger->notice(sprintf('Could not resolve recipient: %s', $e->getMessage()));
         }

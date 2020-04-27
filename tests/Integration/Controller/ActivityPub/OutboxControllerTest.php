@@ -68,18 +68,17 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $objectAndToResponse->getBody()->write($objectAndToResponseBody);
 
-        $request1 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request2 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request3 = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
+        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $externalUserId);
+        $requestSendFollowToRecipient = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
             ->withHeader('Host', 'example.com')
             ->withHeader('Accept', 'application/activity+json');
 
-        $request3 = $this->signRequest($followingUser, $request3);
+        $requestSendFollowToRecipient = $this->signRequest($followingUser, $requestSendFollowToRecipient);
 
         /** @var EncoderInterface $encoder */
         $encoder = $this->getContainer()->get(EncoderInterface::class);
 
-        $request3->getBody()->write($encoder->encode([
+        $requestSendFollowToRecipient->getBody()->write($encoder->encode([
             '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'Follow',
             'object' => $objectAndTo->id,
@@ -89,15 +88,11 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $apiHttpClientMock = $this->getClientMock([
             [
-                $request1,
+                $requestResolveExternalActor,
                 $objectAndToResponse,
             ],
             [
-                $request2,
-                $objectAndToResponse,
-            ],
-            [
-                $request3,
+                $requestSendFollowToRecipient,
                 self::$responseFactory->createResponse(201),
             ],
         ]);
@@ -112,6 +107,97 @@ final class OutboxControllerTest extends IntegrationTestCase
         $request = $this->createRequest('POST', sprintf('/user/%s/outbox', $followingUser->getUsername()), $body, [
             'Authorization' => sprintf('Bearer %s', $token)
         ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(201, $response);
+
+        /** @var ExternalUserRepository $externalUserRepository */
+        $externalUserRepository = $this->getContainer()->get(ExternalUserRepository::class);
+
+        $followedUser = $externalUserRepository->findOneByExternalId($externalUserId);
+
+        self::assertNotNull($followedUser);
+
+        /** @var SubscriptionRepository $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+
+        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+
+        self::assertNotNull($subscription);
+    }
+
+    public function testFollowingSameUserSecondTimeDoesNothing(): void
+    {
+        $followingUser = $this->createUser();
+
+        $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
+        $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
+
+        $objectAndTo = new PersonDto();
+        $objectAndTo->id = $externalUserId;
+        $objectAndTo->inbox = $externalUserId . '/inbox';
+        $objectAndTo->outbox = $externalUserId . '/outbox';
+
+        $objectAndToResponseBody = sprintf(
+            '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s"}',
+            $externalUserId,
+            $objectAndTo->inbox,
+            $objectAndTo->outbox
+        );
+
+        $objectAndToResponse = self::$responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'application/activity+json');
+
+        $objectAndToResponse->getBody()->write($objectAndToResponseBody);
+
+        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $externalUserId);
+        $requestSendFollowToRecipient = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
+            ->withHeader('Host', 'example.com')
+            ->withHeader('Accept', 'application/activity+json');
+
+        $requestSendFollowToRecipient = $this->signRequest($followingUser, $requestSendFollowToRecipient);
+
+        /** @var EncoderInterface $encoder */
+        $encoder = $this->getContainer()->get(EncoderInterface::class);
+
+        $requestSendFollowToRecipient->getBody()->write($encoder->encode([
+            '@context' => 'https://www.w3.org/ns/activitystreams',
+            'type' => 'Follow',
+            'object' => $objectAndTo->id,
+            'actor' => $actorId,
+            'to' => $objectAndTo->id,
+        ], 'application/json'));
+
+        $apiHttpClientMock = $this->getClientMock([
+            [
+                $requestResolveExternalActor,
+                $objectAndToResponse,
+            ],
+            [
+                $requestSendFollowToRecipient,
+                self::$responseFactory->createResponse(201),
+            ],
+            [
+                $requestSendFollowToRecipient,
+                self::$responseFactory->createResponse(201),
+            ],
+        ]);
+
+        $this->getContainer()->get('api_http_client')->setMock($apiHttpClientMock);
+
+        $body = '{"@context": "https://www.w3.org/ns/activitystreams","type": "Follow", ' .
+            '"to": "' . $externalUserId . '", "object": "' . $externalUserId . '"}';
+
+        $token = $this->createTokenForUser($followingUser);
+
+        $request = $this->createRequest('POST', sprintf('/user/%s/outbox', $followingUser->getUsername()), $body, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(201, $response);
+
+        // Follow same actor again
         $response = $this->executeRequest($request);
 
         self::assertStatusCode(201, $response);
@@ -156,13 +242,12 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $objectAndToResponse->getBody()->write($objectAndToResponseBody);
 
-        $request1 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request2 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request3 = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
+        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $externalUserId);
+        $requestSendUnfollowToRecipient = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
             ->withHeader('Host', 'example.com')
             ->withHeader('Accept', 'application/activity+json');
 
-        $request3 = $this->signRequest($followingUser, $request3);
+        $requestSendUnfollowToRecipient = $this->signRequest($followingUser, $requestSendUnfollowToRecipient);
 
         /** @var EncoderInterface $encoder */
         $encoder = $this->getContainer()->get(EncoderInterface::class);
@@ -171,7 +256,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         $followDto->to = $objectAndTo->id;
         $followDto->object = $objectAndTo->id;
 
-        $request3->getBody()->write($encoder->encode([
+        $requestSendUnfollowToRecipient->getBody()->write($encoder->encode([
             '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'Undo',
             'object' => [
@@ -185,15 +270,11 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $apiHttpClientMock = $this->getClientMock([
             [
-                $request1,
+                $requestResolveExternalActor,
                 $objectAndToResponse,
             ],
             [
-                $request2,
-                $objectAndToResponse,
-            ],
-            [
-                $request3,
+                $requestSendUnfollowToRecipient,
                 self::$responseFactory->createResponse(201),
             ],
         ]);

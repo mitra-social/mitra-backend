@@ -65,7 +65,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
         ): SendObjectToRecipientsCommandHandler {
             return new SendObjectToRecipientsCommandHandler(
                 $container[ActivityPubClientInterface::class],
-                $container[RemoteObjectResolver::class],
+                $container[ExternalUserResolver::class],
                 $container[UriGenerator::class],
                 $container[LoggerInterface::class]
             );
