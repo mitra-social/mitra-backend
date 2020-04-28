@@ -7,7 +7,6 @@ namespace Mitra\ActivityPub\Resolver;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
-use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\ExternalUser;
