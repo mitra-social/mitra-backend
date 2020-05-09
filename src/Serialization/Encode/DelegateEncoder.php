@@ -25,10 +25,7 @@ final class DelegateEncoder implements EncoderInterface
     {
         foreach ($this->encoders as $encoder) {
             if ($encoder->supports($mimeType)) {
-                return $encoder->encode(
-                    $this->deepNormalization($data),
-                    $mimeType
-                );
+                return $encoder->encode($data, $mimeType);
             }
         }
 
@@ -38,38 +35,6 @@ final class DelegateEncoder implements EncoderInterface
     public function addEncoder(string $mimeType, EncoderInterface $encoder): void
     {
         $this->encoders[$mimeType] = $encoder;
-    }
-
-    /**
-     * @param mixed $data
-     * @return mixed
-     */
-    private function deepNormalization($data)
-    {
-        if (null === $data || is_scalar($data)) {
-            return $data;
-        }
-
-        if (is_object($data)) {
-            $normalizedData = $data instanceof ArrayNormalizable ? $data->toArray() : $this->convertToArray($data);
-        } else {
-            $normalizedData = $data;
-        }
-
-        foreach ($normalizedData as $propertyName => $value) {
-            $normalizedData[$propertyName] = $this->deepNormalization($value);
-        }
-
-        return $normalizedData;
-    }
-
-    /**
-     * @param object $data
-     * @return array<mixed>
-     */
-    private function convertToArray(object $data): array
-    {
-        return get_object_vars($data);
     }
 
     public function supports(string $mimeType): bool

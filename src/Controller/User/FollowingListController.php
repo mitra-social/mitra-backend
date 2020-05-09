@@ -36,10 +36,9 @@ final class FollowingListController extends AbstractCollectionController
         SubscriptionRepository $subscriptionRepository,
         InternalUserRepository $internalUserRepository,
         UriGenerator $uriGenerator,
-        ResponseFactoryInterface $responseFactory,
-        EncoderInterface $encoder
+        ResponseFactoryInterface $responseFactory
     ) {
-        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $encoder);
+        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory);
 
         $this->subscriptionRepository = $subscriptionRepository;
         $this->uriGenerator = $uriGenerator;

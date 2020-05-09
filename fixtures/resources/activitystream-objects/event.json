@@ -1,5 +1,6 @@
 {
   "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://example.com/content/3698702c-1d75-4d72-9b3a-7fb918d13343",
   "type": "Event",
   "name": "Going-Away Party for Jim",
   "startTime": "2014-12-31T23:00:00-08:00",

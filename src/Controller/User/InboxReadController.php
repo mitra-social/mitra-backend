@@ -31,13 +31,12 @@ final class InboxReadController extends AbstractOrderedCollectionController
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        EncoderInterface $encoder,
         InternalUserRepository $internalUserRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
         UriGenerator $uriGenerator,
         DataToDtoTransformer $dataToDtoManager
     ) {
-        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $encoder);
+        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory);
 
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->dataToDtoTransformer = $dataToDtoManager;

@@ -13,7 +13,7 @@ use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\InboxWriteController;
-use Mitra\Controller\User\OutboxController;
+use Mitra\Controller\User\OutboxWriteController;
 use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Mitra\Dto\DataToDtoTransformer;
@@ -48,7 +48,6 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[TokenController::class] = static function (Container $container): TokenController {
             return new TokenController(
                 $container[ResponseFactoryInterface::class],
-                $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[TokenProvider::class],
                 $container[RequestToDtoTransformer::class]
@@ -77,7 +76,6 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[InboxReadController::class] = static function (Container $container): InboxReadController {
             return new InboxReadController(
                 $container[ResponseFactoryInterface::class],
-                $container[EncoderInterface::class],
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
                 $container[UriGenerator::class],
@@ -85,8 +83,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[OutboxController::class] = static function (Container $container): OutboxController {
-            return new OutboxController(
+        $container[OutboxWriteController::class] = static function (Container $container): OutboxWriteController {
+            return new OutboxWriteController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
@@ -119,8 +117,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[SubscriptionRepository::class],
                 $container[InternalUserRepository::class],
                 $container[UriGenerator::class],
-                $container[ResponseFactoryInterface::class],
-                $container[EncoderInterface::class]
+                $container[ResponseFactoryInterface::class]
             );
         };
 

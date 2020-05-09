@@ -25,7 +25,7 @@ use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class OutboxController
+final class OutboxWriteController
 {
 
     /**

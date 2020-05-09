@@ -10,6 +10,7 @@ use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Http\Message\ResponseFactory;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Http\Signature\HttpKeyStore;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -31,6 +32,7 @@ final class HttpServiceProvider implements ServiceProviderInterface
         $container[ResponseFactoryInterface::class] = static function (Container $container): ResponseFactoryInterface {
             return new ResponseFactory(
                 new PsrResponseFactory(),
+                $container[NormalizerInterface::class],
                 $container[EncoderInterface::class],
                 $container[EntityToDtoMapper::class]
             );

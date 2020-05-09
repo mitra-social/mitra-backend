@@ -13,6 +13,7 @@ use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -69,6 +70,7 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             return new ActivityPubClient(
                 $container['api_http_client'],
                 $container[RequestFactoryInterface::class],
+                $container[NormalizerInterface::class],
                 $container[EncoderInterface::class],
                 $container[DecoderInterface::class],
                 $container[ActivityPubDtoPopulator::class],

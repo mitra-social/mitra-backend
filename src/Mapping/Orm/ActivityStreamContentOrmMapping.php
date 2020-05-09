@@ -19,7 +19,12 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
      */
     public function configureMapping(ClassMetadata $metadata): void
     {
-        $metadata->setPrimaryTable(['name' => 'activity_stream_content']);
+        $metadata->setPrimaryTable([
+            'name' => 'activity_stream_content',
+            'uniqueConstraints' => [
+                'UNIQUE_EXTERNAL_CONTENT_ID' => ['columns' => ['external_id_hash', 'external_id']],
+            ],
+        ]);
 
         $metadata->mapField([
             'fieldName' => 'id',
@@ -28,6 +33,22 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
             'id' => true,
             'strategy' => 'none',
             'unique' => true,
+        ]);
+
+        $metadata->mapField([
+            'fieldName' => 'externalId',
+            'columnName' => 'external_id',
+            'type' => 'string',
+            'length' => 255,
+            'nullable' => false,
+        ]);
+
+        $metadata->mapField([
+            'fieldName' => 'externalIdHash',
+            'columnName' => 'external_id_hash',
+            'type' => 'string',
+            'length' => 64,
+            'nullable' => false,
         ]);
 
         $metadata->mapField([

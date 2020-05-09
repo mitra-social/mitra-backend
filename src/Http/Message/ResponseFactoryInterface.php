@@ -25,4 +25,11 @@ interface ResponseFactoryInterface
         string $mimeType,
         int $code = 200
     ): ResponseInterface;
+
+    public function createResponseFromDto(
+        object $dto,
+        ServerRequestInterface $request,
+        string $mimeType,
+        int $code = 200
+    ): ResponseInterface;
 }

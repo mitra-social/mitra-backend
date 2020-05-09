@@ -10,7 +10,6 @@ use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Dto\Response\TokenResponseDto;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -22,11 +21,6 @@ final class TokenController
      * @var TokenProvider
      */
     private $tokenProvider;
-
-    /**
-     * @var EncoderInterface
-     */
-    private $encoder;
 
     /**
      * @var ValidatorInterface
@@ -45,20 +39,17 @@ final class TokenController
 
     /**
      * @param ResponseFactoryInterface $responseFactory
-     * @param EncoderInterface $encoder
      * @param ValidatorInterface $validator
      * @param TokenProvider $tokenProvider
      * @param RequestToDtoTransformer $dataToDtoManager
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        EncoderInterface $encoder,
         ValidatorInterface $validator,
         TokenProvider $tokenProvider,
         RequestToDtoTransformer $dataToDtoManager
     ) {
         $this->responseFactory = $responseFactory;
-        $this->encoder = $encoder;
         $this->validator = $validator;
         $this->tokenProvider = $tokenProvider;
         $this->requestToDtoManager = $dataToDtoManager;
@@ -81,9 +72,7 @@ final class TokenController
             $tokenResponseDto = new TokenResponseDto();
             $tokenResponseDto->token = $token;
 
-            $response = $this->responseFactory->createResponse(201);
-
-            $response->getBody()->write($this->encoder->encode($tokenResponseDto, $accept));
+            $response = $this->responseFactory->createResponseFromDto($tokenResponseDto, $request, $accept, 201);
         } catch (TokenIssueException $e) {
             $response = $this->responseFactory->createResponse(401);
         }
