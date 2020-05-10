@@ -167,7 +167,7 @@ final class Config implements ConfigInterface
             ],
             'monolog.name' => 'default',
             'monolog.handlers' => [
-                'php://stdout' => Logger::NOTICE,
+                'php://stderr' => Logger::INFO,
             ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
