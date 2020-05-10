@@ -130,17 +130,22 @@ final class InboxWriteController
 
         $activityStreamContent = new ActivityStreamContent(
             Uuid::uuid4()->toString(),
+            $objectDto->id,
+            md5($objectDto->id),
             $objectDto->type,
             $this->normalizer->normalize($objectDto),
             null,
-            new \DateTimeImmutable($objectDto->published),
-            null
+            null !== $objectDto->published ? new \DateTimeImmutable($objectDto->published) : null,
+            null !== $objectDto->updated ? new \DateTimeImmutable($objectDto->updated) : null,
         );
 
         try {
-            $this->commandBus->handle(new AttributeActivityStreamContentCommand($activityStreamContent));
-            $this->commandBus->handle(new PersistActivityStreamContent($activityStreamContent));
-            $this->commandBus->handle(new AssignActivityStreamContentToFollowersCommand($activityStreamContent));
+            $this->commandBus->handle(new AttributeActivityStreamContentCommand($activityStreamContent, $objectDto));
+            $this->commandBus->handle(new PersistActivityStreamContent($activityStreamContent, $objectDto));
+            $this->commandBus->handle(new AssignActivityStreamContentToFollowersCommand(
+                $activityStreamContent,
+                $objectDto
+            ));
 
             $objectCommand = $this->getCommandForObject($activityStreamContent);
 
