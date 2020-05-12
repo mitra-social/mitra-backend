@@ -5,21 +5,14 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
-use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
-use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContent;
-use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
-use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
+use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\DtoToEntityMapper;
-use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
-use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
-use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
-use Mitra\Entity\Actor\Actor;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\InternalUserRepository;
@@ -140,12 +133,7 @@ final class InboxWriteController
         );
 
         try {
-            $this->commandBus->handle(new AttributeActivityStreamContentCommand($activityStreamContent, $objectDto));
-            $this->commandBus->handle(new PersistActivityStreamContent($activityStreamContent, $objectDto));
-            $this->commandBus->handle(new AssignActivityStreamContentToFollowersCommand(
-                $activityStreamContent,
-                $objectDto
-            ));
+            $this->commandBus->handle(new ValidateContentCommand());
 
             $objectCommand = $this->getCommandForObject($activityStreamContent);
 

@@ -11,11 +11,13 @@ use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
 use Mitra\CommandBus\Handler\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\UndoCommandHandler;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
+use Mitra\CommandBus\Subscriber\ActivityPub\ContentAcceptedSubscriber;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
@@ -163,6 +165,11 @@ final class Config implements ConfigInterface
                     SendObjectToRecipientsCommand::class => SendObjectToRecipientsCommandHandler::class,
                     FollowCommand::class => FollowCommandHandler::class,
                     UndoCommand::class => UndoCommandHandler::class,
+                ],
+            ],
+            'command_bus.event_subscribers' => [
+                ContentAcceptedEvent::class => [
+                    ContentAcceptedSubscriber::class,
                 ],
             ],
             'monolog.name' => 'default',

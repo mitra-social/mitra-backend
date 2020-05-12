@@ -9,16 +9,18 @@ use League\Tactician\Doctrine\ORM\TransactionMiddleware;
 use League\Tactician\Handler\CommandHandlerMiddleware;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
-use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\CommandBus\EventDispatcher;
+use Mitra\CommandBus\EventDispatcherInterface;
 use Mitra\CommandBus\Handler\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\ActivityPub\UndoCommandHandler;
 use Mitra\CommandBus\Handler\CreateUserCommandHandler;
+use Mitra\CommandBus\SubscriptionResolver;
 use Mitra\CommandBus\TacticianCommandBus;
+use Mitra\CommandBus\TacticianEventMiddleware;
 use Mitra\CommandBus\TacticianMapByStaticClassList;
-use Mitra\Repository\ExternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
@@ -36,7 +38,16 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
     {
         $this->registerHandlers($container);
 
-        $container[CommandBusInterface::class] = function () use ($container): CommandBusInterface {
+        $container[EventDispatcherInterface::class] = static function (Container $container): EventDispatcherInterface {
+            return new EventDispatcher(new SubscriptionResolver(
+                $container[ContainerInterface::class],
+                $container['command_bus.event_subscribers']
+            ));
+        };
+
+        $container[CommandBusInterface::class] = static function (Container $container): CommandBusInterface {
+            $eventMiddleware = new TacticianEventMiddleware($container[EventDispatcherInterface::class]);
+
             $handlerMiddleware = new CommandHandlerMiddleware(
                 $container[ContainerInterface::class],
                 new TacticianMapByStaticClassList($container['mappings']['command_handlers'])
@@ -44,7 +55,11 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
 
             $transactionMiddleware = new TransactionMiddleware($container['doctrine.orm.em']);
 
-            return new TacticianCommandBus(new CommandBus($transactionMiddleware, $handlerMiddleware));
+            return new TacticianCommandBus(new CommandBus(
+                $eventMiddleware,
+                $transactionMiddleware,
+                $handlerMiddleware
+            ));
         };
     }
 
