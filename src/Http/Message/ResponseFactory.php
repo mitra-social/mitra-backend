@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Mitra\Http\Message;
 
+use Mitra\ApiProblem\ApiProblemInterface;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ViolationListDto;
+use Mitra\Mapping\Dto\Response\ApiProblemDto;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ViolationListInterface;
@@ -102,5 +104,19 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
         $response->getBody()->write($this->encoder->encode($this->normalizer->normalize($dto), $mimeType));
 
         return $response;
+    }
+
+    public function createResponseFromApiProblem(
+        ApiProblemInterface $apiProblem,
+        ServerRequestInterface $request,
+        string $mimeType
+    ) {
+        return $this->createResponseFromEntity(
+            $apiProblem,
+            ApiProblemDto::class,
+            $request,
+            $mimeType,
+            $apiProblem->getStatus()
+        );
     }
 }

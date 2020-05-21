@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Mitra\Http\Message;
 
+use ActivityPhp\Server;
+use Mitra\ApiProblem\ApiProblem;
+use Mitra\ApiProblem\ApiProblemInterface;
 use Mitra\Validator\ViolationListInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -32,4 +35,10 @@ interface ResponseFactoryInterface
         string $mimeType,
         int $code = 200
     ): ResponseInterface;
+
+    public function createResponseFromApiProblem(
+        ApiProblemInterface $apiProblem,
+        ServerRequestInterface $request,
+        string $mimeType
+    );
 }

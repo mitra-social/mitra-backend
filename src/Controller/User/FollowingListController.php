@@ -60,7 +60,7 @@ final class FollowingListController extends AbstractCollectionController
             $limit = self::ITEMS_PER_PAGE_LIMIT;
         }
 
-        $items = $this->subscriptionRepository->findFollowingActorsForActor(
+        $items = $this->subscriptionRepository->getFollowingActorsForActor(
             $actorDto,
             $offset,
             $limit

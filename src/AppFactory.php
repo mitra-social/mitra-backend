@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Mitra;
 
-use Mitra\Env\Env;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;

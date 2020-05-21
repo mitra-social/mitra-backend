@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Event\ActivityPub;
 
-final class ContentDeclinedEvent
-{
+use Mitra\CommandBus\Command\ActivityPub\AbstractActivityStreamContentEvent;
 
+final class ContentDeclinedEvent extends AbstractActivityStreamContentEvent
+{
 }

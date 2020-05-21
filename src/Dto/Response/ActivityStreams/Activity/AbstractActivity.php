@@ -45,4 +45,12 @@ abstract class AbstractActivity extends ObjectDto implements ActivityDtoInterfac
      * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $instrument;
+
+    /**
+     * @return array|LinkDto|ObjectDto|string|null
+     */
+    public function getActor()
+    {
+        return $this->actor;
+    }
 }

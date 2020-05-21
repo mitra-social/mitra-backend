@@ -8,16 +8,21 @@ use ActivityPhp\Type\Extended\Object\Image;
 use Chubbyphp\Config\ConfigInterface;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
+use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
+use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
-use Mitra\CommandBus\Handler\ActivityPub\AssignActorCommandHandler;
-use Mitra\CommandBus\Handler\ActivityPub\FollowCommandHandler;
-use Mitra\CommandBus\Handler\ActivityPub\SendObjectToRecipientsCommandHandler;
-use Mitra\CommandBus\Handler\ActivityPub\UndoCommandHandler;
-use Mitra\CommandBus\Handler\CreateUserCommandHandler;
-use Mitra\CommandBus\Subscriber\ActivityPub\ContentAcceptedSubscriber;
+use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
+use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
@@ -50,6 +55,7 @@ use Mitra\Mapping\Validation\ActivityPub\ObjectDtoValidationMapping;
 use Mitra\Mapping\Validation\TokenRequestDtoValidationMapping;
 use Mitra\Mapping\Validation\CreateUserRequestDtoValidationMapping;
 use Monolog\Logger;
+use Symfony\Component\Messenger\Transport\TransportInterface;
 
 final class Config implements ConfigInterface
 {
@@ -78,6 +84,11 @@ final class Config implements ConfigInterface
      * @var string
      */
     private const ENV_BASE_URL = 'BASE_URL';
+
+    /**
+     * @var string
+     */
+    private const ENV_QUEUE_DNS = 'QUEUE_DNS';
 
     /**
      * @var string
@@ -131,6 +142,7 @@ final class Config implements ConfigInterface
             'doctrine.migrations.directory' => $this->rootDir . '/migrations/',
             'doctrine.migrations.namespace' => 'Mitra\Migrations',
             'doctrine.migrations.table' => 'doctrine_migration_version',
+            'queue_dns' => $this->env->get(self::ENV_QUEUE_DNS),
             'mappings' => [
                 'orm' => [
                     AbstractUser::class => AbstractUserOrmMapping::class,
@@ -159,17 +171,30 @@ final class Config implements ConfigInterface
                     FollowDto::class => ActivityDtoValidationMapping::class,
                     CreateDto::class => ActivityDtoValidationMapping::class,
                 ],
-                'command_handlers' => [
-                    CreateUserCommand::class => CreateUserCommandHandler::class,
-                    AssignActorCommand::class => AssignActorCommandHandler::class,
-                    SendObjectToRecipientsCommand::class => SendObjectToRecipientsCommandHandler::class,
-                    FollowCommand::class => FollowCommandHandler::class,
-                    UndoCommand::class => UndoCommandHandler::class,
+                'bus' => [
+                    'command_handlers' => [
+                        CreateUserCommand::class => CreateUserCommandHandler::class,
+                        AssignActorCommand::class => AssignActorCommandHandler::class,
+                        SendObjectToRecipientsCommand::class => SendObjectToRecipientsCommandHandler::class,
+                        FollowCommand::class => FollowCommandHandler::class,
+                        UndoCommand::class => UndoCommandHandler::class,
+                        ValidateContentCommand::class => ValidateContentCommandHandler::class,
+
+                        PersistActivityStreamContentCommand::class => PersistActivityStreamContentCommandHandler::class,
+                    ],
+                    'event_handlers' => [
+                        ContentAcceptedEvent::class => [
+                            ContentAcceptedEventHandler::class,
+                        ],
+                    ],
+                    'routing' => [
+                        ActivityStreamContentReceivedEvent::class => TransportInterface::class,
+                    ],
                 ],
             ],
             'command_bus.event_subscribers' => [
                 ContentAcceptedEvent::class => [
-                    ContentAcceptedSubscriber::class,
+                    ContentAcceptedEventHandler::class,
                 ],
             ],
             'monolog.name' => 'default',
@@ -184,6 +209,8 @@ final class Config implements ConfigInterface
             $config['monolog.handlers'] = [
                 sprintf('%s/application.log', $dirs['logs']) => Logger::DEBUG,
             ];
+            // We don't want to send any message to a queue for development
+            $config['mapping']['bus']['routing'] = [];
         }
 
         return $config;

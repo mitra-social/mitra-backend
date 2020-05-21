@@ -73,10 +73,17 @@ final class InboxReadController extends AbstractOrderedCollectionController
 
             unset($object['@context']);
 
-            $dtoItems[] = $this->dataToDtoTransformer->populate(
+            /** @var ObjectDto $dto */
+            $dto = $this->dataToDtoTransformer->populate(
                 ActivityStreamTypeToDtoClassMapping::map($content->getType()),
                 $object
             );
+
+            // Don't leak anonymous recipients
+            $dto->bto = null;
+            $dto->bcc = null;
+
+            $dtoItems[]  = $dto;
         }
 
         Assert::allIsInstanceOfAny($dtoItems, [ObjectDto::class, LinkDto::class]);

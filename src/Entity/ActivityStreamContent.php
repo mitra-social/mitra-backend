@@ -107,4 +107,20 @@ class ActivityStreamContent
     {
         return $this->object;
     }
+
+    /**
+     * @return Actor|null
+     */
+    public function getAttributedTo(): ?Actor
+    {
+        return $this->attributedTo;
+    }
+
+    /**
+     * @param Actor|null $attributedTo
+     */
+    public function setAttributedTo(?Actor $attributedTo): void
+    {
+        $this->attributedTo = $attributedTo;
+    }
 }

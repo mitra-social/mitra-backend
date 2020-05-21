@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Populator;
 
+use Mitra\Dto\DataToDtoPopulatorException;
 use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Mapping\Dto\ActivityStreamTypeToDtoClassMapping;
@@ -54,6 +55,10 @@ final class ActivityPubDtoPopulator implements DataToDtoPopulatorInterface
      */
     public function populate(array $data): object
     {
+        if (!array_key_exists('type', $data)) {
+            throw new DataToDtoPopulatorException('Property `type` is missing');
+        }
+
         $resolvedData = $this->resolveCoreTypeDto($data);
 
         return is_object($resolvedData) ? $resolvedData : new ObjectDto();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\CommandBus\Handler\ActivityPub;
+namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
@@ -57,7 +57,7 @@ final class UndoCommandHandler
                 throw new \RuntimeException('Could not resolve `$object`');
             }
 
-            $subscription = $this->subscriptionRepository->findByActors($commandActor, $objectExternalUser->getActor());
+            $subscription = $this->subscriptionRepository->getByActors($commandActor, $objectExternalUser->getActor());
 
             if (null === $subscription) {
                 return;

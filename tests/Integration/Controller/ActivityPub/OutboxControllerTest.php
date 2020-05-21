@@ -121,7 +121,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var SubscriptionRepository $subscriptionRepository */
         $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
     }
@@ -212,7 +212,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var SubscriptionRepository $subscriptionRepository */
         $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
     }
@@ -297,7 +297,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var SubscriptionRepository $subscriptionRepository */
         $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
         self::assertNull($subscription->getEndDate());
@@ -327,7 +327,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         $em = $this->getContainer()->get('doctrine.orm.em');
         $em->clear();
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNull($subscription);
     }

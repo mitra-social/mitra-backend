@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Mitra\ApiProblem\ApiProblem;
+use Mitra\ApiProblem\BadRequestApiProblem;
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
-use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContent;
+use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
+use Mitra\CommandBus\Command\ActivityPub\ProcessActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
+use Mitra\CommandBus\EventBusInterface;
+use Mitra\Dto\DataToDtoPopulatorException;
 use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\DtoToEntityMapper;
+use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDtoInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -27,9 +34,9 @@ use Ramsey\Uuid\Uuid;
 final class InboxWriteController
 {
     /**
-     * @var CommandBusInterface
+     * @var EventBusInterface
      */
-    private $commandBus;
+    private $eventBus;
 
     /**
      * @var NormalizerInterface
@@ -81,7 +88,7 @@ final class InboxWriteController
         NormalizerInterface $normalizer,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
-        CommandBusInterface $commandBus,
+        EventBusInterface $eventBus,
         DataToDtoPopulatorInterface $activityPubDataToDtoPopulator,
         DecoderInterface $decoder,
         DtoToEntityMapper $dtoToEntityMapper,
@@ -93,7 +100,7 @@ final class InboxWriteController
         $this->encoder = $encoder;
         $this->decoder = $decoder;
         $this->validator = $validator;
-        $this->commandBus = $commandBus;
+        $this->eventBus = $eventBus;
         $this->activityPubDataToDtoPopulator = $activityPubDataToDtoPopulator;
         $this->dtoToEntityMapper = $dtoToEntityMapper;
         $this->internalUserRepository = $internalUserRepository;
@@ -110,12 +117,22 @@ final class InboxWriteController
             'request.headers' => $request->getHeaders(),
         ]);
 
-        if (!is_array($decodedRequestBody) || !array_key_exists('type', $decodedRequestBody)) {
-            return $this->responseFactory->createResponse(400);
+        try {
+            /** @var ObjectDto $objectDto */
+            $objectDto = $this->activityPubDataToDtoPopulator->populate($decodedRequestBody);
+        } catch (DataToDtoPopulatorException $e) {
+            $apiProblem = (new BadRequestApiProblem())->withDetail(
+                sprintf('Could not parse ActivityStream object: %s', $e->getMessage())
+            );
+
+            return $this->responseFactory->createResponseFromApiProblem($apiProblem, $request, $accept);
         }
 
-        /** @var ObjectDto $objectDto */
-        $objectDto = $this->activityPubDataToDtoPopulator->populate($decodedRequestBody);
+        if (!$objectDto instanceof ActivityDtoInterface) {
+            $apiProblem = (new BadRequestApiProblem())->withDetail('Only activities are accepted');
+
+            return $this->responseFactory->createResponseFromApiProblem($apiProblem, $request, $accept);
+        }
 
         if (($violationList = $this->validator->validate($objectDto))->hasViolations()) {
             return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
@@ -133,13 +150,7 @@ final class InboxWriteController
         );
 
         try {
-            $this->commandBus->handle(new ValidateContentCommand());
-
-            $objectCommand = $this->getCommandForObject($activityStreamContent);
-
-            if (null !== $objectCommand) {
-                $this->commandBus->handle($objectCommand);
-            }
+            $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent($activityStreamContent, $objectDto));
 
             return $this->responseFactory->createResponse(201);
         } catch (\Exception $e) {
@@ -149,10 +160,5 @@ final class InboxWriteController
 
             return $response;
         }
-    }
-
-    private function getCommandForObject(ActivityStreamContent $activityStreamContent): ?object
-    {
-        return null;
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\CommandBus\Handler\ActivityPub;
+namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\Entity\User\InternalUser;

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Command\ActivityPub;
 
+use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Entity\Actor\Actor;
 
-final class FollowCommand
+final class FollowCommand implements CommandInterface
 {
     /**
      * @var Actor
