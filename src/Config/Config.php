@@ -171,7 +171,9 @@ final class Config implements ConfigInterface
 
         if ('dev' === $appEnv) {
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
-            $config['monolog.handlers'][sprintf('%s/application.log', $dirs['logs'])] = Logger::DEBUG;
+            $config['monolog.handlers'] = [
+                sprintf('%s/application.log', $dirs['logs']) => Logger::DEBUG
+            ];
             // We don't want to send any message to a queue for development
             $config['mapping']['bus']['routing'] = [];
         }
@@ -253,6 +255,7 @@ final class Config implements ConfigInterface
                     ContentAcceptedEventHandler::class,
                 ],
             ],
+            'routing' => [],
         ];
     }
 
