@@ -114,21 +114,25 @@ final class InboxWriteController
             /** @var ObjectDto $objectDto */
             $objectDto = $this->activityPubDataToDtoPopulator->populate($decodedRequestBody);
         } catch (DataToDtoPopulatorException $e) {
-            $apiProblem = (new BadRequestApiProblem())->withDetail(
-                sprintf('Could not parse ActivityStream object: %s', $e->getMessage())
-            );
+            $apiProblemDetail =  sprintf('Could not parse ActivityStream object: %s', $e->getMessage());
+            $this->logger->error($apiProblemDetail);
+            $apiProblem = (new BadRequestApiProblem())->withDetail($apiProblemDetail);
 
             return $this->responseFactory->createResponseFromApiProblem($apiProblem, $request, $accept);
         }
 
         if (!$objectDto instanceof ActivityDtoInterface) {
-            $apiProblem = (new BadRequestApiProblem())->withDetail('Only activities are accepted');
+            $problemDetail = sprintf('Only activities are accepted, `%s` given', $objectDto->type);
+            $this->logger->error($problemDetail);
+            $apiProblem = (new BadRequestApiProblem())->withDetail($problemDetail);
 
             return $this->responseFactory->createResponseFromApiProblem($apiProblem, $request, $accept);
         }
 
         if (($violationList = $this->validator->validate($objectDto))->hasViolations()) {
-            return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
+            $response = $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
+            $this->logger->error('Violations during validation: ' . (string) $response->getBody());
+            return $response;
         }
 
         $activityStreamContent = new ActivityStreamContent(
