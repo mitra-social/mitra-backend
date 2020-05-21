@@ -146,8 +146,6 @@ final class InboxControllerTest extends IntegrationTestCase
 
     public function testReturnsInboxItemsWithBtoAndBccStripped(): void
     {
-        //self::markTestIncomplete('todo');
-
         /** @var UriGenerator $uriGenerator */
         $uriGenerator = $this->getContainer()->get(UriGenerator::class);
         /** @var CommandBusInterface $commandBus */
@@ -186,7 +184,7 @@ final class InboxControllerTest extends IntegrationTestCase
             $uriGenerator->fullUrlFor('user-read', ['username' => $bccUser->getUsername()]),
         ];
 
-        $sampleContent = $this->createContent($dto);
+        $this->createContent($dto);
 
         $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=0', $toUser->getUsername()), null, [
             'Authorization' => sprintf('Bearer %s', $token)
