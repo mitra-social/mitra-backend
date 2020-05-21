@@ -76,6 +76,11 @@ class ActivityStreamContent
         return $this->id;
     }
 
+    public function getExternalId(): string
+    {
+        return $this->externalId;
+    }
+
     /**
      * @return string
      */

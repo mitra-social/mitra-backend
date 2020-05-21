@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
-use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
+use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
-use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Tests\Integration\ClientMockTrait;
 use Mitra\Tests\Integration\CreateContentTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
@@ -17,16 +15,15 @@ use Mitra\Slim\UriGenerator;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Psr\Http\Message\RequestFactoryInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * @group Integration
  */
-final class InboxControllerTest extends IntegrationTestCase
+final class InboxReadControllerTest extends IntegrationTestCase
 {
     use CreateUserTrait;
     use CreateContentTrait;
-    use ClientMockTrait;
+    use CreateSubscriptionTrait;
 
     /**
      * @var ResponseFactoryInterface
@@ -161,10 +158,8 @@ final class InboxControllerTest extends IntegrationTestCase
         $token = $this->createTokenForUser($toUser);
 
         foreach ([$toUser, $bccUser, $btoUser] as $user) {
-            $followDto = new FollowDto();
-            $followDto->object = $externalUser->getExternalId();
-
-            $commandBus->handle(new FollowCommand($user->getActor(), $followDto));
+            /** @var InternalUser $user */
+            $this->createSubscription($user->getActor(), $externalUser->getActor());
         }
 
         $dtoContent = 'Foo bar baz';

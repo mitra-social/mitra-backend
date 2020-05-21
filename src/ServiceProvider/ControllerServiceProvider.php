@@ -6,6 +6,7 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\CommandBus\EventBusInterface;
 use Mitra\Controller\User\FollowingListController;
 use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
@@ -21,6 +22,7 @@ use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Http\Message\ResponseFactoryInterface;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
@@ -108,6 +110,14 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[InboxWriteController::class] = static function (Container $container): InboxWriteController {
             return new InboxWriteController(
                 $container[ResponseFactoryInterface::class],
+                $container[NormalizerInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[EventBusInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                $container[DecoderInterface::class],
+                $container[DtoToEntityMapper::class],
+                $container[InternalUserRepository::class],
                 $container[LoggerInterface::class]
             );
         };

@@ -133,7 +133,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
 
             $username = $routingResult->getRouteArguments()['username'];
 
-            if (null === $user =  $this->internalUserRepository->findByUsername($username)) {
+            if (null === $user = $this->internalUserRepository->findByUsername($username)) {
                 continue;
             }
 

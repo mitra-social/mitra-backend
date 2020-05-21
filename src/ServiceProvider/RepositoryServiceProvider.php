@@ -32,7 +32,9 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
         };
 
         $container[ActivityStreamContentAssignmentRepository::class] = static function (Container $container) {
-            return $container['doctrine.orm.em']->getRepository(ActivityStreamContentAssignment::class);
+            return new ActivityStreamContentAssignmentRepository(
+                $container['doctrine.orm.em']->getRepository(ActivityStreamContentAssignment::class)
+            );
         };
 
         $container[SubscriptionRepository::class] = static function (Container $container): SubscriptionRepository {

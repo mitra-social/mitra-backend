@@ -23,10 +23,14 @@ use Ramsey\Uuid\Uuid;
  */
 trait CreateUserTrait
 {
-    protected function createExternalUser(string $preferredUsername, string $actorType = 'Person'): ExternalUser
+    protected function createExternalUser(?string $preferredUsername = null, string $actorType = 'Person'): ExternalUser
     {
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $this->getContainer()->get(EntityManagerInterface::class);
+
+        if (null === $preferredUsername) {
+            $preferredUsername = sprintf('bob.%s', uniqid());
+        }
 
         $externalUserId = sprintf('https://example.com/user/%s', $preferredUsername);
 
@@ -52,6 +56,7 @@ trait CreateUserTrait
         $externalUser->setActor($actor);
 
         $entityManager->persist($externalUser);
+        $entityManager->flush();
 
         return $externalUser;
     }

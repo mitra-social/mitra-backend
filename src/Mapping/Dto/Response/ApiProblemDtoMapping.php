@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Mitra\Mapping\Dto\Response;
 
+use Mitra\ApiProblem\ApiProblem;
 use Mitra\ApiProblem\ApiProblemInterface;
+use Mitra\Dto\Response\ApiProblemDto;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 
-final class ApiProblemDtoMapping implements EntityToDtoMappingInterface
+class ApiProblemDtoMapping implements EntityToDtoMappingInterface
 {
 
     public static function getDtoClass(): string
@@ -18,7 +20,7 @@ final class ApiProblemDtoMapping implements EntityToDtoMappingInterface
 
     public static function getEntityClass(): string
     {
-        return ApiProblemInterface::class;
+        return ApiProblem::class;
     }
 
     public function toDto(object $entity): object

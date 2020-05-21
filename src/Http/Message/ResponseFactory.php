@@ -7,7 +7,7 @@ namespace Mitra\Http\Message;
 use Mitra\ApiProblem\ApiProblemInterface;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ViolationListDto;
-use Mitra\Mapping\Dto\Response\ApiProblemDto;
+use Mitra\Dto\Response\ApiProblemDto;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ViolationListInterface;

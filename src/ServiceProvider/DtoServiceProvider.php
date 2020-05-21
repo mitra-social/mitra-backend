@@ -24,6 +24,8 @@ use Mitra\Dto\Response\ActivityStreams\NoteDto;
 use Mitra\Dto\Response\ActivityStreams\VideoDto;
 use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
 use Mitra\Mapping\Dto\Response\ActivityPub\PersonDtoMapping;
+use Mitra\Mapping\Dto\Response\ApiProblemDtoMapping;
+use Mitra\Mapping\Dto\Response\BadRequestApiProblemDtoMapping;
 use Mitra\Mapping\Dto\Response\UserResponseDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationListDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationDtoMapping;
@@ -53,6 +55,8 @@ final class DtoServiceProvider implements ServiceProviderInterface
                 UserResponseDtoMapping::class,
                 ViolationListDtoMapping::class,
                 ViolationDtoMapping::class,
+                ApiProblemDtoMapping::class,
+                BadRequestApiProblemDtoMapping::class,
             ]);
         };
 
@@ -131,6 +135,14 @@ final class DtoServiceProvider implements ServiceProviderInterface
 
         $container[PersonDtoMapping::class] = static function (Container $container): PersonDtoMapping {
             return new PersonDtoMapping($container[UriGenerator::class]);
+        };
+
+        $container[ApiProblemDtoMapping::class] = static function (): ApiProblemDtoMapping {
+            return new ApiProblemDtoMapping();
+        };
+
+        $container[BadRequestApiProblemDtoMapping::class] = static function (): BadRequestApiProblemDtoMapping {
+            return new BadRequestApiProblemDtoMapping();
         };
     }
 }
