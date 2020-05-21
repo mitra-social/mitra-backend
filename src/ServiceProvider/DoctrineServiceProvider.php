@@ -53,5 +53,9 @@ final class DoctrineServiceProvider implements ServiceProviderInterface
 
             return $configuration;
         };
+
+        $container[EntityManagerInterface::class] = static function (Container $container): EntityManagerInterface {
+            return $container['doctrine.orm.em'];
+        };
     }
 }

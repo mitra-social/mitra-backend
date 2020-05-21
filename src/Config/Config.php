@@ -6,22 +6,31 @@ namespace Mitra\Config;
 
 use ActivityPhp\Type\Extended\Object\Image;
 use Chubbyphp\Config\ConfigInterface;
+use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
+use Mitra\CommandBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
 use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAttributedEvent;
+use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
+use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
@@ -181,14 +190,27 @@ final class Config implements ConfigInterface
                         ValidateContentCommand::class => ValidateContentCommandHandler::class,
 
                         PersistActivityStreamContentCommand::class => PersistActivityStreamContentCommandHandler::class,
+                        AttributeActivityStreamContentCommand::class => AttributeActivityStreamContentCommandHandler::class,
+                        AssignActivityStreamContentToFollowersCommand::class => AssignActivityStreamContentToFollowersCommandHandler::class,
                     ],
                     'event_handlers' => [
+                        ActivityStreamContentReceivedEvent::class => [
+                            ActivityStreamContentReceivedEventHandler::class,
+                        ],
+                        ActivityStreamContentAttributedEvent::class => [
+                            ActivityStreamContentAttributedEventHandler::class,
+                        ],
+                        ActivityStreamContentPersistedEvent::class => [
+                            ActivityStreamContentPersistedEventHandler::class,
+                        ],
                         ContentAcceptedEvent::class => [
                             ContentAcceptedEventHandler::class,
                         ],
                     ],
                     'routing' => [
-                        ActivityStreamContentReceivedEvent::class => TransportInterface::class,
+                        /*ActivityStreamContentReceivedEvent::class => [
+                            TransportInterface::class
+                        ],*/
                     ],
                 ],
             ],

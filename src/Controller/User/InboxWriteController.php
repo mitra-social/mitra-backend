@@ -4,14 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use Mitra\ApiProblem\ApiProblem;
 use Mitra\ApiProblem\BadRequestApiProblem;
-use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
-use Mitra\CommandBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
-use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
-use Mitra\CommandBus\Command\ActivityPub\ProcessActivityStreamContentCommand;
-use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
-use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\EventBusInterface;
 use Mitra\Dto\DataToDtoPopulatorException;

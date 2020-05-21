@@ -115,8 +115,8 @@ final class SubscriptionRepository
         $qb = $this->entityRepository->createQueryBuilder('s');
         $qb
             ->select($qb->expr()->count('s'))
-            ->where('s.subscribingActor = :subscribingActor')
-            ->setParameter('subscribingActor', $actor->getUser());
+            ->where('s.subscribedActor = :subscribedActor')
+            ->setParameter('subscribedActor', $actor->getUser());
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }

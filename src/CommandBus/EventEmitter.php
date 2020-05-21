@@ -7,14 +7,14 @@ namespace Mitra\CommandBus;
 final class EventEmitter implements EventEmitterInterface
 {
     /**
-     * @var array<object>
-     */
-    private $raisedEvents = [];
-
-    /**
      * @var EventBusInterface
      */
     private $eventBus;
+
+    public function __construct(EventBusInterface $eventBus)
+    {
+        $this->eventBus = $eventBus;
+    }
 
     public function raise(EventInterface $event): void
     {

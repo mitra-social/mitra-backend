@@ -15,6 +15,11 @@ final class ActivityStreamContentReceivedEventHandler
      */
     private $commandBus;
 
+    public function __construct(CommandBusInterface $commandBus)
+    {
+        $this->commandBus = $commandBus;
+    }
+
     public function __invoke(ActivityStreamContentReceivedEvent $event): void
     {
         $dto = $event->getActivityStreamDto();

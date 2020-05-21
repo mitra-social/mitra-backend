@@ -37,7 +37,7 @@ final class ProfileControllerTest extends IntegrationTestCase
 
     public function testReturnsUserInformationIfAuthorized(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
         $token = $this->createTokenForUser($user);
 
         $request = $this->createRequest('GET', '/me', null, ['Authorization' => sprintf('Bearer %s', $token)]);

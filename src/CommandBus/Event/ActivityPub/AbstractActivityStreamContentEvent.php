@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\CommandBus\Command\ActivityPub;
+namespace Mitra\CommandBus\Event\ActivityPub;
 
 use Mitra\CommandBus\EventInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;

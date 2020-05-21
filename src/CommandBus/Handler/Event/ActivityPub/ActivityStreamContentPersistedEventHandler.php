@@ -6,7 +6,7 @@ namespace Mitra\CommandBus\Handler\Event\ActivityPub;
 
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\CommandBusInterface;
-use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
+use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 
 final class ActivityStreamContentPersistedEventHandler
 {
@@ -15,7 +15,12 @@ final class ActivityStreamContentPersistedEventHandler
      */
     private $commandBus;
 
-    public function __invoke(ActivityStreamContentReceivedEvent $event): void
+    public function __construct(CommandBusInterface $commandBus)
+    {
+        $this->commandBus = $commandBus;
+    }
+
+    public function __invoke(ActivityStreamContentPersistedEvent $event): void
     {
         $dto = $event->getActivityStreamDto();
         $entity = $event->getActivityStreamContentEntity();

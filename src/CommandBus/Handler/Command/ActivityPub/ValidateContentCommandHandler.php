@@ -17,7 +17,7 @@ final class ValidateContentCommandHandler
     /**
      * @var EventEmitterInterface
      */
-    private $eventDispatcher;
+    private $eventEmitter;
 
     /**
      * @var SubscriptionRepository
@@ -25,10 +25,10 @@ final class ValidateContentCommandHandler
     private $subscriptionRepository;
 
     public function __construct(
-        EventEmitterInterface $eventDispatcher,
+        EventEmitterInterface $eventEmitter,
         SubscriptionRepository $subscriptionRepository
     ) {
-        $this->eventDispatcher = $eventDispatcher;
+        $this->eventEmitter = $eventEmitter;
         $this->subscriptionRepository = $subscriptionRepository;
     }
 
@@ -38,7 +38,7 @@ final class ValidateContentCommandHandler
         $entity = $command->getActivityStreamContentEntity();
 
         if ($this->isValid($dto, $entity)) {
-            $this->eventDispatcher->raise(new ContentAcceptedEvent($entity, $dto));
+            $this->eventEmitter->raise(new ContentAcceptedEvent($entity, $dto));
         }
     }
 

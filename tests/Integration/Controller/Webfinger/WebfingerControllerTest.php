@@ -16,7 +16,7 @@ final class WebfingerControllerTest extends IntegrationTestCase
 
     public function testWebfingerReturnsResourceInformation(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
         $resource = sprintf('acct:%s@localhost', $user->getUsername());
 
         $request = $this->createRequest('GET', sprintf(

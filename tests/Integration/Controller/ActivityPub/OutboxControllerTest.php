@@ -46,7 +46,7 @@ final class OutboxControllerTest extends IntegrationTestCase
 
     public function testSuccessfulFollow(): void
     {
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
@@ -128,7 +128,7 @@ final class OutboxControllerTest extends IntegrationTestCase
 
     public function testFollowingSameUserSecondTimeDoesNothing(): void
     {
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
@@ -220,7 +220,7 @@ final class OutboxControllerTest extends IntegrationTestCase
     public function testSuccessfulUnfollow(): void
     {
         // Prepare
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();

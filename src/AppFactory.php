@@ -19,6 +19,7 @@ use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\CallableResolver;
 use Slim\Exception\HttpException;
+use Slim\Interfaces\RouteResolverInterface;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
 use Tuupola\Middleware\JwtAuthentication;
@@ -51,6 +52,7 @@ final class AppFactory
     }
 
     /**
+     * @param Container $container
      * @return App
      */
     private function createApp(Container $container): App
@@ -66,7 +68,8 @@ final class AppFactory
             $container[ResponseFactory::class],
             $container[ContainerInterface::class],
             $container[CallableResolver::class],
-            $container[RouteCollector::class]
+            $container[RouteCollector::class],
+            $container[RouteResolverInterface::class]
         );
     }
 }
