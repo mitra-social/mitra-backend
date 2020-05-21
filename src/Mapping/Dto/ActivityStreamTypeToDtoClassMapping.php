@@ -10,6 +10,8 @@ use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
+use Mitra\Dto\Response\ActivityStreams\CollectionDto;
+use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
 use Mitra\Dto\Response\ActivityStreams\EventDto;
 use Mitra\Dto\Response\ActivityStreams\ImageDto;
@@ -17,6 +19,8 @@ use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\MentionDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\PlaceDto;
 use Mitra\Dto\Response\ActivityStreams\ProfileDto;
 use Mitra\Dto\Response\ActivityStreams\RelationshipDto;
@@ -52,6 +56,11 @@ final class ActivityStreamTypeToDtoClassMapping
         'Create' => CreateDto::class,
         'Follow' => FollowDto::class,
         'Undo' => UndoDto::class,
+
+        'Collection' => CollectionDto::class,
+        'OrderedCollection' => OrderedCollectionDto::class,
+        'CollectionPage' => CollectionPageDto::class,
+        'OrderedCollectionPage' => OrderedCollectionPageDto::class,
     ];
 
     public static function map(string $activityStreamType): string
