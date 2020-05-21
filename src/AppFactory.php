@@ -16,6 +16,7 @@ use Mitra\ServiceProvider\SlimServiceProvider;
 use Mitra\Slim\ErrorHandler\HttpErrorHandler;
 use Pimple\Container;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\CallableResolver;
 use Slim\Exception\HttpException;
@@ -42,7 +43,12 @@ final class AppFactory
         $app->add(RequestCycleCleanupMiddleware::class);
 
         // Needs to be last middleware to handle all the errors
-        $errorMiddleware = $app->addErrorMiddleware($container->get('debug'), true, true);
+        $errorMiddleware = $app->addErrorMiddleware(
+            $container->get('debug'),
+            true,
+            true,
+            $container->get(LoggerInterface::class)
+        );
         $errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
 
         $app->group('', new PublicRouterProvider());
