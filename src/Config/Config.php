@@ -223,7 +223,7 @@ final class Config implements ConfigInterface
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, array<string, string|array<string>>>
      */
     private function getMappingBus(): array
     {
