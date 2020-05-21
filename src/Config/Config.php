@@ -164,16 +164,14 @@ final class Config implements ConfigInterface
             ],
             'monolog.name' => 'default',
             'monolog.handlers' => [
-                sprintf('%s/application.log', $dirs['logs']) => Logger::DEBUG,
+                'php://stderr' => Logger::INFO,
             ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
 
         if ('dev' === $appEnv) {
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
-            $config['monolog.handlers'] = [
-                sprintf('%s/application.log', $dirs['logs']) => Logger::DEBUG,
-            ];
+            $config['monolog.handlers'][sprintf('%s/application.log', $dirs['logs'])] = Logger::DEBUG;
             // We don't want to send any message to a queue for development
             $config['mapping']['bus']['routing'] = [];
         }
@@ -255,22 +253,11 @@ final class Config implements ConfigInterface
                     ContentAcceptedEventHandler::class,
                 ],
             ],
-            'monolog.name' => 'default',
-            'monolog.handlers' => [
-                'php://stderr' => Logger::INFO,
-            ],
         ];
-
-        if ('dev' === $appEnv) {
-            $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
-            $config['monolog.handlers'][sprintf('%s/application.log', $dirs['logs'])] = Logger::DEBUG;
-        }
-
-        return $config;
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, string>
      */
     public function getDirectories(): array
     {
