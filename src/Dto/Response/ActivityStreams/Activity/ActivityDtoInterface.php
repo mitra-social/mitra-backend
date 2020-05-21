@@ -10,7 +10,7 @@ use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 interface ActivityDtoInterface
 {
     /**
-     * @return array|LinkDto|ObjectDto|string|null
+     * @return array<LinkDto|string|ObjectDto>|LinkDto|ObjectDto|string|null
      */
     public function getActor();
 }

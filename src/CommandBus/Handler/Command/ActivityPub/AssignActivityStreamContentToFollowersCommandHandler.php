@@ -104,14 +104,15 @@ final class AssignActivityStreamContentToFollowersCommandHandler
     private function determineAssignmentList(ObjectDto $dto): array
     {
         $recipientList = array_merge(
-            $dto->to ?? [],
-            $dto->cc ?? [],
-            $dto->bcc ?? [],
-            $dto->bto ?? [],
-            $dto->audience ?? [],
+            (array) $dto->to ?? [],
+            (array) $dto->cc ?? [],
+            (array) $dto->bcc ?? [],
+            (array) $dto->bto ?? [],
+            (array) $dto->audience ?? [],
         );
 
-        $filteredRecipientList = array_filter($recipientList, function ($value) {
+        /** @var array<string> $filteredRecipientList */
+        $filteredRecipientList = array_filter($recipientList, function ($value): bool {
             if (!is_string($value)) {
                 // TODO: support other stuff than link representations as strings
                 return false;

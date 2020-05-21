@@ -48,6 +48,17 @@ class ActivityStreamContent
      */
     private $object;
 
+    /**
+     * ActivityStreamContent constructor.
+     * @param string $id
+     * @param string $externalId
+     * @param string $externalIdHash
+     * @param string $type
+     * @param array<mixed> $object
+     * @param Actor|null $attributedTo
+     * @param \DateTimeInterface|null $published
+     * @param \DateTimeInterface|null $updated
+     */
     public function __construct(
         string $id,
         string $externalId,
@@ -89,18 +100,12 @@ class ActivityStreamContent
         return $this->type;
     }
 
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getPublished(): ?\DateTime
+    public function getPublished(): ?\DateTimeInterface
     {
         return $this->published;
     }
 
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getUpdated(): ?\DateTime
+    public function getUpdated(): ?\DateTimeInterface
     {
         return $this->updated;
     }

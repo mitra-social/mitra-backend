@@ -153,66 +153,9 @@ final class Config implements ConfigInterface
             'doctrine.migrations.table' => 'doctrine_migration_version',
             'queue_dns' => $this->env->get(self::ENV_QUEUE_DNS),
             'mappings' => [
-                'orm' => [
-                    AbstractUser::class => AbstractUserOrmMapping::class,
-                    ExternalUser::class => ExternalUserOrmMapping::class,
-                    InternalUser::class => InternalUserOrmMapping::class,
-                    ActivityStreamContent::class => ActivityStreamContentOrmMapping::class,
-                    ActivityStreamContentAssignment::class => ActivityStreamContentAssignmentOrmMapping::class,
-                    Actor::class => ActorOrmMapping::class,
-                    Person::class => PersonOrmMapping::class,
-                    Organization::class => OrganizationOrmMapping::class,
-                    Subscription::class => SubscriptionOrmMapping::class,
-                ],
-                'validation' => [
-                    CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,
-                    TokenRequestDto::class => TokenRequestDtoValidationMapping::class,
-
-                    // ActivityPub
-                    ObjectDto::class => ObjectDtoValidationMapping::class,
-                    // TODO: LinkDto::class => ,
-                    ArticleDto::class => ObjectDtoValidationMapping::class,
-                    DocumentDto::class => ObjectDtoValidationMapping::class,
-                    Image::class => ObjectDtoValidationMapping::class,
-
-                    PersonDto::class => ObjectDtoValidationMapping::class,
-
-                    FollowDto::class => ActivityDtoValidationMapping::class,
-                    CreateDto::class => ActivityDtoValidationMapping::class,
-                ],
-                'bus' => [
-                    'command_handlers' => [
-                        CreateUserCommand::class => CreateUserCommandHandler::class,
-                        AssignActorCommand::class => AssignActorCommandHandler::class,
-                        SendObjectToRecipientsCommand::class => SendObjectToRecipientsCommandHandler::class,
-                        FollowCommand::class => FollowCommandHandler::class,
-                        UndoCommand::class => UndoCommandHandler::class,
-                        ValidateContentCommand::class => ValidateContentCommandHandler::class,
-
-                        PersistActivityStreamContentCommand::class => PersistActivityStreamContentCommandHandler::class,
-                        AttributeActivityStreamContentCommand::class => AttributeActivityStreamContentCommandHandler::class,
-                        AssignActivityStreamContentToFollowersCommand::class => AssignActivityStreamContentToFollowersCommandHandler::class,
-                    ],
-                    'event_handlers' => [
-                        ActivityStreamContentReceivedEvent::class => [
-                            ActivityStreamContentReceivedEventHandler::class,
-                        ],
-                        ActivityStreamContentAttributedEvent::class => [
-                            ActivityStreamContentAttributedEventHandler::class,
-                        ],
-                        ActivityStreamContentPersistedEvent::class => [
-                            ActivityStreamContentPersistedEventHandler::class,
-                        ],
-                        ContentAcceptedEvent::class => [
-                            ContentAcceptedEventHandler::class,
-                        ],
-                    ],
-                    'routing' => [
-                        /*ActivityStreamContentReceivedEvent::class => [
-                            TransportInterface::class
-                        ],*/
-                    ],
-                ],
+                'orm' => $this->getMappingOrm(),
+                'validation' => $this->getMappingValidation(),
+                'bus' => $this->getMappingBus(),
             ],
             'command_bus.event_subscribers' => [
                 ContentAcceptedEvent::class => [
@@ -236,6 +179,88 @@ final class Config implements ConfigInterface
         }
 
         return $config;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getMappingOrm(): array
+    {
+        return [
+            AbstractUser::class => AbstractUserOrmMapping::class,
+            ExternalUser::class => ExternalUserOrmMapping::class,
+            InternalUser::class => InternalUserOrmMapping::class,
+            ActivityStreamContent::class => ActivityStreamContentOrmMapping::class,
+            ActivityStreamContentAssignment::class => ActivityStreamContentAssignmentOrmMapping::class,
+            Actor::class => ActorOrmMapping::class,
+            Person::class => PersonOrmMapping::class,
+            Organization::class => OrganizationOrmMapping::class,
+            Subscription::class => SubscriptionOrmMapping::class,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getMappingValidation(): array
+    {
+        return [
+            CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,
+            TokenRequestDto::class => TokenRequestDtoValidationMapping::class,
+
+            // ActivityPub
+            ObjectDto::class => ObjectDtoValidationMapping::class,
+            // TODO: LinkDto::class => ,
+            ArticleDto::class => ObjectDtoValidationMapping::class,
+            DocumentDto::class => ObjectDtoValidationMapping::class,
+            Image::class => ObjectDtoValidationMapping::class,
+
+            PersonDto::class => ObjectDtoValidationMapping::class,
+
+            FollowDto::class => ActivityDtoValidationMapping::class,
+            CreateDto::class => ActivityDtoValidationMapping::class,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getMappingBus(): array
+    {
+        return [
+            'command_handlers' => [
+                CreateUserCommand::class => CreateUserCommandHandler::class,
+                AssignActorCommand::class => AssignActorCommandHandler::class,
+                SendObjectToRecipientsCommand::class => SendObjectToRecipientsCommandHandler::class,
+                FollowCommand::class => FollowCommandHandler::class,
+                UndoCommand::class => UndoCommandHandler::class,
+                ValidateContentCommand::class => ValidateContentCommandHandler::class,
+
+                PersistActivityStreamContentCommand::class => PersistActivityStreamContentCommandHandler::class,
+                AttributeActivityStreamContentCommand::class => AttributeActivityStreamContentCommandHandler::class,
+                AssignActivityStreamContentToFollowersCommand::class =>
+                    AssignActivityStreamContentToFollowersCommandHandler::class,
+            ],
+            'event_handlers' => [
+                ActivityStreamContentReceivedEvent::class => [
+                    ActivityStreamContentReceivedEventHandler::class,
+                ],
+                ActivityStreamContentAttributedEvent::class => [
+                    ActivityStreamContentAttributedEventHandler::class,
+                ],
+                ActivityStreamContentPersistedEvent::class => [
+                    ActivityStreamContentPersistedEventHandler::class,
+                ],
+                ContentAcceptedEvent::class => [
+                    ContentAcceptedEventHandler::class,
+                ],
+            ],
+            'routing' => [
+                /*ActivityStreamContentReceivedEvent::class => [
+                    TransportInterface::class
+                ],*/
+            ],
+        ];
     }
 
     /**

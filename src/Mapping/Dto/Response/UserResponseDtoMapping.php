@@ -76,7 +76,7 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
         $userResponseDto->url = $userUrl;
         $userResponseDto->publicKey = [
             'id' => $userUrl . '#main-key',
-            'owner' =>  $userResponseDto->url,
+            'owner' =>  $userResponseDto->id,
             'publicKeyPem' => $entity->getPublicKey(),
         ];
 

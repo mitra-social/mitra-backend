@@ -12,9 +12,4 @@ class IntransitiveActivityDto extends AbstractActivity
      * @var string
      */
     public $type = 'IntransitiveActivity';
-
-    public function getActor(): ActorInterface
-    {
-        // TODO: Implement getActor() method.
-    }
 }

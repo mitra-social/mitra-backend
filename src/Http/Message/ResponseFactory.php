@@ -110,7 +110,7 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
         ApiProblemInterface $apiProblem,
         ServerRequestInterface $request,
         string $mimeType
-    ) {
+    ): ResponseInterface {
         return $this->createResponseFromEntity(
             $apiProblem,
             ApiProblemDto::class,

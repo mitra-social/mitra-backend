@@ -65,7 +65,7 @@ trait ActorTrait
     public $endpoints;
 
     /**
-     * @var null|array<string, string>
+     * @var null|array<string, null|string>
      */
     public $publicKey;
 

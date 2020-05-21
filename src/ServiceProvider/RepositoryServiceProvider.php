@@ -31,7 +31,9 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
             return new ExternalUserRepository($container['doctrine.orm.em']->getRepository(ExternalUser::class));
         };
 
-        $container[ActivityStreamContentAssignmentRepository::class] = static function (Container $container) {
+        $container[ActivityStreamContentAssignmentRepository::class] = static function (
+            Container $container
+        ): ActivityStreamContentAssignmentRepository {
             return new ActivityStreamContentAssignmentRepository(
                 $container['doctrine.orm.em']->getRepository(ActivityStreamContentAssignment::class)
             );

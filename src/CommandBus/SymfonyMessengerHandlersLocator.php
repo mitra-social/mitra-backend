@@ -17,10 +17,14 @@ final class SymfonyMessengerHandlersLocator implements HandlersLocatorInterface
     private $container;
 
     /**
-     * @var array<string, string>
+     * @var array<string, array<string>|string>
      */
     private $handlerMap;
 
+    /**
+     * @param ContainerInterface $container
+     * @param array<string, array<string>|string> $handlerMap
+     */
     public function __construct(ContainerInterface $container, array $handlerMap)
     {
         $this->container = $container;

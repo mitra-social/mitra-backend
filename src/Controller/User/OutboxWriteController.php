@@ -10,6 +10,7 @@ use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
@@ -132,7 +133,7 @@ final class OutboxWriteController
         }
     }
 
-    private function getCommandForObject(Actor $outboxActor, object $object): ?object
+    private function getCommandForObject(Actor $outboxActor, object $object): ?CommandInterface
     {
         if ($object instanceof FollowDto) {
             return new FollowCommand($outboxActor, $object);

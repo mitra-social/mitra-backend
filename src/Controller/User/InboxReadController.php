@@ -86,8 +86,6 @@ final class InboxReadController extends AbstractOrderedCollectionController
             $dtoItems[]  = $dto;
         }
 
-        Assert::allIsInstanceOfAny($dtoItems, [ObjectDto::class, LinkDto::class]);
-
         return $dtoItems;
     }
 

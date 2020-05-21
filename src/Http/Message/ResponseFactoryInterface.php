@@ -40,5 +40,5 @@ interface ResponseFactoryInterface
         ApiProblemInterface $apiProblem,
         ServerRequestInterface $request,
         string $mimeType
-    );
+    ): ResponseInterface;
 }
