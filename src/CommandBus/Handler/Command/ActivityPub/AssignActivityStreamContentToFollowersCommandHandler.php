@@ -11,6 +11,7 @@ use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAssignedEvent;
 use Mitra\CommandBus\EventEmitterInterface;
 use Mitra\Dto\Response\ActivityStreams\CollectionDto;
 use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
+use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
@@ -112,20 +113,27 @@ final class AssignActivityStreamContentToFollowersCommandHandler
     /**
      * @param ObjectDto $dto
      * @return array<Actor>
+     * @throws \Mitra\ActivityPub\Client\ActivityPubClientException
      */
     private function determineAssignmentList(ObjectDto $dto): array
     {
+        /** @var array<string|LinkDto|ObjectDto> $mergedRecipientList */
         $mergedRecipientList = array_merge(
             (array) $dto->to ?? [],
             (array) $dto->cc ?? [],
             (array) $dto->bcc ?? [],
             (array) $dto->bto ?? [],
-            (array) $dto->audience ?? [],
+            (array) $dto->audience ?? []
         );
 
         return $this->getRelevantRecipients($mergedRecipientList);
     }
 
+    /**
+     * @param array<string|LinkDto|ObjectDto> $recipientList
+     * @return array<Actor>
+     * @throws \Mitra\ActivityPub\Client\ActivityPubClientException
+     */
     private function getRelevantRecipients(array $recipientList): array
     {
         /** @var array<string> $filteredRecipientList */
@@ -169,29 +177,44 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         return $actors;
     }
 
+    /**
+     * @param CollectionDto $collection
+     * @return array<string|LinkDto|ObjectDto>
+     * @throws \Mitra\ActivityPub\Client\ActivityPubClientException
+     */
     private function getItemsFromCollection(CollectionDto $collection): array
     {
         if ($collection instanceof OrderedCollectionDto && null !== $collection->orderedItems) {
             return $collection->orderedItems;
-        } elseif ($collection instanceof CollectionDto && null !== $collection->items) {
+        }
+
+        if (null !== $collection->items) {
             return $collection->items;
-        } elseif (null !== $collection->first) {
+        }
+
+        if (null !== $collection->first) {
             $items = [];
             $next = $collection->first;
 
             while (null !== $next) {
                 $response = $this->activityPubClient->sendRequest(
-                    $this->activityPubClient->createRequest('GET', $collection->first)
+                    $this->activityPubClient->createRequest('GET', (string) $collection->first)
                 );
                 $objectResponse = $response->getReceivedObject();
 
                 if ($objectResponse instanceof OrderedCollectionPageDto) {
                     $items = array_merge($items, $objectResponse->orderedItems);
-                } elseif ($objectResponse instanceof CollectionPageDto) {
-                    $items = array_merge($items, $objectResponse->items);
+                    $next = $objectResponse->next;
+                    continue;
                 }
 
-                $next = $objectResponse->next;
+                if ($objectResponse instanceof CollectionPageDto) {
+                    $items = array_merge($items, $objectResponse->items);
+                    $next = $objectResponse->next;
+                    continue;
+                }
+
+                $next = null;
             }
 
             return $items;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\ServiceProvider;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\CommandBus\CommandBusInterface;
@@ -215,7 +216,8 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container[EventEmitterInterface::class],
                 $uriFactory->createUri($container['baseUrl']),
                 $container[RouteResolverInterface::class],
-                $container[UriFactoryInterface::class]
+                $container[UriFactoryInterface::class],
+                $container[ActivityPubClient::class]
             );
         };
     }
