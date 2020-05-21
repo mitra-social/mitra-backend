@@ -49,7 +49,7 @@ final class AppFactory
             true,
             $container->get(LoggerInterface::class)
         );
-        $errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
+        //$errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
 
         $app->group('', new PublicRouterProvider());
         $app->group('', new PrivateRouteProvider())->add(JwtAuthentication::class);
