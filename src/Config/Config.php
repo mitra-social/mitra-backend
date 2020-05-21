@@ -255,12 +255,18 @@ final class Config implements ConfigInterface
                     ContentAcceptedEventHandler::class,
                 ],
             ],
-            'routing' => [
-                /*ActivityStreamContentReceivedEvent::class => [
-                    TransportInterface::class
-                ],*/
+            'monolog.name' => 'default',
+            'monolog.handlers' => [
+                'php://stderr' => Logger::INFO,
             ],
         ];
+
+        if ('dev' === $appEnv) {
+            $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
+            $config['monolog.handlers'][sprintf('%s/application.log', $dirs['logs'])] = Logger::DEBUG;
+        }
+
+        return $config;
     }
 
     /**
