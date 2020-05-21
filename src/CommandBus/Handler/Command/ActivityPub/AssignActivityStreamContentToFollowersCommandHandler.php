@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAssignedEvent;
 use Mitra\CommandBus\EventEmitterInterface;
+use Mitra\Dto\Response\ActivityStreams\CollectionDto;
+use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Repository\InternalUserRepository;
@@ -55,6 +60,11 @@ final class AssignActivityStreamContentToFollowersCommandHandler
      */
     private $routeResolver;
 
+    /**
+     * @var ActivityPubClient
+     */
+    private $activityPubClient;
+
     public function __construct(
         SubscriptionRepository $subscriptionRepository,
         InternalUserRepository $internalUserRepository,
@@ -62,7 +72,8 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         EventEmitterInterface $eventEmitter,
         UriInterface $baseUri,
         RouteResolverInterface $routeResolver,
-        UriFactoryInterface $uriFactory
+        UriFactoryInterface $uriFactory,
+        ActivityPubClient $activityPubClient
     ) {
         $this->subscriptionRepository = $subscriptionRepository;
         $this->internalUserRepository = $internalUserRepository;
@@ -71,6 +82,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         $this->baseUri = $baseUri;
         $this->routeResolver = $routeResolver;
         $this->uriFactory = $uriFactory;
+        $this->activityPubClient = $activityPubClient;
     }
 
     public function __invoke(AssignActivityStreamContentToFollowersCommand $command): void
@@ -103,7 +115,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
      */
     private function determineAssignmentList(ObjectDto $dto): array
     {
-        $recipientList = array_merge(
+        $mergedRecipientList = array_merge(
             (array) $dto->to ?? [],
             (array) $dto->cc ?? [],
             (array) $dto->bcc ?? [],
@@ -111,23 +123,36 @@ final class AssignActivityStreamContentToFollowersCommandHandler
             (array) $dto->audience ?? [],
         );
 
+        return $this->getRelevantRecipients($mergedRecipientList);
+    }
+
+    private function getRelevantRecipients(array $recipientList): array
+    {
         /** @var array<string> $filteredRecipientList */
         $filteredRecipientList = array_filter($recipientList, function ($value): bool {
-            if (!is_string($value)) {
-                // TODO: support other stuff than link representations as strings
-                return false;
-            }
-
-            if (0 !== strpos($value, (string) $this->baseUri)) {
-                return false;
-            }
-
-            return true;
+            // TODO: support other stuff than link representations as strings
+            return is_string($value);
         });
 
+        $baseUriAsString = (string) $this->baseUri;
         $actors = [];
 
         foreach ($filteredRecipientList as $recipient) {
+            if (0 !== strpos($recipient, $baseUriAsString)) {
+                $response = $this->activityPubClient->sendRequest(
+                    $this->activityPubClient->createRequest('GET', $recipient)
+                );
+                $responseObject = $response->getReceivedObject();
+
+                if ($responseObject instanceof CollectionDto) {
+                    $actors = array_merge($actors, $this->getRelevantRecipients(
+                        $this->getItemsFromCollection($responseObject)
+                    ));
+                }
+
+                continue;
+            }
+
             $actorUrl = $this->uriFactory->createUri($recipient);
 
             $routingResult = $this->routeResolver->computeRoutingResults($actorUrl->getPath(), 'GET');
@@ -142,5 +167,36 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         }
 
         return $actors;
+    }
+
+    private function getItemsFromCollection(CollectionDto $collection): array
+    {
+        if ($collection instanceof OrderedCollectionDto && null !== $collection->orderedItems) {
+            return $collection->orderedItems;
+        } elseif ($collection instanceof CollectionDto && null !== $collection->items) {
+            return $collection->items;
+        } elseif (null !== $collection->first) {
+            $items = [];
+            $next = $collection->first;
+
+            while (null !== $next) {
+                $response = $this->activityPubClient->sendRequest(
+                    $this->activityPubClient->createRequest('GET', $collection->first)
+                );
+                $objectResponse = $response->getReceivedObject();
+
+                if ($objectResponse instanceof OrderedCollectionPageDto) {
+                    $items = array_merge($items, $objectResponse->orderedItems);
+                } elseif ($objectResponse instanceof CollectionPageDto) {
+                    $items = array_merge($items, $objectResponse->items);
+                }
+
+                $next = $objectResponse->next;
+            }
+
+            return $items;
+        }
+
+        return [];
     }
 }

@@ -103,10 +103,11 @@ final class InboxWriteController
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
-        $decodedRequestBody = $this->decoder->decode((string) $request->getBody(), $accept);
+        $body = (string) $request->getBody();
+        $decodedRequestBody = $this->decoder->decode($body, $accept);
 
         $this->logger->info('Write request to inbox', [
-            'request.body' => (string) $request->getBody(),
+            'request.body' => $body,
             'request.headers' => $request->getHeaders(),
         ]);
 
