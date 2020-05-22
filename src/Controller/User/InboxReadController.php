@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\Dto\DataToDtoTransformer;
+use Mitra\Dto\EntityToDtoMapper;
+use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
+use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\Actor\Person;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Mapping\Dto\ActivityStreamTypeToDtoClassMapping;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
-use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\UriGenerator;
-use Webmozart\Assert\Assert;
 
 final class InboxReadController extends AbstractOrderedCollectionController
 {
@@ -29,17 +32,24 @@ final class InboxReadController extends AbstractOrderedCollectionController
      */
     private $dataToDtoTransformer;
 
+    /**
+     * @var EntityToDtoMapper
+     */
+    private $entityToDtoMapper;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         InternalUserRepository $internalUserRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
         UriGenerator $uriGenerator,
-        DataToDtoTransformer $dataToDtoManager
+        DataToDtoTransformer $dataToDtoManager,
+        EntityToDtoMapper $entityToDtoMapper
     ) {
         parent::__construct($internalUserRepository, $uriGenerator, $responseFactory);
 
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->dataToDtoTransformer = $dataToDtoManager;
+        $this->entityToDtoMapper = $entityToDtoMapper;
     }
 
     /**
@@ -73,10 +83,18 @@ final class InboxReadController extends AbstractOrderedCollectionController
 
             unset($object['@context']);
 
-            /** @var ObjectDto $dto */
+            /** @var AbstractActivity $dto */
             $dto = $this->dataToDtoTransformer->populate(
                 ActivityStreamTypeToDtoClassMapping::map($content->getType()),
                 $object
+            );
+
+            // Inline author infos
+            $author = $item->getContent()->getAttributedTo()->getUser();
+            $dtoClass = $author->getActor() instanceof Person ? PersonDto::class : OrganizationDto::class;
+            $dto->actor = $this->entityToDtoMapper->map(
+                $author,
+                $dtoClass
             );
 
             // Don't leak anonymous recipients

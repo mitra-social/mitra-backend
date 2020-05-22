@@ -200,7 +200,12 @@ final class InboxReadControllerTest extends IntegrationTestCase
                         'type' => 'Note',
                         'content' => $dtoContent,
                     ],
-                    'actor' => 'https://example.com/user/bob',
+                    'actor' => [
+                        'id' => 'https://example.com/user/bob',
+                        'preferredUsername' => 'bob',
+                        'name' => 'Bob',
+                        'type' => 'Person',
+                    ],
                     'id' => $dto->id,
                     'to' => [
                         $toUserExternalId,

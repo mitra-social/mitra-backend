@@ -22,13 +22,14 @@ use Mitra\Dto\Response\ActivityStreams\EventDto;
 use Mitra\Dto\Response\ActivityStreams\ImageDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
 use Mitra\Dto\Response\ActivityStreams\VideoDto;
-use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
-use Mitra\Mapping\Dto\Response\ActivityPub\PersonDtoMapping;
 use Mitra\Mapping\Dto\Response\ApiProblemDtoMapping;
 use Mitra\Mapping\Dto\Response\BadRequestApiProblemDtoMapping;
+use Mitra\Mapping\Dto\Response\OrganizationDtoMapping;
+use Mitra\Mapping\Dto\Response\PersonDtoMapping;
 use Mitra\Mapping\Dto\Response\UserResponseDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationListDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationDtoMapping;
+use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
@@ -52,6 +53,7 @@ final class DtoServiceProvider implements ServiceProviderInterface
         $container[EntityToDtoMapper::class] = static function (Container $container): EntityToDtoMapper {
             return new EntityToDtoMapper($container[ContainerInterface::class], [
                 PersonDtoMapping::class,
+                OrganizationDtoMapping::class,
                 UserResponseDtoMapping::class,
                 ViolationListDtoMapping::class,
                 ViolationDtoMapping::class,

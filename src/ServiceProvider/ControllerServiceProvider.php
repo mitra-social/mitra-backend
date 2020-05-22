@@ -19,6 +19,7 @@ use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\DtoToEntityMapper;
+use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -81,7 +82,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
                 $container[UriGenerator::class],
-                $container[DataToDtoTransformer::class]
+                $container[DataToDtoTransformer::class],
+                $container[EntityToDtoMapper::class]
             );
         };
 

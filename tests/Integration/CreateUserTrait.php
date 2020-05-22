@@ -51,7 +51,7 @@ trait CreateUserTrait
             throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $actorType));
         }
 
-        $actor->setName($actor->getName());
+        $actor->setName('Bob');
 
         $externalUser->setActor($actor);
 
