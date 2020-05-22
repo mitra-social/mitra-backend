@@ -63,6 +63,10 @@ final class ActivityStreamTypeToDtoClassMapping
         // Link
         'Link' => LinkDto::class,
         'Mention' => MentionDto::class,
+
+        // TODO these is a hack to support hashtags. The final goal is to strip/replace unknown/non-standard types
+        'Hashtag' => LinkDto::class,
+        'Tag' => LinkDto::class,
     ];
 
     public static function map(string $activityStreamType): string
