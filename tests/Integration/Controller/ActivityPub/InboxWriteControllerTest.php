@@ -121,6 +121,7 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         $externalCollectionId = sprintf('https://example.com/user/%s/followers', $externalUser->getPreferredUsername());
         $externalCollectionFirstPage = $externalCollectionId . '?page=1';
+        $unresolvableCollectionId = 'http://example.com/list/not.found';
 
         $dto = new CreateDto();
         $dto->id = sprintf('https://example.com/user/%s/post/123456', $externalUser->getPreferredUsername());
@@ -130,6 +131,7 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $dto->to = [
             'https://www.w3.org/ns/activitystreams#Public',
             $externalCollectionId,
+            $unresolvableCollectionId,
         ];
 
         $objectAndToResponse1 = self::$responseFactory->createResponse(200)
@@ -146,10 +148,16 @@ final class InboxWriteControllerTest extends IntegrationTestCase
             '{"type": "OrderedCollectionPage", "totalItems": 1, "orderedItems": ["'.$toUserExternalId.'"]}'
         );
 
+        $objectAndToResponse3 = self::$responseFactory->createResponse(404);
+
         $requestResolveExternalCollection = self::$requestFactory->createRequest('GET', $externalCollectionId);
         $requestResolveExternalCollectionPage = self::$requestFactory->createRequest(
             'GET',
             $externalCollectionFirstPage
+        );
+        $requestResolveUnresolvableExternalCollection = self::$requestFactory->createRequest(
+            'GET',
+            $unresolvableCollectionId
         );
 
         $apiHttpClientMock = $this->getClientMock([
@@ -160,6 +168,10 @@ final class InboxWriteControllerTest extends IntegrationTestCase
             [
                 $requestResolveExternalCollectionPage,
                 $objectAndToResponse2,
+            ],
+            [
+                $requestResolveUnresolvableExternalCollection,
+                $objectAndToResponse3,
             ],
         ]);
 

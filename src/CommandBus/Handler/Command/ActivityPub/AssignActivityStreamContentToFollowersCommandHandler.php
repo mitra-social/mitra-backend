@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Mitra\ActivityPub\Client\ActivityPubClientException;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAssignedEvent;
@@ -21,6 +22,7 @@ use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Slim\Interfaces\RouteResolverInterface;
 
@@ -68,6 +70,11 @@ final class AssignActivityStreamContentToFollowersCommandHandler
      */
     private $activityPubClient;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         SubscriptionRepository $subscriptionRepository,
         InternalUserRepository $internalUserRepository,
@@ -76,7 +83,8 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         UriInterface $baseUri,
         RouteResolverInterface $routeResolver,
         UriFactoryInterface $uriFactory,
-        ActivityPubClientInterface $activityPubClient
+        ActivityPubClientInterface $activityPubClient,
+        LoggerInterface $logger
     ) {
         $this->subscriptionRepository = $subscriptionRepository;
         $this->internalUserRepository = $internalUserRepository;
@@ -86,6 +94,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         $this->routeResolver = $routeResolver;
         $this->uriFactory = $uriFactory;
         $this->activityPubClient = $activityPubClient;
+        $this->logger = $logger;
     }
 
     public function __invoke(AssignActivityStreamContentToFollowersCommand $command): void
@@ -149,9 +158,16 @@ final class AssignActivityStreamContentToFollowersCommandHandler
 
         foreach ($filteredRecipientList as $recipient) {
             if (0 !== strpos($recipient, $baseUriAsString)) {
-                $response = $this->activityPubClient->sendRequest(
-                    $this->activityPubClient->createRequest('GET', $recipient)
-                );
+                // External resource
+                try {
+                    $response = $this->activityPubClient->sendRequest(
+                        $this->activityPubClient->createRequest('GET', $recipient)
+                    );
+                } catch (ActivityPubClientException $e) {
+                    $this->logger->info(sprintf('Could not fetch external recipient with id `%s`', $recipient));
+                    continue;
+                }
+
                 $responseObject = $response->getReceivedObject();
 
                 if ($responseObject instanceof CollectionDto) {
@@ -159,21 +175,18 @@ final class AssignActivityStreamContentToFollowersCommandHandler
                         $this->getItemsFromCollection($responseObject)
                     ));
                 }
+            } else {
+                // Internal resource
+                $actorUrl = $this->uriFactory->createUri($recipient);
+                $routingResult = $this->routeResolver->computeRoutingResults($actorUrl->getPath(), 'GET');
+                $username = $routingResult->getRouteArguments()['username'];
 
-                continue;
+                if (null === $user = $this->internalUserRepository->findByUsername($username)) {
+                    continue;
+                }
+
+                $actors[] = $user->getActor();
             }
-
-            $actorUrl = $this->uriFactory->createUri($recipient);
-
-            $routingResult = $this->routeResolver->computeRoutingResults($actorUrl->getPath(), 'GET');
-
-            $username = $routingResult->getRouteArguments()['username'];
-
-            if (null === $user = $this->internalUserRepository->findByUsername($username)) {
-                continue;
-            }
-
-            $actors[] = $user->getActor();
         }
 
         return $actors;
@@ -199,9 +212,17 @@ final class AssignActivityStreamContentToFollowersCommandHandler
             $next = $collection->first;
 
             while (null !== $next) {
-                $response = $this->activityPubClient->sendRequest(
-                    $this->activityPubClient->createRequest('GET', (string) $collection->first)
-                );
+                $nextUrl = (string) $next;
+
+                try {
+                    $response = $this->activityPubClient->sendRequest(
+                        $this->activityPubClient->createRequest('GET', $nextUrl)
+                    );
+                } catch (ActivityPubClientException $e) {
+                    $this->logger->info(sprintf('Could not fetch external recipient with id `%s`', $nextUrl));
+                    continue;
+                }
+
                 $objectResponse = $response->getReceivedObject();
 
                 if ($objectResponse instanceof OrderedCollectionPageDto) {

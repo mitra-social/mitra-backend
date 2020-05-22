@@ -217,7 +217,8 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $uriFactory->createUri($container['baseUrl']),
                 $container[RouteResolverInterface::class],
                 $container[UriFactoryInterface::class],
-                $container[ActivityPubClientInterface::class]
+                $container[ActivityPubClientInterface::class],
+                $container[LoggerInterface::class]
             );
         };
     }
