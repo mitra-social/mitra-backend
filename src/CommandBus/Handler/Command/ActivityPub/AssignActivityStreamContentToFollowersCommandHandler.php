@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Mitra\ActivityPub\Client\ActivityPubClient;
+use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAssignedEvent;
 use Mitra\CommandBus\EventEmitterInterface;
@@ -62,7 +62,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
     private $routeResolver;
 
     /**
-     * @var ActivityPubClient
+     * @var ActivityPubClientInterface
      */
     private $activityPubClient;
 
@@ -74,7 +74,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         UriInterface $baseUri,
         RouteResolverInterface $routeResolver,
         UriFactoryInterface $uriFactory,
-        ActivityPubClient $activityPubClient
+        ActivityPubClientInterface $activityPubClient
     ) {
         $this->subscriptionRepository = $subscriptionRepository;
         $this->internalUserRepository = $internalUserRepository;
