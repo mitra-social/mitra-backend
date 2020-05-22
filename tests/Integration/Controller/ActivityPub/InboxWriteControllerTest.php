@@ -128,18 +128,23 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $dto->object = new NoteDto();
         $dto->object->content = $dtoContent;
         $dto->to = [
+            'https://www.w3.org/ns/activitystreams#Public',
             $externalCollectionId,
         ];
 
         $objectAndToResponse1 = self::$responseFactory->createResponse(200)
             ->withHeader('Content-Type', 'application/activity+json');
 
-        $objectAndToResponse1->getBody()->write('{"type": "OrderedCollection", "totalItems": 1, "first": "'.$externalCollectionFirstPage.'"}');
+        $objectAndToResponse1->getBody()->write(
+            '{"type": "OrderedCollection", "totalItems": 1, "first": "'.$externalCollectionFirstPage.'"}'
+        );
 
         $objectAndToResponse2 = self::$responseFactory->createResponse(200)
             ->withHeader('Content-Type', 'application/activity+json');
 
-        $objectAndToResponse2->getBody()->write('{"type": "OrderedCollectionPage", "totalItems": 1, "orderedItems": ["'.$toUserExternalId.'"]}');
+        $objectAndToResponse2->getBody()->write(
+            '{"type": "OrderedCollectionPage", "totalItems": 1, "orderedItems": ["'.$toUserExternalId.'"]}'
+        );
 
         $requestResolveExternalCollection = self::$requestFactory->createRequest('GET', $externalCollectionId);
         $requestResolveExternalCollectionPage = self::$requestFactory->createRequest(

@@ -26,6 +26,8 @@ use Slim\Interfaces\RouteResolverInterface;
 
 final class AssignActivityStreamContentToFollowersCommandHandler
 {
+    private const PUBLIC_URL = 'https://www.w3.org/ns/activitystreams#Public';
+
     /**
      * @var SubscriptionRepository
      */
@@ -139,7 +141,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         /** @var array<string> $filteredRecipientList */
         $filteredRecipientList = array_filter($recipientList, function ($value): bool {
             // TODO: support other stuff than link representations as strings
-            return is_string($value);
+            return is_string($value) && self::PUBLIC_URL !== $value;
         });
 
         $baseUriAsString = (string) $this->baseUri;
