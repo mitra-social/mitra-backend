@@ -18,8 +18,18 @@ final class ActivityPubDtoPopulator implements DataToDtoPopulatorInterface
      */
     private function resolveCoreTypeDto($data)
     {
-        if (!is_array($data) || !array_key_exists('type', $data)) {
+        if (!is_array($data)) {
             return $data;
+        }
+
+        if (!array_key_exists('type', $data)) {
+            $resolvedArray = [];
+
+            foreach ($data as $value) {
+                $resolvedArray[] = $this->resolveCoreTypeDto($value);
+            }
+
+            return $resolvedArray;
         }
 
         try {

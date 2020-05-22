@@ -40,8 +40,6 @@ final class ActivityStreamTypeToDtoClassMapping
         'Document' => DocumentDto::class,
         'Event' => EventDto::class,
         'Image' => ImageDto::class,
-        'Link' => LinkDto::class,
-        'Mention' => MentionDto::class,
         'Note' => NoteDto::class,
         'Place' => PlaceDto::class,
         'Profile' => ProfileDto::class,
@@ -61,6 +59,10 @@ final class ActivityStreamTypeToDtoClassMapping
         'OrderedCollection' => OrderedCollectionDto::class,
         'CollectionPage' => CollectionPageDto::class,
         'OrderedCollectionPage' => OrderedCollectionPageDto::class,
+
+        // Link
+        'Link' => LinkDto::class,
+        'Mention' => MentionDto::class,
     ];
 
     public static function map(string $activityStreamType): string
