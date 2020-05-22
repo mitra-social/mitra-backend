@@ -92,10 +92,12 @@ final class InboxReadController extends AbstractOrderedCollectionController
             // Inline author infos
             $author = $item->getContent()->getAttributedTo()->getUser();
             $dtoClass = $author->getActor() instanceof Person ? PersonDto::class : OrganizationDto::class;
-            $dto->actor = $this->entityToDtoMapper->map(
+            /** @var ObjectDto $actorDto */
+            $actorDto = $this->entityToDtoMapper->map(
                 $author,
                 $dtoClass
             );
+            $dto->actor = $actorDto;
 
             // Don't leak anonymous recipients
             $dto->bto = null;
