@@ -7,15 +7,13 @@ namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\Client\ActivityPubClientException;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\CollectionIterator;
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAssignedEvent;
 use Mitra\CommandBus\EventEmitterInterface;
 use Mitra\Dto\Response\ActivityStreams\CollectionDto;
-use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
-use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
-use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Repository\InternalUserRepository;
@@ -141,22 +139,21 @@ final class AssignActivityStreamContentToFollowersCommandHandler
     }
 
     /**
-     * @param array<string|LinkDto|ObjectDto> $recipientList
+     * @param iterable<string|LinkDto|ObjectDto> $recipientList
      * @return array<Actor>
      * @throws \Mitra\ActivityPub\Client\ActivityPubClientException
      */
-    private function getRelevantRecipients(array $recipientList): array
+    private function getRelevantRecipients(iterable $recipientList): array
     {
-        /** @var array<string> $filteredRecipientList */
-        $filteredRecipientList = array_filter($recipientList, function ($value): bool {
-            // TODO: support other stuff than link representations as strings
-            return is_string($value) && self::PUBLIC_URL !== $value;
-        });
-
         $baseUriAsString = (string) $this->baseUri;
         $actors = [];
 
-        foreach ($filteredRecipientList as $recipient) {
+        foreach ($recipientList as $recipient) {
+            // TODO: support other stuff than link representations as strings
+            if (!is_string($recipient) || self::PUBLIC_URL === $recipient) {
+                continue;
+            }
+
             if (0 !== strpos($recipient, $baseUriAsString)) {
                 // External resource
                 try {
@@ -172,7 +169,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
 
                 if ($responseObject instanceof CollectionDto) {
                     $actors = array_merge($actors, $this->getRelevantRecipients(
-                        $this->getItemsFromCollection($responseObject)
+                        new CollectionIterator($this->activityPubClient, $responseObject)
                     ));
                 }
             } else {
@@ -190,59 +187,5 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         }
 
         return $actors;
-    }
-
-    /**
-     * @param CollectionDto $collection
-     * @return array<string|LinkDto|ObjectDto>
-     * @throws \Mitra\ActivityPub\Client\ActivityPubClientException
-     */
-    private function getItemsFromCollection(CollectionDto $collection): array
-    {
-        if ($collection instanceof OrderedCollectionDto && null !== $collection->orderedItems) {
-            return $collection->orderedItems;
-        }
-
-        if (null !== $collection->items) {
-            return $collection->items;
-        }
-
-        if (null !== $collection->first) {
-            $items = [];
-            $next = $collection->first;
-
-            while (null !== $next) {
-                $nextUrl = (string) $next;
-
-                try {
-                    $response = $this->activityPubClient->sendRequest(
-                        $this->activityPubClient->createRequest('GET', $nextUrl)
-                    );
-                } catch (ActivityPubClientException $e) {
-                    $this->logger->info(sprintf('Could not fetch external recipient with id `%s`', $nextUrl));
-                    continue;
-                }
-
-                $objectResponse = $response->getReceivedObject();
-
-                if ($objectResponse instanceof OrderedCollectionPageDto) {
-                    $items = array_merge($items, $objectResponse->orderedItems);
-                    $next = $objectResponse->next;
-                    continue;
-                }
-
-                if ($objectResponse instanceof CollectionPageDto) {
-                    $items = array_merge($items, $objectResponse->items);
-                    $next = $objectResponse->next;
-                    continue;
-                }
-
-                $next = null;
-            }
-
-            return $items;
-        }
-
-        return [];
     }
 }
