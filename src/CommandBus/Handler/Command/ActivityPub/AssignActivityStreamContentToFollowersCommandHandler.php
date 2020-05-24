@@ -149,8 +149,12 @@ final class AssignActivityStreamContentToFollowersCommandHandler
         $actors = [];
 
         foreach ($recipientList as $recipient) {
-            // TODO: support other stuff than link representations as strings
+            if ($recipient instanceof LinkDto) {
+                $recipient = (string) $recipient;
+            }
+
             if (!is_string($recipient) || self::PUBLIC_URL === $recipient) {
+                // TODO: support objects as well
                 continue;
             }
 
