@@ -1,5 +1,6 @@
 {
   "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://example.com/content/02753771-2198-44d7-a31d-0bde18fded30",
   "type": "Article",
   "name": "What a Crazy Day I Had",
   "content": "<div>... you will never believe ...</div>",

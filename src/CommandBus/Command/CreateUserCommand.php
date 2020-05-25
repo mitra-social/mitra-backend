@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Command;
 
+use Mitra\CommandBus\CommandInterface;
 use Mitra\Entity\User\InternalUser;
 
-final class CreateUserCommand
+final class CreateUserCommand implements CommandInterface
 {
     /**
      * @var InternalUser

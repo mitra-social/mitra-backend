@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Command\ActivityPub;
 
+use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\Actor\Actor;
@@ -11,7 +12,7 @@ use Mitra\Entity\Actor\Actor;
 /**
  * Sets the provided actor as the actor of the provided activity
  */
-final class AssignActorCommand
+final class AssignActorCommand implements CommandInterface
 {
     /**
      * @var Actor

@@ -16,7 +16,7 @@ use Mitra\Validator\Symfony\ValidationMappingInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\Choice;
-use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Validator\Constraints\DateTime;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\Type;
@@ -24,6 +24,8 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class ObjectDtoValidationMapping implements ValidationMappingInterface
 {
+    private const DATETIME_FORMAT = \DateTime::RFC3339;
+
     public function configureMapping(ClassMetadata $metadata): void
     {
         $imageOrLinkConstraints = [
@@ -44,7 +46,7 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
 
         $metadata
             ->addPropertyConstraints('context', [
-                new Type('string'),
+                new Type(['array', 'string']),
                 new NotBlank(),
             ])
             ->addPropertyConstraints('id', [
@@ -73,7 +75,7 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
             ->addPropertyConstraints('nameMap', $langStringConstraints)
             ->addPropertyConstraints('endTime', [
                 new Type('string'),
-                new Date(),
+                new DateTime(self::DATETIME_FORMAT),
             ])
             ->addPropertyConstraints('generator', self::getMultipleObjectOrLinkConstraints())
             ->addPropertyConstraints('icon', $imageOrLinkConstraints)
@@ -83,7 +85,7 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
             ->addPropertyConstraints('preview', self::getObjectOrLinkConstraints())
             ->addPropertyConstraints('published', [
                 new Type('string'),
-                new Date(),
+                new DateTime(self::DATETIME_FORMAT),
             ])
             ->addPropertyConstraints('replies', [
                 new Type(CollectionDto::class),
@@ -91,7 +93,7 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
             ])
             ->addPropertyConstraints('startTime', [
                 new Type('string'),
-                new Date(),
+                new DateTime(self::DATETIME_FORMAT),
             ])
             ->addPropertyConstraints('summary', [
                 new Type('string'),
@@ -100,7 +102,7 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
             ->addPropertyConstraints('tag', self::getMultipleObjectOrLinkConstraints())
             ->addPropertyConstraints('updated', [
                 new Type('string'),
-                new Date(),
+                new DateTime(self::DATETIME_FORMAT),
             ])
             ->addPropertyConstraints('url', self::getMultipleLinkConstraints())
             ->addPropertyConstraints('to', self::getMultipleObjectOrLinkConstraints())

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Command\ActivityPub;
 
-use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Entity\Actor\Actor;
 
-final class UndoCommand
+final class UndoCommand implements CommandInterface
 {
     /**
      * @var Actor

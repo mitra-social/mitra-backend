@@ -12,7 +12,7 @@ abstract class AbstractActivity extends ObjectDto implements ActivityDtoInterfac
     /**
      * Describes one or more entities that either performed or are expected to perform the activity. Any single activity
      * can have multiple actors. The actor MAY be specified using an indirect Link.
-     * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
+     * @var null|string|ObjectDto|LinkDto
      */
     public $actor;
 
@@ -45,4 +45,12 @@ abstract class AbstractActivity extends ObjectDto implements ActivityDtoInterfac
      * @var null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      */
     public $instrument;
+
+    /**
+     * @return array<LinkDto|ObjectDto|string>|LinkDto|ObjectDto|string|null
+     */
+    public function getActor()
+    {
+        return $this->actor;
+    }
 }

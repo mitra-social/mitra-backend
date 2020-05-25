@@ -14,8 +14,10 @@ use Slim\CallableResolver;
 use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\RouteCollectorInterface;
+use Slim\Interfaces\RouteResolverInterface;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
+use Slim\Routing\RouteResolver;
 
 final class SlimServiceProvider implements ServiceProviderInterface
 {
@@ -42,6 +44,10 @@ final class SlimServiceProvider implements ServiceProviderInterface
                 null,
                 $container['routerCacheFile']
             );
+        };
+
+        $container[RouteResolverInterface::class] = function () use ($container): RouteResolverInterface {
+            return new RouteResolver($container[RouteCollector::class]);
         };
 
         $container[UriGenerator::class] = static function (Container $container): UriGenerator {

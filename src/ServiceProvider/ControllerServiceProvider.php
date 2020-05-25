@@ -6,6 +6,7 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
+use Mitra\CommandBus\EventBusInterface;
 use Mitra\Controller\User\FollowingListController;
 use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
@@ -13,14 +14,16 @@ use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\InboxWriteController;
-use Mitra\Controller\User\OutboxController;
+use Mitra\Controller\User\OutboxWriteController;
 use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\DtoToEntityMapper;
+use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Http\Message\ResponseFactoryInterface;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
@@ -48,7 +51,6 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[TokenController::class] = static function (Container $container): TokenController {
             return new TokenController(
                 $container[ResponseFactoryInterface::class],
-                $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[TokenProvider::class],
                 $container[RequestToDtoTransformer::class]
@@ -77,16 +79,16 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[InboxReadController::class] = static function (Container $container): InboxReadController {
             return new InboxReadController(
                 $container[ResponseFactoryInterface::class],
-                $container[EncoderInterface::class],
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
                 $container[UriGenerator::class],
-                $container[DataToDtoTransformer::class]
+                $container[DataToDtoTransformer::class],
+                $container[EntityToDtoMapper::class]
             );
         };
 
-        $container[OutboxController::class] = static function (Container $container): OutboxController {
-            return new OutboxController(
+        $container[OutboxWriteController::class] = static function (Container $container): OutboxWriteController {
+            return new OutboxWriteController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
@@ -110,6 +112,14 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[InboxWriteController::class] = static function (Container $container): InboxWriteController {
             return new InboxWriteController(
                 $container[ResponseFactoryInterface::class],
+                $container[NormalizerInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[EventBusInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                $container[DecoderInterface::class],
+                $container[DtoToEntityMapper::class],
+                $container[InternalUserRepository::class],
                 $container[LoggerInterface::class]
             );
         };
@@ -119,8 +129,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[SubscriptionRepository::class],
                 $container[InternalUserRepository::class],
                 $container[UriGenerator::class],
-                $container[ResponseFactoryInterface::class],
-                $container[EncoderInterface::class]
+                $container[ResponseFactoryInterface::class]
             );
         };
 

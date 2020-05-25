@@ -8,8 +8,18 @@ use Doctrine\ORM\EntityRepository;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 
-final class ActivityStreamContentAssignmentRepository extends EntityRepository
+final class ActivityStreamContentAssignmentRepository
 {
+    /**
+     * @var EntityRepository
+     */
+    private $repository;
+
+    public function __construct(EntityRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * @param Actor $actor
      * @param int $offset
@@ -19,13 +29,13 @@ final class ActivityStreamContentAssignmentRepository extends EntityRepository
      */
     public function findContentForActor(Actor $actor, ?int $offset, ?int $limit): array
     {
-        $qb = $this->createQueryBuilder('ca')
+        $qb = $this->repository->createQueryBuilder('ca')
             ->select('ca', 'c')
             ->innerJoin('ca.content', 'c')
             ->where('ca.actor = :actor')
             ->orderBy('c.published', 'DESC')
             ->setParameters([
-                'actor' => $actor,
+                'actor' => $actor->getUser(),
             ])
         ;
 
@@ -42,7 +52,7 @@ final class ActivityStreamContentAssignmentRepository extends EntityRepository
 
     public function getTotalContentForUserId(Actor $actor): int
     {
-        $qb = $this->createQueryBuilder('ca');
+        $qb = $this->repository->createQueryBuilder('ca');
         $qb
             ->select($qb->expr()->count('ca'))
             ->where('ca.actor = :actor')

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\CommandBus\Handler;
+namespace Mitra\CommandBus\Handler\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\CommandBus\Command\CreateUserCommand;

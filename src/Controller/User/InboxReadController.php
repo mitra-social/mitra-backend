@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\Dto\DataToDtoTransformer;
+use Mitra\Dto\EntityToDtoMapper;
+use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
+use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\Actor\Person;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Mapping\Dto\ActivityStreamTypeToDtoClassMapping;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
-use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\UriGenerator;
-use Webmozart\Assert\Assert;
 
 final class InboxReadController extends AbstractOrderedCollectionController
 {
@@ -29,18 +32,24 @@ final class InboxReadController extends AbstractOrderedCollectionController
      */
     private $dataToDtoTransformer;
 
+    /**
+     * @var EntityToDtoMapper
+     */
+    private $entityToDtoMapper;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        EncoderInterface $encoder,
         InternalUserRepository $internalUserRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
         UriGenerator $uriGenerator,
-        DataToDtoTransformer $dataToDtoManager
+        DataToDtoTransformer $dataToDtoManager,
+        EntityToDtoMapper $entityToDtoMapper
     ) {
-        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $encoder);
+        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory);
 
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->dataToDtoTransformer = $dataToDtoManager;
+        $this->entityToDtoMapper = $entityToDtoMapper;
     }
 
     /**
@@ -74,13 +83,28 @@ final class InboxReadController extends AbstractOrderedCollectionController
 
             unset($object['@context']);
 
-            $dtoItems[] = $this->dataToDtoTransformer->populate(
+            /** @var AbstractActivity $dto */
+            $dto = $this->dataToDtoTransformer->populate(
                 ActivityStreamTypeToDtoClassMapping::map($content->getType()),
                 $object
             );
-        }
 
-        Assert::allIsInstanceOfAny($dtoItems, [ObjectDto::class, LinkDto::class]);
+            // Inline author infos
+            $author = $item->getContent()->getAttributedTo()->getUser();
+            $dtoClass = $author->getActor() instanceof Person ? PersonDto::class : OrganizationDto::class;
+            /** @var ObjectDto $actorDto */
+            $actorDto = $this->entityToDtoMapper->map(
+                $author,
+                $dtoClass
+            );
+            $dto->actor = $actorDto;
+
+            // Don't leak anonymous recipients
+            $dto->bto = null;
+            $dto->bcc = null;
+
+            $dtoItems[]  = $dto;
+        }
 
         return $dtoItems;
     }

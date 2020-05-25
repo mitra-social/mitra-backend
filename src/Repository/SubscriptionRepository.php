@@ -21,7 +21,7 @@ final class SubscriptionRepository
         $this->entityRepository = $entityRepository;
     }
 
-    public function findByActors(Actor $subscribingActor, Actor $subscribedActor): ?Subscription
+    public function getByActors(Actor $subscribingActor, Actor $subscribedActor): ?Subscription
     {
         $qb = $this->entityRepository->createQueryBuilder('s');
         $qb
@@ -33,6 +33,13 @@ final class SubscriptionRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
+    /**
+     * Returns the number of actors the given actor is following
+     * @param Actor $actor
+     * @return int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function getFollowingCountForActor(Actor $actor): int
     {
         $qb = $this->entityRepository->createQueryBuilder('s');
@@ -45,12 +52,13 @@ final class SubscriptionRepository
     }
 
     /**
+     * Returns all actors the given actor is following
      * @param Actor $actor
      * @param int|null $offset
      * @param int|null $limit
      * @return array<Subscription>
      */
-    public function findFollowingActorsForActor(Actor $actor, ?int $offset, ?int $limit): array
+    public function getFollowingActorsForActor(Actor $actor, ?int $offset, ?int $limit): array
     {
         $qb = $this->entityRepository->createQueryBuilder('s')
             ->select('s', 'a')
@@ -67,5 +75,49 @@ final class SubscriptionRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Returns all actors who follow the given actor
+     * @param Actor $actor
+     * @param int|null $offset
+     * @param int|null $limit
+     * @return array<Subscription>
+     */
+    public function getFollowersOfActor(Actor $actor, ?int $offset, ?int $limit): array
+    {
+        $qb = $this->entityRepository->createQueryBuilder('s')
+            ->select('s', 'a')
+            ->innerJoin('s.subscribingActor', 'a')
+            ->where('s.subscribedActor = :actor')
+            ->setParameters(['actor' => $actor]);
+
+        if (null !== $offset) {
+            $qb->setFirstResult($offset);
+        }
+
+        if (null !== $limit) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Returns the number of actors following the given actor
+     * @param Actor $actor
+     * @return int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getFollowerCountForActor(Actor $actor): int
+    {
+        $qb = $this->entityRepository->createQueryBuilder('s');
+        $qb
+            ->select($qb->expr()->count('s'))
+            ->where('s.subscribedActor = :subscribedActor')
+            ->setParameter('subscribedActor', $actor->getUser());
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 }

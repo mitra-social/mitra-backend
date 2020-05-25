@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\CommandBus\Handler\ActivityPub;
+namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
@@ -57,7 +57,7 @@ final class FollowCommandHandler
 
         $externalActor = $objectExternalUser->getActor();
 
-        if (null !== $this->subscriptionRepository->findByActors($commandActor, $externalActor)) {
+        if (null !== $this->subscriptionRepository->getByActors($commandActor, $externalActor)) {
             return;
         }
 

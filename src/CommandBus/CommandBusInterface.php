@@ -9,8 +9,8 @@ interface CommandBusInterface
     /**
      * Executes the given command and optionally returns a value
      *
-     * @param object $command
+     * @param CommandInterface $command
      * @return mixed
      */
-    public function handle(object $command);
+    public function handle(CommandInterface $command);
 }

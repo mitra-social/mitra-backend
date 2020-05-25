@@ -46,7 +46,7 @@ final class OutboxControllerTest extends IntegrationTestCase
 
     public function testSuccessfulFollow(): void
     {
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
@@ -121,14 +121,14 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var SubscriptionRepository $subscriptionRepository */
         $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
     }
 
     public function testFollowingSameUserSecondTimeDoesNothing(): void
     {
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
@@ -212,7 +212,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var SubscriptionRepository $subscriptionRepository */
         $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
     }
@@ -220,7 +220,7 @@ final class OutboxControllerTest extends IntegrationTestCase
     public function testSuccessfulUnfollow(): void
     {
         // Prepare
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
@@ -297,7 +297,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var SubscriptionRepository $subscriptionRepository */
         $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
         self::assertNull($subscription->getEndDate());
@@ -327,7 +327,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         $em = $this->getContainer()->get('doctrine.orm.em');
         $em->clear();
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNull($subscription);
     }

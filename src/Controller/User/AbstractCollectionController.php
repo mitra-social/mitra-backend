@@ -48,21 +48,14 @@ abstract class AbstractCollectionController
      */
     private $responseFactory;
 
-    /**
-     * @var EncoderInterface
-     */
-    private $encoder;
-
     public function __construct(
         InternalUserRepository $internalUserRepository,
         UriGenerator $uriGenerator,
-        ResponseFactoryInterface $responseFactory,
-        EncoderInterface $encoder
+        ResponseFactoryInterface $responseFactory
     ) {
         $this->internalUserRepository = $internalUserRepository;
         $this->uriGenerator = $uriGenerator;
         $this->responseFactory = $responseFactory;
-        $this->encoder = $encoder;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -140,11 +133,7 @@ abstract class AbstractCollectionController
         $collectionDto->setContext(TypeInterface::CONTEXT_ACTIVITY_STREAMS);
         $collectionDto->setTotalItems($totalItems);
 
-        $response = $this->responseFactory->createResponse();
-
-        $response->getBody()->write($this->encoder->encode($collectionDto, $accept));
-
-        return $response;
+        return $this->responseFactory->createResponseFromDto($collectionDto, $request, $accept);
     }
 
     protected function getCollectionDto(): CollectionInterface

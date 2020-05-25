@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\Normalization\Normalizer;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Decode\DelegateDecoder;
 use Mitra\Serialization\Decode\JsonDecoder;
@@ -21,7 +23,11 @@ final class SerializationServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        $container[EncoderInterface::class] = function (): EncoderInterface {
+        $container[NormalizerInterface::class] = static function (): NormalizerInterface {
+            return new Normalizer();
+        };
+
+        $container[EncoderInterface::class] = static function (): EncoderInterface {
             $encoder = new DelegateEncoder();
             $encoder->addEncoder('application/json', new JsonEncoder(
                 JSON_PRETTY_PRINT | JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
@@ -30,7 +36,7 @@ final class SerializationServiceProvider implements ServiceProviderInterface
             return $encoder;
         };
 
-        $container[DecoderInterface::class] = function (): DecoderInterface {
+        $container[DecoderInterface::class] = static function (): DecoderInterface {
             $decoder = new DelegateDecoder();
             $decoder->addDecoder('application/json', new JsonDecoder());
 

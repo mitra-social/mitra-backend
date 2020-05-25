@@ -1,5 +1,6 @@
 {
   "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://example.com/content/c2ec1508-7fbc-43d3-b7af-eb42cfc2925f",
   "type": "Document",
   "name": "4Q Sales Forecast",
   "url": "http://example.org/4q-sales-forecast.pdf",

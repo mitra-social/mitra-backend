@@ -112,6 +112,8 @@ final class ActivityStreamContentFixture extends AbstractFixture
 
         return new ActivityStreamContent(
             Uuid::uuid4()->toString(),
+            $content['id'],
+            md5($content['id']),
             $content['type'],
             $content,
             $attributedToActor,
