@@ -130,7 +130,6 @@ abstract class AbstractCollectionController
             }
         }
 
-        $collectionDto->setContext(TypeInterface::CONTEXT_ACTIVITY_STREAMS);
         $collectionDto->setTotalItems($totalItems);
 
         return $this->responseFactory->createResponseFromDto($collectionDto, $request, $accept);
