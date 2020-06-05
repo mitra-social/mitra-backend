@@ -14,7 +14,7 @@ use Pimple\ServiceProviderInterface;
 
 final class FilesystemServiceProvider implements ServiceProviderInterface
 {
-    public function register(Container $container)
+    public function register(Container $container): void
     {
         $container[FilesystemInterface::class] = static function (Container $container): FilesystemInterface {
             $adapterType = $container['filesystem']['adapter']['type'];

@@ -78,7 +78,7 @@ final class PersonDtoMapping implements EntityToDtoMappingInterface
             ));
         }
 
-        $personDto->icon = $entity->getIcon();
+        $personDto->icon = $entity->getIcon()->getOriginalUri();
         $personDto->name = $entity->getName();
 
         return $personDto;
