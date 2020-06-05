@@ -39,6 +39,7 @@ use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
@@ -264,6 +265,7 @@ final class Config implements ConfigInterface
 
             FollowDto::class => ActivityDtoValidationMapping::class,
             CreateDto::class => ActivityDtoValidationMapping::class,
+            UpdateDto::class => ActivityDtoValidationMapping::class,
         ];
     }
 
