@@ -11,9 +11,11 @@ final class UserResponseDto extends PersonDto
     public $context = [
         'https://www.w3.org/ns/activitystreams',
         'https://w3id.org/security/v1',
-        'mitra' => 'https://mitra.social/#',
-        'registeredAt' => 'mitra:registeredAt',
-        'internalUserId' => 'mitra:internalUserId',
+        [
+            'mitra' => 'https://mitra.social/#',
+            'registeredAt' => 'mitra:registeredAt',
+            'internalUserId' => 'mitra:internalUserId',
+        ],
     ];
 
     /**

@@ -19,7 +19,7 @@ final class Normalizer implements NormalizerInterface
         $normalizedData = $this->deepNormalization($data, $context);
 
         if (0 !== count($context)) {
-            $context = array_unique($context);
+            $context = array_intersect_key($context, array_unique(array_map('serialize', $context)));
 
             if (1 === count($context) && isset($context[0])) {
                 $context = $context[0];
