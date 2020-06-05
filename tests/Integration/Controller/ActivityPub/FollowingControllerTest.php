@@ -121,7 +121,10 @@ final class FollowingControllerTest extends IntegrationTestCase
 
         $actualPayload = json_decode((string) $response->getBody(), true);
         $expectedPayload = [
-            '@context' => 'https://www.w3.org/ns/activitystreams',
+            '@context' => [
+                'https://www.w3.org/ns/activitystreams',
+                'https://w3id.org/security/v1',
+            ],
             'type' => 'CollectionPage',
             'totalItems' => 1,
             'items' => [

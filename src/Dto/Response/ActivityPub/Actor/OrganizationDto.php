@@ -9,4 +9,9 @@ use Mitra\Dto\Response\ActivityStreams\Actor\OrganizationDto as ActivityStreamsO
 class OrganizationDto extends ActivityStreamsOrganizationDto implements ActorInterface
 {
     use ActorTrait;
+
+    public $context = [
+        'https://www.w3.org/ns/activitystreams',
+        'https://w3id.org/security/v1',
+    ];
 }
