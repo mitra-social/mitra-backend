@@ -234,7 +234,8 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container[HashGeneratorInterface::class],
                 $container['api_http_client'],
                 $container[RequestFactoryInterface::class],
-                $container[FilesystemInterface::class]
+                $container[FilesystemInterface::class],
+                $container[LoggerInterface::class]
             );
         };
     }

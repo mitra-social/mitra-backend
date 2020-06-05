@@ -16,6 +16,7 @@ use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\User\ExternalUser;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 final class UpdateExternalActorCommandHandler
 {
@@ -45,18 +46,25 @@ final class UpdateExternalActorCommandHandler
      */
     private $filesystem;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         ExternalUserResolver $externalUserResolver,
         HashGeneratorInterface $hashGenerator,
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
-        FilesystemInterface $filesystem
+        FilesystemInterface $filesystem,
+        LoggerInterface $logger
     ) {
         $this->externalUserResolver = $externalUserResolver;
         $this->hashGenerator = $hashGenerator;
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->filesystem = $filesystem;
+        $this->logger = $logger;
     }
 
     public function __invoke(UpdateExternalActorCommand $command): void
@@ -64,16 +72,28 @@ final class UpdateExternalActorCommandHandler
         $dto = $command->getActivityStreamDto();
 
         if (!$dto instanceof ActivityDto) {
+            $this->logger->info(sprintf(
+                'Skip updating user as type `%s` is not an activity',
+                $dto->type
+            ));
             return;
         }
 
         $object = $dto->object;
 
         if (!$object instanceof ActorInterface) {
+            $this->logger->info(sprintf(
+                'Skip updating user as object type `%s` is not an actor type',
+                $object->type
+            ));
             return;
         }
 
         if (null === $resolvedActor = $this->externalUserResolver->resolve($object)) {
+            $this->logger->info(sprintf(
+                'Skip updating user as user with external id `%s` is unknown',
+                $object->id
+            ));
             return;
         }
 
@@ -97,12 +117,21 @@ final class UpdateExternalActorCommandHandler
         $response = $this->httpClient->sendRequest($this->requestFactory->createRequest('GET', $newIconUrl));
 
         if (200 !== $response->getStatusCode()) {
+            $this->logger->warning(sprintf(
+                'Cannot update user\'s icon: Unable to download icon `%s`, HTTP response code: %d',
+                $newIconUrl,
+                $response->getStatusCode()
+            ));
             return;
         }
 
         $newIconChecksum = $this->hashGenerator->hash((string) $response->getBody());
 
         if ($externalUser->getActor()->getIconChecksum() === $newIconChecksum) {
+            $this->logger->warning(sprintf(
+                'Cannot update user\'s icon: Checksum `%s` of file is still the same',
+                $newIconChecksum
+            ));
             return;
         }
 
