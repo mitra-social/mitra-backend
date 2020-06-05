@@ -50,7 +50,6 @@ final class WebfingerController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        throw new \Exception('foo');
         $resource = $request->getQueryParams()['resource'];
 
         if (0 === preg_match('/^acct:(.+)/i', $resource, $match)) {
