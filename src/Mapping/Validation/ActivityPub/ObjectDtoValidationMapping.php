@@ -111,7 +111,7 @@ class ObjectDtoValidationMapping implements ValidationMappingInterface
             ->addPropertyConstraints('bcc', self::getMultipleObjectOrLinkConstraints())
             ->addPropertyConstraints('mediaType', [
                 new Type('string'),
-                new Regex('~^[-\w.]+/[+\w-.]+$~'),
+                new Regex('~^[-\w.]+/[-+\w.]+$~'),
             ])
             ->addPropertyConstraints('duration', [
                 new Type('string'),
