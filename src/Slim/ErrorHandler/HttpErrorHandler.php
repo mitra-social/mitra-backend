@@ -56,6 +56,7 @@ final class HttpErrorHandler implements ErrorHandlerInterface
         $this->logger->info($exception->getMessage(), [
             'request.method' => $requestMethod,
             'request.path' => $requestPath,
+            'stacktrace' => $exception->getTraceAsString(),
         ]);
 
         $response = $this->responseFactory->createResponse($exception->getCode())

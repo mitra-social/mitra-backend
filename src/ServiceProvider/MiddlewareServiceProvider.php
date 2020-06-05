@@ -7,6 +7,7 @@ namespace Mitra\ServiceProvider;
 use HttpSignatures\Verifier;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
+use Mitra\Middleware\LogErrorMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Pimple\Container;
@@ -55,6 +56,10 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
                 $container[Verifier::class],
                 $container[ResponseFactoryInterface::class]
             );
+        };
+
+        $container[LogErrorMiddleware::class] = static function (Container $container): LogErrorMiddleware {
+            return new LogErrorMiddleware($container[LoggerInterface::class]);
         };
     }
 }

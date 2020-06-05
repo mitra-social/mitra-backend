@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra;
 
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
+use Mitra\Middleware\LogErrorMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Mitra\Routes\PrivateRouteProvider;
@@ -41,6 +42,7 @@ final class AppFactory
         $app->add(ValidateHttpSignatureMiddleware::class);
         $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
+        $app->add(LogErrorMiddleware::class);
 
         // Needs to be last middleware to handle all the errors
         $errorMiddleware = $app->addErrorMiddleware(
