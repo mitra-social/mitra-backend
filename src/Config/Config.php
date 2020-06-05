@@ -218,7 +218,7 @@ final class Config implements ConfigInterface
             $config['filesystem']['adapter'] = [
                 'type' => 'local',
                 'config' => [
-                    'root' => '',
+                    'root' => $this->getDirectories()['storage'],
                 ],
             ];
         }
@@ -315,6 +315,7 @@ final class Config implements ConfigInterface
         return [
             'cache' => $this->rootDir . '/var/cache/' . $appEnv,
             'logs' => $this->rootDir . '/var/logs/' . $appEnv,
+            'storage' => $this->rootDir . '/var/storage/' . $appEnv,
         ];
     }
 
