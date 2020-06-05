@@ -50,6 +50,13 @@ final class ActorOrmMapping implements ClassMapMappingInterface
             'nullable' => true,
         ]);
 
+        $metadata->mapField([
+            'fieldName' => 'iconChecksum',
+            'type' => 'string',
+            'length' => 64,
+            'nullable' => true,
+        ]);
+
         $metadata->mapOneToOne([
             'fieldName' => 'user',
             'id' => true,
