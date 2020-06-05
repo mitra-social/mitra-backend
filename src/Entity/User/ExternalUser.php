@@ -90,6 +90,21 @@ class ExternalUser extends AbstractUser
         return $this->outbox;
     }
 
+    public function setPreferredUsername(?string $preferredUsername): void
+    {
+        $this->preferredUsername = $preferredUsername;
+    }
+
+    public function setInbox(string $inbox): void
+    {
+        $this->inbox = $inbox;
+    }
+
+    public function setOutbox(string $outbox): void
+    {
+        $this->outbox = $outbox;
+    }
+
     public function getFollowing(): ?string
     {
         return $this->following;

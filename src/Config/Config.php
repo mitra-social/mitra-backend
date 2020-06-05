@@ -13,6 +13,7 @@ use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
+use Mitra\CommandBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAttributedEvent;
@@ -26,6 +27,7 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
@@ -102,6 +104,26 @@ final class Config implements ConfigInterface
     /**
      * @var string
      */
+    private const ENV_S3_BUCKET = 'S3_BUCKET';
+
+    /**
+     * @var string
+     */
+    private const ENV_S3_CREDENTIALS_KEY = 'S3_CREDENTIALS_KEY';
+
+    /**
+     * @var string
+     */
+    private const ENV_S3_CREDENTIALS_SECRET = 'S3_CREDENTIALS_SECRET';
+
+    /**
+     * @var string
+     */
+    private const ENV_S3_REGION = 'S3_REGION';
+
+    /**
+     * @var string
+     */
     private $rootDir;
 
     /**
@@ -169,6 +191,23 @@ final class Config implements ConfigInterface
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
 
+        if ('prod' === $appEnv) {
+            $config['filesystem'] = [
+                'adapter' => [
+                    'type' => 's3',
+                    'config' => [
+                        'bucket' => $this->env->get(self::ENV_S3_BUCKET),
+                        'credentials' => [
+                            'key' => $this->env->get(self::ENV_S3_CREDENTIALS_KEY),
+                            'secret' => $this->env->get(self::ENV_S3_CREDENTIALS_SECRET),
+                        ],
+                        'region' => $this->env->get(self::ENV_S3_REGION),
+                        'version' => 'latest'
+                    ],
+                ],
+            ];
+        }
+
         if ('dev' === $appEnv) {
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
             $config['monolog.handlers'] = [
@@ -176,6 +215,12 @@ final class Config implements ConfigInterface
             ];
             // We don't want to send any message to a queue for development
             $config['mapping']['bus']['routing'] = [];
+            $config['filesystem']['adapter'] = [
+                'type' => 'local',
+                'config' => [
+                    'root' => '',
+                ],
+            ];
         }
 
         return $config;
@@ -240,6 +285,7 @@ final class Config implements ConfigInterface
                 AttributeActivityStreamContentCommand::class => AttributeActivityStreamContentCommandHandler::class,
                 AssignActivityStreamContentToFollowersCommand::class =>
                     AssignActivityStreamContentToFollowersCommandHandler::class,
+                UpdateExternalActorCommand::class => UpdateExternalActorCommandHandler::class,
             ],
             'event_handlers' => [
                 ActivityStreamContentReceivedEvent::class => [

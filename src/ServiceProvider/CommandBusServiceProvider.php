@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Mitra\ServiceProvider;
 
 use Doctrine\ORM\EntityManagerInterface;
+use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
@@ -19,6 +21,7 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
@@ -34,6 +37,7 @@ use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Interfaces\RouteResolverInterface;
@@ -219,6 +223,18 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container[UriFactoryInterface::class],
                 $container[ActivityPubClientInterface::class],
                 $container[LoggerInterface::class]
+            );
+        };
+
+        $container[UpdateExternalActorCommandHandler::class] = static function (
+            Container $container
+        ): UpdateExternalActorCommandHandler {
+            return new UpdateExternalActorCommandHandler(
+                $container[ExternalUserResolver::class],
+                $container[HashGeneratorInterface::class],
+                $container['api_http_client'],
+                $container[RequestFactoryInterface::class],
+                $container[FilesystemInterface::class]
             );
         };
     }

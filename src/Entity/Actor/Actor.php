@@ -21,6 +21,12 @@ class Actor
     private $icon;
 
     /**
+     * Checksum of the icon
+     * @var null|string
+     */
+    private $iconChecksum;
+
+    /**
      * Related user of the actor (internal or external user)
      * @var AbstractUser
      */
@@ -61,6 +67,22 @@ class Actor
     public function setIcon(?string $icon): void
     {
         $this->icon = $icon;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getIconChecksum(): ?string
+    {
+        return $this->iconChecksum;
+    }
+
+    /**
+     * @param string|null $iconChecksum
+     */
+    public function setIconChecksum(?string $iconChecksum): void
+    {
+        $this->iconChecksum = $iconChecksum;
     }
 
     public function getUser(): AbstractUser

@@ -98,4 +98,9 @@ trait ActorTrait
     {
         return $this->type;
     }
+
+    public function getIcon()
+    {
+        return $this->icon;
+    }
 }
