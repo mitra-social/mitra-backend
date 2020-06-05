@@ -32,6 +32,7 @@ use Mitra\CommandBus\SymfonyMessengerCommandBus;
 use Mitra\CommandBus\SymfonyMessengerEventBus;
 use Mitra\CommandBus\SymfonyMessengerHandlersLocator;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
@@ -235,7 +236,9 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container['api_http_client'],
                 $container[RequestFactoryInterface::class],
                 $container[FilesystemInterface::class],
-                $container[LoggerInterface::class]
+                $container[LoggerInterface::class],
+                $container[MediaRepositoryInterface::class],
+                $container['doctrine.orm.em']
             );
         };
     }

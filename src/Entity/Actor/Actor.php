@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Entity\Actor;
 
+use Mitra\Entity\Media;
 use Mitra\Entity\User\AbstractUser;
 
 class Actor
@@ -16,15 +17,9 @@ class Actor
 
     /**
      * An optional icon (avatar) of the actor
-     * @var null|string
+     * @var null|Media
      */
     private $icon;
-
-    /**
-     * Checksum of the icon
-     * @var null|string
-     */
-    private $iconChecksum;
 
     /**
      * Related user of the actor (internal or external user)
@@ -54,35 +49,19 @@ class Actor
     }
 
     /**
-     * @return string|null
+     * @return Media|null
      */
-    public function getIcon(): ?string
+    public function getIcon(): ?Media
     {
         return $this->icon;
     }
 
     /**
-     * @param string|null $icon
+     * @param Media|null $icon
      */
-    public function setIcon(?string $icon): void
+    public function setIcon(?Media $icon): void
     {
         $this->icon = $icon;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getIconChecksum(): ?string
-    {
-        return $this->iconChecksum;
-    }
-
-    /**
-     * @param string|null $iconChecksum
-     */
-    public function setIconChecksum(?string $iconChecksum): void
-    {
-        $this->iconChecksum = $iconChecksum;
     }
 
     public function getUser(): AbstractUser

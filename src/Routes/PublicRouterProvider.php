@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Routes;
 
+use Mitra\Controller\System\MediaController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
@@ -22,5 +23,7 @@ final class PublicRouterProvider implements RouteProviderInterface
         $group->get('/user/{username}', UserReadController::class)->setName('user-read');
         $group->post('/user/{username}/inbox', InboxWriteController::class)->setName('user-inbox-write');
         $group->get('/.well-known/webfinger', WebfingerController::class)->setName('webfinger');
+
+        $group->get('/media/{hash}', MediaController::class)->setName('media-read');
     }
 }

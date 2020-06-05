@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
+use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
@@ -13,10 +14,13 @@ use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
 use Mitra\Dto\Response\ActivityStreams\ImageDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Entity\Media;
 use Mitra\Entity\User\ExternalUser;
+use Mitra\Repository\MediaRepositoryInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
+use Ramsey\Uuid\Uuid;
 
 final class UpdateExternalActorCommandHandler
 {
@@ -51,13 +55,25 @@ final class UpdateExternalActorCommandHandler
      */
     private $logger;
 
+    /**
+     * @var MediaRepositoryInterface
+     */
+    private $mediaRepository;
+
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
     public function __construct(
         ExternalUserResolver $externalUserResolver,
         HashGeneratorInterface $hashGenerator,
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         FilesystemInterface $filesystem,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        MediaRepositoryInterface $mediaRepository,
+        EntityManagerInterface $entityManager
     ) {
         $this->externalUserResolver = $externalUserResolver;
         $this->hashGenerator = $hashGenerator;
@@ -65,6 +81,8 @@ final class UpdateExternalActorCommandHandler
         $this->requestFactory = $requestFactory;
         $this->filesystem = $filesystem;
         $this->logger = $logger;
+        $this->mediaRepository = $mediaRepository;
+        $this->entityManager = $entityManager;
     }
 
     public function __invoke(UpdateExternalActorCommand $command): void
@@ -108,43 +126,55 @@ final class UpdateExternalActorCommandHandler
 
     private function updateIcon(ExternalUser $externalUser, ObjectDto $object): void
     {
-        $newIconUrl = $this->extractIconUrl($object);
+        $newOriginalIconUrl = $this->extractIconUrl($object);
 
-        if (null === $newIconUrl) {
+        if (null === $newOriginalIconUrl) {
             return;
         }
 
-        $response = $this->httpClient->sendRequest($this->requestFactory->createRequest('GET', $newIconUrl));
+        $currentIcon = $externalUser->getActor()->getIcon();
+
+        if (null !== $currentIcon && $currentIcon->getOriginalUri() === $newOriginalIconUrl) {
+            $this->logger->warning(sprintf(
+                'Cannot update user\'s icon: Uri `%s` is unchanged',
+                $newOriginalIconUrl
+            ));
+            return;
+        }
+
+        $response = $this->httpClient->sendRequest($this->requestFactory->createRequest('GET', $newOriginalIconUrl));
 
         if (200 !== $response->getStatusCode()) {
             $this->logger->warning(sprintf(
                 'Cannot update user\'s icon: Unable to download icon `%s`, HTTP response code: %d',
-                $newIconUrl,
+                $newOriginalIconUrl,
                 $response->getStatusCode()
             ));
             return;
         }
 
         $newIconChecksum = $this->hashGenerator->hash((string) $response->getBody());
+        $fileExtension = pathinfo($newOriginalIconUrl, PATHINFO_EXTENSION);
 
-        if ($externalUser->getActor()->getIconChecksum() === $newIconChecksum) {
-            $this->logger->warning(sprintf(
-                'Cannot update user\'s icon: Checksum `%s` of file is still the same',
-                $newIconChecksum
-            ));
-            return;
+        $newLocalIconUri = 'icons/' . $newIconChecksum . ('' !== $fileExtension ? '.' . $fileExtension : '');
+
+        if (null === $iconMedia = $this->mediaRepository->getByLocalUri($newLocalIconUri)) {
+            if (false === $this->filesystem->write($newLocalIconUri, (string)$response->getBody())) {
+                throw new \RuntimeException('Could not store new icon');
+            }
+
+            $iconMedia = new Media(
+                Uuid::uuid4()->toString(),
+                $newIconChecksum,
+                $newOriginalIconUrl,
+                $this->hashGenerator->hash($newOriginalIconUrl),
+                $newLocalIconUri
+            );
         }
 
-        $fileExtension = pathinfo($newIconUrl, PATHINFO_EXTENSION);
+        $this->entityManager->persist($iconMedia);
 
-        $newIconPath = 'icons/' . $newIconChecksum . ('' !== $fileExtension ? '.' . $fileExtension : '');
-
-        if (false === $this->filesystem->write($newIconPath, (string) $response->getBody())) {
-            throw new \RuntimeException('Could not store new icon');
-        }
-
-        $externalUser->getActor()->setIcon($newIconPath);
-        $externalUser->getActor()->setIconChecksum($newIconChecksum);
+        $externalUser->getActor()->setIcon($iconMedia);
     }
 
     private function extractIconUrl(ObjectDto $object): ?string

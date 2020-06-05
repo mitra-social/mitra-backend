@@ -48,6 +48,7 @@ use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
+use Mitra\Entity\Media;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\AbstractUser;
 use Mitra\Entity\User\ExternalUser;
@@ -58,6 +59,7 @@ use Mitra\Mapping\Orm\ActivityStreamContentOrmMapping;
 use Mitra\Mapping\Orm\Actor\ActorOrmMapping;
 use Mitra\Mapping\Orm\Actor\OrganizationOrmMapping;
 use Mitra\Mapping\Orm\Actor\PersonOrmMapping;
+use Mitra\Mapping\Orm\MediaOrmMapping;
 use Mitra\Mapping\Orm\SubscriptionOrmMapping;
 use Mitra\Mapping\Orm\User\AbstractUserOrmMapping;
 use Mitra\Mapping\Orm\User\ExternalUserOrmMapping;
@@ -242,6 +244,7 @@ final class Config implements ConfigInterface
             Person::class => PersonOrmMapping::class,
             Organization::class => OrganizationOrmMapping::class,
             Subscription::class => SubscriptionOrmMapping::class,
+            Media::class => MediaOrmMapping::class,
         ];
     }
 

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use League\Flysystem\FilesystemInterface;
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
+use Mitra\Controller\System\MediaController;
 use Mitra\Controller\User\FollowingListController;
 use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
@@ -26,6 +28,7 @@ use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -130,6 +133,14 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[InternalUserRepository::class],
                 $container[UriGenerator::class],
                 $container[ResponseFactoryInterface::class]
+            );
+        };
+
+        $container[MediaController::class] = static function (Container $container): MediaController {
+            return new MediaController(
+                $container[ResponseFactoryInterface::class],
+                $container[MediaRepositoryInterface::class],
+                $container[FilesystemInterface::class]
             );
         };
 
