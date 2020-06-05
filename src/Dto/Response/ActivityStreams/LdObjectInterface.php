@@ -7,7 +7,7 @@ namespace Mitra\Dto\Response\ActivityStreams;
 interface LdObjectInterface
 {
     /**
-     * @return array<string, string>
+     * @return array<mixed>
      */
     public function getContext(): array;
 }

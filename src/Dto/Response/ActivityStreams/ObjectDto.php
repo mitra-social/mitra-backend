@@ -17,7 +17,7 @@ class ObjectDto implements TypeInterface, LdObjectInterface
     public $id;
 
     /**
-     * @var null|string|array<int,string>
+     * @var null|string|array<mixed>
      */
     public $context = 'https://www.w3.org/ns/activitystreams';
 

@@ -33,7 +33,7 @@ final class Normalizer implements NormalizerInterface
 
     /**
      * @param mixed $data
-     * @param array $context
+     * @param array<mixed> $context
      * @return mixed
      */
     private function deepNormalization($data, array &$context)
