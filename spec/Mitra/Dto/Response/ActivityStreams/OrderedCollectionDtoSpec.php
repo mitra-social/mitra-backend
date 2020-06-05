@@ -11,11 +11,10 @@ final class OrderedCollectionDtoSpec extends ObjectBehavior
 {
     public function it_returns_normalized_array(): void
     {
-        $this->context = 'https://www.w3.org/ns/activitystreams';
         $this->orderedItems = [];
 
         $this->toArray()->shouldReturn([
-            '@context' => $this->context,
+            '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'OrderedCollection',
             'orderedItems' => $this->orderedItems,
             'totalItems' => 0,

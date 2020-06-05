@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Mitra\Dto\Response\ActivityStreams;
+
+interface LdObjectInterface
+{
+    /**
+     * @return array<string, string>
+     */
+    public function getContext(): array;
+}

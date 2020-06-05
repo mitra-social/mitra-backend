@@ -9,6 +9,7 @@ use Mitra\Validator\Symfony\ValidationMappingInterface;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
@@ -27,6 +28,7 @@ final class CreateUserRequestDtoValidationMapping implements ValidationMappingIn
                 new NotNull(),
                 new NotBlank(),
                 new Length(['min' => 5, 'max' => 32]),
+                new Regex('/^[a-z0-9-_.]+$/')
             ])
             ->addPropertyConstraints('email', [
                 new Type('string'),

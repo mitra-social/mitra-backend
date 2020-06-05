@@ -14,14 +14,29 @@ final class Normalizer implements NormalizerInterface
      */
     public function normalize($data): array
     {
-        return $this->deepNormalization($data);
+        $context = [];
+
+        $normalizedData = $this->deepNormalization($data, $context);
+
+        if (0 !== count($context)) {
+            $context = array_unique($context);
+
+            if (1 === count($context) && isset($context[0])) {
+                $context = $context[0];
+            }
+
+            $normalizedData = ['@context' => $context] + $normalizedData;
+        }
+
+        return $normalizedData;
     }
 
     /**
      * @param mixed $data
+     * @param array $context
      * @return mixed
      */
-    private function deepNormalization($data)
+    private function deepNormalization($data, array &$context)
     {
         if (null === $data || is_scalar($data)) {
             return $data;
@@ -34,7 +49,12 @@ final class Normalizer implements NormalizerInterface
         }
 
         foreach ($normalizedData as $propertyName => $value) {
-            $normalizedData[$propertyName] = $this->deepNormalization($value);
+            $normalizedData[$propertyName] = $this->deepNormalization($value, $context);
+        }
+
+        if (isset($normalizedData['@context'])) {
+            $context = array_merge($context, (array) $normalizedData['@context']);
+            unset($normalizedData['@context']);
         }
 
         return $normalizedData;
