@@ -15,6 +15,9 @@ use React\Http\Server as ReactHttpServer;
 use React\Socket\Server as ReactSocketServer;
 use React\EventLoop\Factory as ReactEventLoopFactory;
 
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+
 require __DIR__ . '/../vendor/autoload.php';
 
 $env = Env::immutable(
