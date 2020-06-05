@@ -49,9 +49,7 @@ final class MediaController
             $streamResource = $this->filesystem->readStream($media->getLocalUri());
             $response = $this->responseFactory->createResponse(200);
 
-            $response->withBody(new Stream($streamResource));
-
-            return $response;
+            return $response->withBody(new Stream($streamResource));
         } catch (FileNotFoundException $e) {
             return $this->responseFactory->createResponse(404);
         }

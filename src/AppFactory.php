@@ -42,7 +42,6 @@ final class AppFactory
         $app->add(ValidateHttpSignatureMiddleware::class);
         $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
-        $app->add(LogErrorMiddleware::class);
 
         // Needs to be last middleware to handle all the errors
         $errorMiddleware = $app->addErrorMiddleware(

@@ -57,9 +57,5 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
                 $container[ResponseFactoryInterface::class]
             );
         };
-
-        $container[LogErrorMiddleware::class] = static function (Container $container): LogErrorMiddleware {
-            return new LogErrorMiddleware($container[LoggerInterface::class]);
-        };
     }
 }
