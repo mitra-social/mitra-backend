@@ -190,6 +190,7 @@ final class Config implements ConfigInterface
             'monolog.name' => 'default',
             'monolog.handlers' => [
                 'php://stderr' => Logger::INFO,
+                sprintf('%s/application.log', $dirs['logs']) => Logger::INFO,
             ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
