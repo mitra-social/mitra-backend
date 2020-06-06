@@ -110,27 +110,19 @@ final class OutboxWriteController
             return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
-        try {
-            if ($objectDto instanceof AbstractActivity) {
-                $this->commandBus->handle(new AssignActorCommand($outboxUser->getActor(), $objectDto));
-            }
-
-            $objectCommand = $this->getCommandForObject($outboxUser->getActor(), $objectDto);
-
-            if (null !== $objectCommand) {
-                $this->commandBus->handle($objectCommand);
-            }
-
-            $this->commandBus->handle(new SendObjectToRecipientsCommand($outboxUser, $objectDto));
-
-            return $this->responseFactory->createResponse(201);
-        } catch (\Exception $e) {
-            $response = $this->responseFactory->createResponse(500)->withHeader('Content-Type', 'text/plain');
-
-            $response->getBody()->write('ERROR: ' . $e->getMessage() . PHP_EOL . PHP_EOL . $e->getTraceAsString());
-
-            return $response;
+        if ($objectDto instanceof AbstractActivity) {
+            $this->commandBus->handle(new AssignActorCommand($outboxUser->getActor(), $objectDto));
         }
+
+        $objectCommand = $this->getCommandForObject($outboxUser->getActor(), $objectDto);
+
+        if (null !== $objectCommand) {
+            $this->commandBus->handle($objectCommand);
+        }
+
+        $this->commandBus->handle(new SendObjectToRecipientsCommand($outboxUser, $objectDto));
+
+        return $this->responseFactory->createResponse(201);
     }
 
     private function getCommandForObject(Actor $outboxActor, object $object): ?CommandInterface

@@ -147,16 +147,8 @@ final class InboxWriteController
             null !== $objectDto->updated ? new \DateTimeImmutable($objectDto->updated) : null,
         );
 
-        try {
-            $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent($activityStreamContent, $objectDto));
+        $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent($activityStreamContent, $objectDto));
 
-            return $this->responseFactory->createResponse(201);
-        } catch (\Exception $e) {
-            $response = $this->responseFactory->createResponse(500)->withHeader('Content-Type', 'text/plain');
-
-            $response->getBody()->write('ERROR: ' . $e->getMessage() . PHP_EOL . PHP_EOL . $e->getTraceAsString());
-
-            return $response;
-        }
+        return $this->responseFactory->createResponse(201);
     }
 }
