@@ -53,11 +53,16 @@ final class HttpErrorHandler implements ErrorHandlerInterface
         $requestMethod = $request->getMethod();
         $requestPath = $request->getUri()->getPath();
 
-        $this->logger->info($exception->getMessage(), [
-            'request.method' => $requestMethod,
-            'request.path' => $requestPath,
-            'stacktrace' => $exception->getTraceAsString(),
-        ]);
+        if ($exception->getCode() > 499) {
+            $this->logger->error($exception->getMessage(), [
+                'request.method' => $requestMethod,
+                'request.path' => $requestPath,
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'code' => $exception->getCode(),
+                'stacktrace' => $exception->getTraceAsString(),
+            ]);
+        }
 
         $response = $this->responseFactory->createResponse($exception->getCode())
             ->withHeader('Content-Type', 'text/plain');
