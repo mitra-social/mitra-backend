@@ -35,8 +35,8 @@ final class RemoteObjectResolver
             $url = $value;
         } elseif ($value instanceof LinkDto) {
             $url = $value->href;
-        } elseif ($value instanceof ObjectDto && null !== $value->id) {
-            $url = $value->id;
+        } elseif ($value instanceof ObjectDto) {
+            return $value;
         }
 
         if (null === $url) {
