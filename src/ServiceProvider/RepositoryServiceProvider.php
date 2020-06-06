@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Media;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Repository\ActivityStreamContentRepository;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepository;
@@ -39,6 +43,15 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
         ): ActivityStreamContentAssignmentRepository {
             return new ActivityStreamContentAssignmentRepository(
                 $container['doctrine.orm.em']->getRepository(ActivityStreamContentAssignment::class)
+            );
+        };
+
+        $container[ActivityStreamContentRepositoryInterface::class] = static function (
+            Container $container
+        ): ActivityStreamContentRepositoryInterface {
+            return new ActivityStreamContentRepository(
+                $container['doctrine.orm.em']->getRepository(ActivityStreamContent::class),
+                $container[HashGeneratorInterface::class]
             );
         };
 

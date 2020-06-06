@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\ServiceProvider;
 
 use League\Flysystem\FilesystemInterface;
+use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
@@ -27,6 +28,7 @@ use Mitra\Dto\RequestToDtoTransformer;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
@@ -123,6 +125,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[DecoderInterface::class],
                 $container[DtoToEntityMapper::class],
                 $container[InternalUserRepository::class],
+                $container[ActivityStreamContentRepositoryInterface::class],
+                $container[HashGeneratorInterface::class],
                 $container[LoggerInterface::class]
             );
         };
