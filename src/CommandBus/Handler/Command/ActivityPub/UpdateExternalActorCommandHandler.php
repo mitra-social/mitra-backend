@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
+use League\Flysystem\FileExistsException;
 use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
@@ -173,8 +174,20 @@ final class UpdateExternalActorCommandHandler
         $newLocalIconUri = 'icons/' . $newIconChecksum . ('' !== $fileExtension ? '.' . $fileExtension : '');
 
         if (null === $iconMedia = $this->mediaRepository->getByLocalUri($newLocalIconUri)) {
-            if (false === $this->filesystem->write($newLocalIconUri, (string)$response->getBody())) {
-                throw new \RuntimeException('Could not store new icon');
+            try {
+                if (false === $this->filesystem->write($newLocalIconUri, (string)$response->getBody())) {
+                    $this->logger->error(sprintf(
+                        'Unable to store icon to path `%s`',
+                        $newLocalIconUri
+                    ));
+                    throw new \RuntimeException('Could not store new icon');
+                }
+            } catch (FileExistsException $e) {
+                $this->logger->info(sprintf(
+                    'Unable to store icon to path, file already exists at path `%s`: %s',
+                    $newLocalIconUri,
+                    $e->getMessage()
+                ));
             }
 
             $iconMedia = new Media(
