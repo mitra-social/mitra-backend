@@ -32,6 +32,7 @@ use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
 use Mitra\CommandBus\SymfonyMessengerCommandBus;
 use Mitra\CommandBus\SymfonyMessengerEventBus;
 use Mitra\CommandBus\SymfonyMessengerHandlersLocator;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
@@ -205,6 +206,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
         ): PersistActivityStreamContentCommandHandler {
             return new PersistActivityStreamContentCommandHandler(
                 $container[EntityManagerInterface::class],
+                $container[ActivityStreamContentRepositoryInterface::class],
                 $container[EventEmitterInterface::class]
             );
         };
