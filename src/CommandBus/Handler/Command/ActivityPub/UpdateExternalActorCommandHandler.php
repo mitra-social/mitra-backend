@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
@@ -65,7 +66,13 @@ final class UpdateExternalActorCommandHandler
      */
     private $entityManager;
 
+    /**
+     * @var RemoteObjectResolver
+     */
+    private $remoteObjectResolver;
+
     public function __construct(
+        RemoteObjectResolver $remoteObjectResolver,
         ExternalUserResolver $externalUserResolver,
         HashGeneratorInterface $hashGenerator,
         ClientInterface $httpClient,
@@ -75,6 +82,7 @@ final class UpdateExternalActorCommandHandler
         MediaRepositoryInterface $mediaRepository,
         EntityManagerInterface $entityManager
     ) {
+        $this->remoteObjectResolver = $remoteObjectResolver;
         $this->externalUserResolver = $externalUserResolver;
         $this->hashGenerator = $hashGenerator;
         $this->httpClient = $httpClient;
@@ -97,7 +105,13 @@ final class UpdateExternalActorCommandHandler
             return;
         }
 
-        $object = $dto->object;
+        if (null === $object = $this->remoteObjectResolver->resolve($dto->object)) {
+            $this->logger->info(sprintf(
+                'Skip updating user as object `%s` could not be resolved',
+                is_string($dto->object) || $dto->object instanceof LinkDto ? (string) $dto->object : '<unknown>'
+            ));
+            return;
+        }
 
         if (!$object instanceof ActorInterface) {
             $this->logger->info(sprintf(
@@ -193,10 +207,7 @@ final class UpdateExternalActorCommandHandler
             return (string) $icon;
         }
 
-        if ($icon instanceof ImageDto) {
-            return (string) (is_array($icon->url) ? $icon->url[0] : $icon->url);
-        }
-
-        return null;
+        // Must be ImageDto then
+        return (string) (is_array($icon->url) ? $icon->url[0] : $icon->url);
     }
 }

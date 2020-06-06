@@ -10,6 +10,7 @@ use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
 use Mitra\CommandBus\EventEmitter;
@@ -231,6 +232,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): UpdateExternalActorCommandHandler {
             return new UpdateExternalActorCommandHandler(
+                $container[RemoteObjectResolver::class],
                 $container[ExternalUserResolver::class],
                 $container[HashGeneratorInterface::class],
                 $container['api_http_client'],

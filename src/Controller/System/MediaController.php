@@ -45,8 +45,20 @@ final class MediaController
             return $this->responseFactory->createResponse(404);
         }
 
+        $localUri = $media->getLocalUri();
+
         try {
-            $streamResource = $this->filesystem->readStream($media->getLocalUri());
+            if (false === $this->filesystem->has($localUri)) {
+                return $this->responseFactory->createResponse(404);
+            }
+
+            if (false === $streamResource = $this->filesystem->readStream($localUri)) {
+                throw new \RuntimeException(sprintf(
+                    'Could not retrieve file `%s` from filesystem',
+                    $localUri
+                ));
+            }
+
             $response = $this->responseFactory->createResponse(200);
 
             return $response->withBody(new Stream($streamResource));
