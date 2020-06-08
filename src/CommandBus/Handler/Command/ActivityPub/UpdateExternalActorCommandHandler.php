@@ -6,6 +6,7 @@ namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FileExistsException;
+use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
@@ -13,7 +14,6 @@ use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
-use Mitra\Dto\Response\ActivityStreams\ImageDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\Media;
@@ -190,12 +190,41 @@ final class UpdateExternalActorCommandHandler
                 ));
             }
 
+            try {
+                if (false === $mimeType = $this->filesystem->getMimetype($newLocalIconUri)) {
+                    throw new \RuntimeException(sprintf(
+                        'Could not fetch mime-type for icon with path `%s`',
+                        $newLocalIconUri
+                    ));
+                }
+
+                if (false === $size = $this->filesystem->getSize($newLocalIconUri)) {
+                    throw new \RuntimeException(sprintf(
+                        'Could not fetch file size for icon with path `%s`',
+                        $newLocalIconUri
+                    ));
+                }
+            } catch (FileNotFoundException $e) {
+                $this->logger->warning(sprintf(
+                    'Unable to store icon to path, file already exists at path `%s`: %s',
+                    $newLocalIconUri,
+                    $e->getMessage()
+                ));
+
+                throw new \RuntimeException(sprintf(
+                    'Could not find file with path `%s`',
+                    $newLocalIconUri
+                ));
+            }
+
             $iconMedia = new Media(
                 Uuid::uuid4()->toString(),
                 $newIconChecksum,
                 $newOriginalIconUrl,
                 $this->hashGenerator->hash($newOriginalIconUrl),
-                $newLocalIconUri
+                $newLocalIconUri,
+                $mimeType,
+                $size
             );
         }
 

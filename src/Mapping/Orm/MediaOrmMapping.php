@@ -19,10 +19,9 @@ final class MediaOrmMapping implements ClassMapMappingInterface
     {
         $metadata->setPrimaryTable([
             'name' => 'media',
-            'indexes' => [
-                'INDEX_CHECKSUM' => ['columns' => ['checksum']],
-                'INDEX_ORIGINAL_URI_HASH' => ['columns' => ['original_uri_hash']],
-                'INDEX_LOCAL_URI_HASH' => ['columns' => ['local_uri_hash']],
+            'uniqueConstraints' => [
+                'UNIQUE_ORIGINAL_URI' => ['columns' => ['original_uri_hash', 'original_uri']],
+                'UNIQUE_LOCAL_URI' => ['columns' => ['local_uri']],
             ],
         ]);
 
@@ -59,7 +58,21 @@ final class MediaOrmMapping implements ClassMapMappingInterface
 
         $metadata->mapField([
             'fieldName' => 'localUri',
+            'columnName' => 'local_uri',
             'type' => 'string',
+            'nullable' => false,
+        ]);
+
+        $metadata->mapField([
+            'fieldName' => 'mimeType',
+            'columnName' => 'mime_type',
+            'type' => 'string',
+            'nullable' => false,
+        ]);
+
+        $metadata->mapField([
+            'fieldName' => 'size',
+            'type' => 'integer',
             'nullable' => false,
         ]);
     }

@@ -31,18 +31,32 @@ class Media
      */
     private $localUri;
 
+    /**
+     * @var string
+     */
+    private $mimeType;
+
+    /**
+     * @var int
+     */
+    private $size;
+
     public function __construct(
         string $id,
         string $checksum,
         string $originalUri,
         string $originalUriHash,
-        string $localUri
+        string $localUri,
+        string $mimeType,
+        int $size
     ) {
         $this->id = $id;
         $this->checksum = $checksum;
         $this->originalUri = $originalUri;
         $this->originalUriHash = $originalUriHash;
         $this->localUri = $localUri;
+        $this->mimeType = $mimeType;
+        $this->size = $size;
     }
 
     public function getId(): string
@@ -68,5 +82,15 @@ class Media
     public function getLocalUri(): string
     {
         return $this->localUri;
+    }
+
+    public function getMimeType(): string
+    {
+        return $this->mimeType;
+    }
+
+    public function getSize(): int
+    {
+        return $this->size;
     }
 }
