@@ -13,7 +13,7 @@ use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 
-final class PublicRouterProvider implements RouteProviderInterface
+final class ApiPublicRouterProvider implements RouteProviderInterface
 {
     public function __invoke(RouteCollectorProxyInterface $group): void
     {
@@ -23,7 +23,5 @@ final class PublicRouterProvider implements RouteProviderInterface
         $group->get('/user/{username}', UserReadController::class)->setName('user-read');
         $group->post('/user/{username}/inbox', InboxWriteController::class)->setName('user-inbox-write');
         $group->get('/.well-known/webfinger', WebfingerController::class)->setName('webfinger');
-
-        $group->get('/media/{hash}', MediaController::class)->setName('media-read');
     }
 }
