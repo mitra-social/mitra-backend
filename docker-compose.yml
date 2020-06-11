@@ -29,7 +29,7 @@ services:
     ports:
       - 1337:1337
     volumes:
-      - ../:/var/www/html
+      - ./:/var/www/html
       - ~/.bash_aliases:/home/www-data/.bash_aliases:rw
       - ~/.bash_history:/home/www-data/.bash_history:rw
       - ~/.gitconfig:/home/www-data/.gitconfig:rw
