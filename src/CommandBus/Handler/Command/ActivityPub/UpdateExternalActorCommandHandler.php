@@ -157,25 +157,29 @@ final class UpdateExternalActorCommandHandler
             return;
         }
 
-        $response = $this->httpClient->sendRequest($this->requestFactory->createRequest('GET', $newOriginalIconUrl));
+        $fileResponse = $this->httpClient->sendRequest(
+            $this->requestFactory->createRequest('GET', $newOriginalIconUrl)
+        );
 
-        if (200 !== $response->getStatusCode()) {
+        if (200 !== $fileResponse->getStatusCode()) {
             $this->logger->warning(sprintf(
-                'Cannot update user\'s icon: Unable to download icon `%s`, HTTP response code: %d',
+                'Cannot update user\'s icon: Unable to download icon `%s`, HTTP fileResponse code: %d',
                 $newOriginalIconUrl,
-                $response->getStatusCode()
+                $fileResponse->getStatusCode()
             ));
             return;
         }
 
-        $newIconChecksum = $this->hashGenerator->hash((string) $response->getBody());
+        $streamResource = $fileResponse->getBody()->detach();
+
+        $newIconChecksum = $this->hashGenerator->hashResource($streamResource);
         $fileExtension = pathinfo($newOriginalIconUrl, PATHINFO_EXTENSION);
 
         $newLocalIconUri = 'icons/' . $newIconChecksum . ('' !== $fileExtension ? '.' . $fileExtension : '');
 
         if (null === $iconMedia = $this->mediaRepository->getByLocalUri($newLocalIconUri)) {
             try {
-                if (false === $this->filesystem->write($newLocalIconUri, (string)$response->getBody())) {
+                if (false === $this->filesystem->writeStream($newLocalIconUri, $streamResource)) {
                     $this->logger->error(sprintf(
                         'Unable to store icon to path `%s`',
                         $newLocalIconUri
@@ -190,27 +194,31 @@ final class UpdateExternalActorCommandHandler
                 ));
             }
 
+            $mimeType = $fileResponse->getHeaderLine('Content-Type');
+            if (null !== $size = $fileResponse->getHeaderLine('Content-Length')) {
+                $size = (int) $size;
+            }
+
             try {
-                if (false === $mimeType = $this->filesystem->getMimetype($newLocalIconUri)) {
-                    throw new \RuntimeException(sprintf(
-                        'Could not fetch mime-type for icon with path `%s`',
-                        $newLocalIconUri
-                    ));
+                // Only request file info from filesystem if we didn't get it within the response headers
+                if (null === $mimeType) {
+                    if (false === $mimeType = $this->filesystem->getMimetype($newLocalIconUri)) {
+                        throw new \RuntimeException(sprintf(
+                            'Could not fetch mime-type for icon with path `%s`',
+                            $newLocalIconUri
+                        ));
+                    }
                 }
 
-                if (false === $size = $this->filesystem->getSize($newLocalIconUri)) {
-                    throw new \RuntimeException(sprintf(
-                        'Could not fetch file size for icon with path `%s`',
-                        $newLocalIconUri
-                    ));
+                if (null === $size) {
+                    if (false === $size = $this->filesystem->getSize($newLocalIconUri)) {
+                        throw new \RuntimeException(sprintf(
+                            'Could not fetch file size for icon with path `%s`',
+                            $newLocalIconUri
+                        ));
+                    }
                 }
             } catch (FileNotFoundException $e) {
-                $this->logger->warning(sprintf(
-                    'Unable to store icon to path, file already exists at path `%s`: %s',
-                    $newLocalIconUri,
-                    $e->getMessage()
-                ));
-
                 throw new \RuntimeException(sprintf(
                     'Could not find file with path `%s`',
                     $newLocalIconUri

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
-use Mitra\ActivityPub\Md5HashGenerator;
+use Mitra\ActivityPub\HashGenerator;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
@@ -62,7 +62,7 @@ final class SlimServiceProvider implements ServiceProviderInterface
         };
 
         $container[HashGeneratorInterface::class] = static function (): HashGeneratorInterface {
-            return new Md5HashGenerator();
+            return new HashGenerator('md5');
         };
     }
 }
