@@ -195,13 +195,12 @@ final class UpdateExternalActorCommandHandler
             }
 
             $mimeType = $fileResponse->getHeaderLine('Content-Type');
-            if (null !== $size = $fileResponse->getHeaderLine('Content-Length')) {
-                $size = (int) $size;
-            }
+            $sizeHeader = $fileResponse->getHeaderLine('Content-Length');
+            $size = '' !== $sizeHeader ? (int) $sizeHeader : null;
 
             try {
                 // Only request file info from filesystem if we didn't get it within the response headers
-                if (null === $mimeType) {
+                if ('' === $mimeType) {
                     if (false === $mimeType = $this->filesystem->getMimetype($newLocalIconUri)) {
                         throw new \RuntimeException(sprintf(
                             'Could not fetch mime-type for icon with path `%s`',

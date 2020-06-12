@@ -59,12 +59,10 @@ final class MediaController
                 ));
             }
 
-            $response = $this->responseFactory->createResponse(200);
-
-            return $response
+            return $this->responseFactory->createResponse(200)
                 ->withBody(new Stream($streamResource))
                 ->withHeader('Content-Type', $media->getMimeType())
-                ->withHeader('Content-Length', $media->getSize());
+                ->withHeader('Content-Length', (string) $media->getSize());
         } catch (FileNotFoundException $e) {
             return $this->responseFactory->createResponse(404);
         }

@@ -51,7 +51,7 @@ final class AppFactory
         $errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
 
         // API group
-        $app->group('', function () use ($app) {
+        $app->group('', function () use ($app): void {
             $app->group('', new ApiPublicRouterProvider());
             $app->group('', new ApiPrivateRouteProvider())->add(JwtAuthentication::class);
         })
