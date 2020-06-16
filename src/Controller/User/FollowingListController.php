@@ -102,6 +102,10 @@ final class FollowingListController extends AbstractCollectionController
 
             $actorDto->name = $subscribedActor->getName();
 
+            if (null !== $subscribedActor->getIcon()) {
+                $actorDto->icon = $subscribedActor->getIcon()->getOriginalUri();
+            }
+
             $dtoItems[] = $actorDto;
         }
 
