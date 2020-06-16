@@ -90,7 +90,9 @@ final class InboxReadController extends AbstractOrderedCollectionController
             );
 
             // Inline author infos
-            $author = $item->getContent()->getAttributedTo()->getUser();
+            $itemContent = $item->getContent();
+
+            $author = $itemContent->getAttributedTo()->getUser();
             $dtoClass = $author->getActor() instanceof Person ? PersonDto::class : OrganizationDto::class;
             /** @var ObjectDto $actorDto */
             $actorDto = $this->entityToDtoMapper->map(

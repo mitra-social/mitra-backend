@@ -136,7 +136,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[SubscriptionRepository::class],
                 $container[InternalUserRepository::class],
                 $container[UriGenerator::class],
-                $container[ResponseFactoryInterface::class]
+                $container[ResponseFactoryInterface::class],
+                $container[EntityToDtoMapper::class]
             );
         };
 
