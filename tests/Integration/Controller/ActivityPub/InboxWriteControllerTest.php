@@ -297,8 +297,8 @@ final class InboxWriteControllerTest extends IntegrationTestCase
             $toUserExternalId,
         ];
 
-        self::assertNotEquals($dto->object->name, $externalUser->getActor()->getName());
         self::assertNull($externalUser->getActor()->getIcon());
+        self::assertNotEquals($dto->object->name, $externalUser->getActor()->getName());
         self::assertNotEquals($dto->object->inbox, $externalUser->getInbox());
         self::assertNotEquals($dto->object->outbox, $externalUser->getOutbox());
 

@@ -16,10 +16,12 @@ use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
 use Mitra\CommandBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\CommandBus\Command\UpdateActorIconCommand;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAttributedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
+use Mitra\CommandBus\Event\ActivityPub\ExternalUserUpdatedEvent;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
@@ -30,10 +32,12 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\CommandBus\Handler\Command\UpdateActorIconCommandHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
@@ -292,6 +296,7 @@ final class Config implements ConfigInterface
                 AssignActivityStreamContentToFollowersCommand::class =>
                     AssignActivityStreamContentToFollowersCommandHandler::class,
                 UpdateExternalActorCommand::class => UpdateExternalActorCommandHandler::class,
+                UpdateActorIconCommand::class => UpdateActorIconCommandHandler::class,
             ],
             'event_handlers' => [
                 ActivityStreamContentReceivedEvent::class => [
@@ -305,6 +310,9 @@ final class Config implements ConfigInterface
                 ],
                 ContentAcceptedEvent::class => [
                     ContentAcceptedEventHandler::class,
+                ],
+                ExternalUserUpdatedEvent::class => [
+                    ExternalUserUpdatedEventHandler::class,
                 ],
             ],
             'routing' => [],

@@ -25,10 +25,12 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\CommandBus\Handler\Command\UpdateActorIconCommandHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\CommandBus\SymfonyMessengerCommandBus;
 use Mitra\CommandBus\SymfonyMessengerEventBus;
 use Mitra\CommandBus\SymfonyMessengerHandlersLocator;
@@ -234,8 +236,18 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): UpdateExternalActorCommandHandler {
             return new UpdateExternalActorCommandHandler(
+                $container[EventEmitterInterface::class],
                 $container[RemoteObjectResolver::class],
                 $container[ExternalUserResolver::class],
+                $container[LoggerInterface::class]
+            );
+        };
+
+        $container[UpdateActorIconCommandHandler::class] = static function (
+            Container $container
+        ): UpdateActorIconCommandHandler {
+            return new UpdateActorIconCommandHandler(
+                $container[RemoteObjectResolver::class],
                 $container[HashGeneratorInterface::class],
                 $container['api_http_client'],
                 $container[RequestFactoryInterface::class],
@@ -271,6 +283,12 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): ActivityStreamContentPersistedEventHandler {
             return new ActivityStreamContentPersistedEventHandler($container[CommandBusInterface::class]);
+        };
+
+        $container[ExternalUserUpdatedEventHandler::class] = static function (
+            Container $container
+        ): ExternalUserUpdatedEventHandler {
+            return new ExternalUserUpdatedEventHandler($container[CommandBusInterface::class]);
         };
     }
 }
