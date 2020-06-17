@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Event\ActivityPub;
 
 use Mitra\CommandBus\EventInterface;
-use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
+use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Entity\Actor\Actor;
 
 final class ExternalUserUpdatedEvent implements EventInterface
@@ -16,14 +16,14 @@ final class ExternalUserUpdatedEvent implements EventInterface
     private $actorEntity;
 
     /**
-     * @var UpdateDto
+     * @var ActorInterface
      */
-    private $updateDto;
+    private $actorDto;
 
-    public function __construct(Actor $actorEntity, UpdateDto $updateDto)
+    public function __construct(Actor $actorEntity, ActorInterface $actorDto)
     {
         $this->actorEntity = $actorEntity;
-        $this->updateDto = $updateDto;
+        $this->actorDto = $actorDto;
     }
 
     /**
@@ -35,10 +35,10 @@ final class ExternalUserUpdatedEvent implements EventInterface
     }
 
     /**
-     * @return UpdateDto
+     * @return ActorInterface
      */
-    public function getUpdateDto(): UpdateDto
+    public function getActorDto(): ActorInterface
     {
-        return $this->updateDto;
+        return $this->actorDto;
     }
 }

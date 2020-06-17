@@ -12,7 +12,7 @@ final class ExternalUserUpdatedEventHandler extends CommandDispatcherEventHandle
 {
     public function __invoke(ExternalUserUpdatedEvent $event): void
     {
-        if (null === $icon = $event->getUpdateDto()->object->icon) {
+        if (null === $icon = $event->getActorDto()->getIcon()) {
             return;
         }
 

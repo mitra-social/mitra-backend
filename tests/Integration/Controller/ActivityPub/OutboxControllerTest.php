@@ -9,6 +9,7 @@ use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Entity\Media;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
@@ -50,17 +51,20 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
+        $iconUri = 'http://example.com/image/123.jpg';
 
         $objectAndTo = new PersonDto();
         $objectAndTo->id = $externalUserId;
         $objectAndTo->inbox = $externalUserId . '/inbox';
         $objectAndTo->outbox = $externalUserId . '/outbox';
+        $objectAndTo->icon = $iconUri;
 
         $objectAndToResponseBody = sprintf(
-            '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s"}',
+            '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s", "icon": "%s"}',
             $externalUserId,
             $objectAndTo->inbox,
-            $objectAndTo->outbox
+            $objectAndTo->outbox,
+            $iconUri
         );
 
         $objectAndToResponse = self::$responseFactory->createResponse(200)
@@ -72,6 +76,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         $requestSendFollowToRecipient = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
             ->withHeader('Host', 'example.com')
             ->withHeader('Accept', 'application/activity+json');
+        $requestActorIcon = self::$requestFactory->createRequest('GET', $iconUri);
 
         $requestSendFollowToRecipient = $this->signRequest($followingUser, $requestSendFollowToRecipient);
 
@@ -86,10 +91,21 @@ final class OutboxControllerTest extends IntegrationTestCase
             'to' => $objectAndTo->id,
         ], 'application/json'));
 
+        $iconData = 'jpegIconDataHere';
+
+        $responseIcon = self::$responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'image/jpeg');
+
+        $responseIcon->getBody()->write($iconData);
+
         $apiHttpClientMock = $this->getClientMock([
             [
                 $requestResolveExternalActor,
                 $objectAndToResponse,
+            ],
+            [
+                $requestActorIcon,
+                $responseIcon,
             ],
             [
                 $requestSendFollowToRecipient,
@@ -117,6 +133,12 @@ final class OutboxControllerTest extends IntegrationTestCase
         $followedUser = $externalUserRepository->findOneByExternalId($externalUserId);
 
         self::assertNotNull($followedUser);
+        self::assertInstanceOf(Media::class, $followedUser->getActor()->getIcon());
+        self::assertEquals($iconUri, $followedUser->getActor()->getIcon()->getOriginalUri());
+        self::assertEquals(
+            sprintf('icons/%s.jpg', md5($iconData)),
+            $followedUser->getActor()->getIcon()->getLocalUri()
+        );
 
         /** @var SubscriptionRepository $subscriptionRepository */
         $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);

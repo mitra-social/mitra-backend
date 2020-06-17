@@ -36,10 +36,11 @@ final class ExternalUserResolver
 
     /**
      * @param string|ObjectDto|LinkDto $object
+     * @param \Closure|null $onCreate
      * @return null|ExternalUser
-     * @throws \Mitra\ActivityPub\Resolver\RemoteObjectResolverException
+     * @throws RemoteObjectResolverException
      */
-    public function resolve($object): ?ExternalUser
+    public function resolve($object, ?\Closure $onCreate = null): ?ExternalUser
     {
         Assert::notNull($object);
 
@@ -62,6 +63,8 @@ final class ExternalUserResolver
         }
 
         Assert::isInstanceOf($resolvedObject, ActorInterface::class);
+
+        /** @var ActorInterface $resolvedObject */
 
         $externalId = $resolvedObject->getId();
 
@@ -89,9 +92,12 @@ final class ExternalUserResolver
         }
 
         $actor->setName($resolvedObject->getName());
-        //$actor->setIcon($resolvedObject->getIcon()); could be array... which one to choose then?
 
         $externalUser->setActor($actor);
+
+        if (null !== $onCreate) {
+            $onCreate($externalUser, $resolvedObject);
+        }
 
         return $externalUser;
     }

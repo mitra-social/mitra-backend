@@ -91,6 +91,6 @@ final class UpdateExternalActorCommandHandler
 
         $resolvedActor->getActor()->setName($object->getName());
 
-        $this->eventEmitter->raise(new ExternalUserUpdatedEvent($resolvedActor->getActor(), $dto));
+        $this->eventEmitter->raise(new ExternalUserUpdatedEvent($resolvedActor->getActor(), $object));
     }
 }

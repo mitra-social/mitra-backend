@@ -210,7 +210,7 @@ final class ActivityPubClient implements ActivityPubClientInterface
             $decodedBody = $this->decoder->decode($responseBody, $mediaType->getType());
         } catch (\JsonException $e) {
             throw new ActivityPubClientException($request, $response, sprintf(
-                'Could not decode body from remote serve response: %s (body: %s, content-type: %s)',
+                'Could not decode body from remote server response: %s (body: %s, content-type: %s)',
                 $e->getMessage(),
                 (string) $response->getBody(),
                 $mediaType->getType()
