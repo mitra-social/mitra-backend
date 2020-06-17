@@ -7,8 +7,9 @@ namespace Mitra;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
-use Mitra\Routes\PrivateRouteProvider;
-use Mitra\Routes\PublicRouterProvider;
+use Mitra\Routes\ApiPrivateRouteProvider;
+use Mitra\Routes\ApiPublicRouterProvider;
+use Mitra\Routes\MediaPublicRouteProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
 use Mitra\ServiceProvider\ErrorHandlerServiceProvider;
 use Mitra\ServiceProvider\MiddlewareServiceProvider;
@@ -38,8 +39,6 @@ final class AppFactory
         /** @var ContainerInterface $container */
         $container = $app->getContainer();
 
-        $app->add(ValidateHttpSignatureMiddleware::class);
-        $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
 
         // Needs to be last middleware to handle all the errors
@@ -51,8 +50,15 @@ final class AppFactory
         );
         $errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
 
-        $app->group('', new PublicRouterProvider());
-        $app->group('', new PrivateRouteProvider())->add(JwtAuthentication::class);
+        // API group
+        $app->group('', function () use ($app): void {
+            $app->group('', new ApiPublicRouterProvider());
+            $app->group('', new ApiPrivateRouteProvider())->add(JwtAuthentication::class);
+        })
+            ->add(ValidateHttpSignatureMiddleware::class)
+            ->add(AcceptAndContentTypeMiddleware::class);
+
+        $app->group('', new MediaPublicRouteProvider());
 
         return $app;
     }

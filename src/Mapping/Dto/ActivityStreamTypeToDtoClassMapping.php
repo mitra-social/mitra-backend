@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Mitra\Mapping\Dto;
 
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\AcceptDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\DeleteDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
 use Mitra\Dto\Response\ActivityStreams\CollectionDto;
@@ -54,6 +57,9 @@ final class ActivityStreamTypeToDtoClassMapping
         'Create' => CreateDto::class,
         'Follow' => FollowDto::class,
         'Undo' => UndoDto::class,
+        'Update' => UpdateDto::class,
+        'Delete' => DeleteDto::class,
+        'Accept' => AcceptDto::class,
 
         'Collection' => CollectionDto::class,
         'OrderedCollection' => OrderedCollectionDto::class,

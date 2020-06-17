@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
+use Mitra\Entity\Media;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Repository\ActivityStreamContentRepository;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Repository\MediaRepository;
+use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -39,8 +46,21 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
             );
         };
 
+        $container[ActivityStreamContentRepositoryInterface::class] = static function (
+            Container $container
+        ): ActivityStreamContentRepositoryInterface {
+            return new ActivityStreamContentRepository(
+                $container['doctrine.orm.em']->getRepository(ActivityStreamContent::class),
+                $container[HashGeneratorInterface::class]
+            );
+        };
+
         $container[SubscriptionRepository::class] = static function (Container $container): SubscriptionRepository {
             return new SubscriptionRepository($container['doctrine.orm.em']->getRepository(Subscription::class));
+        };
+
+        $container[MediaRepositoryInterface::class] = static function (Container $container): MediaRepositoryInterface {
+            return new MediaRepository($container['doctrine.orm.em']->getRepository(Media::class));
         };
     }
 }

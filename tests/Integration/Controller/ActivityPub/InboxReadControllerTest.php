@@ -206,6 +206,8 @@ final class InboxReadControllerTest extends IntegrationTestCase
                         'preferredUsername' => 'bob',
                         'name' => 'Bob',
                         'type' => 'Person',
+                        'inbox' => 'https://example.com/user/bob/inbox',
+                        'outbox' => 'https://example.com/user/bob/outbox',
                     ],
                     'id' => $dto->id,
                     'to' => [

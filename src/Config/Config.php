@@ -13,12 +13,15 @@ use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
+use Mitra\CommandBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\ValidateContentCommand;
 use Mitra\CommandBus\Command\CreateUserCommand;
+use Mitra\CommandBus\Command\UpdateActorIconCommand;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAttributedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
+use Mitra\CommandBus\Event\ActivityPub\ExternalUserUpdatedEvent;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
@@ -26,17 +29,21 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\CommandBus\Handler\Command\UpdateActorIconCommandHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
@@ -45,6 +52,7 @@ use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
+use Mitra\Entity\Media;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\AbstractUser;
 use Mitra\Entity\User\ExternalUser;
@@ -55,6 +63,7 @@ use Mitra\Mapping\Orm\ActivityStreamContentOrmMapping;
 use Mitra\Mapping\Orm\Actor\ActorOrmMapping;
 use Mitra\Mapping\Orm\Actor\OrganizationOrmMapping;
 use Mitra\Mapping\Orm\Actor\PersonOrmMapping;
+use Mitra\Mapping\Orm\MediaOrmMapping;
 use Mitra\Mapping\Orm\SubscriptionOrmMapping;
 use Mitra\Mapping\Orm\User\AbstractUserOrmMapping;
 use Mitra\Mapping\Orm\User\ExternalUserOrmMapping;
@@ -98,6 +107,26 @@ final class Config implements ConfigInterface
      * @var string
      */
     private const ENV_QUEUE_DNS = 'QUEUE_DNS';
+
+    /**
+     * @var string
+     */
+    private const ENV_S3_BUCKET = 'S3_BUCKET';
+
+    /**
+     * @var string
+     */
+    private const ENV_S3_CREDENTIALS_KEY = 'S3_CREDENTIALS_KEY';
+
+    /**
+     * @var string
+     */
+    private const ENV_S3_CREDENTIALS_SECRET = 'S3_CREDENTIALS_SECRET';
+
+    /**
+     * @var string
+     */
+    private const ENV_S3_REGION = 'S3_REGION';
 
     /**
      * @var string
@@ -165,9 +194,27 @@ final class Config implements ConfigInterface
             'monolog.name' => 'default',
             'monolog.handlers' => [
                 'php://stderr' => Logger::INFO,
+                sprintf('%s/application.log', $dirs['logs']) => Logger::INFO,
             ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
         ];
+
+        if ('prod' === $appEnv) {
+            $config['filesystem'] = [
+                'adapter' => [
+                    'type' => 's3',
+                    'config' => [
+                        'bucket' => $this->env->get(self::ENV_S3_BUCKET),
+                        'credentials' => [
+                            'key' => $this->env->get(self::ENV_S3_CREDENTIALS_KEY),
+                            'secret' => $this->env->get(self::ENV_S3_CREDENTIALS_SECRET),
+                        ],
+                        'region' => $this->env->get(self::ENV_S3_REGION),
+                        'version' => 'latest'
+                    ],
+                ],
+            ];
+        }
 
         if ('dev' === $appEnv) {
             $config['doctrine.orm.em.options']['proxies.auto_generate'] = true;
@@ -176,6 +223,12 @@ final class Config implements ConfigInterface
             ];
             // We don't want to send any message to a queue for development
             $config['mapping']['bus']['routing'] = [];
+            $config['filesystem']['adapter'] = [
+                'type' => 'local',
+                'config' => [
+                    'root' => $this->getDirectories()['storage'],
+                ],
+            ];
         }
 
         return $config;
@@ -196,6 +249,7 @@ final class Config implements ConfigInterface
             Person::class => PersonOrmMapping::class,
             Organization::class => OrganizationOrmMapping::class,
             Subscription::class => SubscriptionOrmMapping::class,
+            Media::class => MediaOrmMapping::class,
         ];
     }
 
@@ -219,6 +273,7 @@ final class Config implements ConfigInterface
 
             FollowDto::class => ActivityDtoValidationMapping::class,
             CreateDto::class => ActivityDtoValidationMapping::class,
+            UpdateDto::class => ActivityDtoValidationMapping::class,
         ];
     }
 
@@ -240,6 +295,8 @@ final class Config implements ConfigInterface
                 AttributeActivityStreamContentCommand::class => AttributeActivityStreamContentCommandHandler::class,
                 AssignActivityStreamContentToFollowersCommand::class =>
                     AssignActivityStreamContentToFollowersCommandHandler::class,
+                UpdateExternalActorCommand::class => UpdateExternalActorCommandHandler::class,
+                UpdateActorIconCommand::class => UpdateActorIconCommandHandler::class,
             ],
             'event_handlers' => [
                 ActivityStreamContentReceivedEvent::class => [
@@ -253,6 +310,9 @@ final class Config implements ConfigInterface
                 ],
                 ContentAcceptedEvent::class => [
                     ContentAcceptedEventHandler::class,
+                ],
+                ExternalUserUpdatedEvent::class => [
+                    ExternalUserUpdatedEventHandler::class,
                 ],
             ],
             'routing' => [],
@@ -269,6 +329,7 @@ final class Config implements ConfigInterface
         return [
             'cache' => $this->rootDir . '/var/cache/' . $appEnv,
             'logs' => $this->rootDir . '/var/logs/' . $appEnv,
+            'storage' => $this->rootDir . '/var/storage/' . $appEnv,
         ];
     }
 

@@ -36,10 +36,11 @@ final class ExternalUserResolver
 
     /**
      * @param string|ObjectDto|LinkDto $object
+     * @param \Closure|null $onCreate
      * @return null|ExternalUser
-     * @throws \Mitra\ActivityPub\Resolver\RemoteObjectResolverException
+     * @throws RemoteObjectResolverException
      */
-    public function resolve($object): ?ExternalUser
+    public function resolve($object, ?\Closure $onCreate = null): ?ExternalUser
     {
         Assert::notNull($object);
 
@@ -63,6 +64,8 @@ final class ExternalUserResolver
 
         Assert::isInstanceOf($resolvedObject, ActorInterface::class);
 
+        /** @var ActorInterface $resolvedObject */
+
         $externalId = $resolvedObject->getId();
 
         // Check again because maybe the provided string was not really the object id itself in the first place but
@@ -80,18 +83,21 @@ final class ExternalUserResolver
             $resolvedObject->getOutbox()
         );
 
-        if ('Person' === $resolvedObject->type) {
+        if ('Person' === $resolvedObject->getType()) {
             $actor = new Person($externalUser);
-        } elseif ('Organization' === $resolvedObject->type) {
+        } elseif ('Organization' === $resolvedObject->getType()) {
             $actor = new Organization($externalUser);
         } else {
-            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->type));
+            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->getType()));
         }
 
         $actor->setName($resolvedObject->getName());
-        //$actor->setIcon($resolvedObject->getIcon()); could be array... which one to choose then?
 
         $externalUser->setActor($actor);
+
+        if (null !== $onCreate) {
+            $onCreate($externalUser, $resolvedObject);
+        }
 
         return $externalUser;
     }

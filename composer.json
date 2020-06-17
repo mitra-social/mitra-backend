@@ -36,7 +36,9 @@
     "kriswallsmith/buzz": "^1.1",
     "webmozart/assert": "^1.7.0",
     "willdurand/negotiation": "^2.3",
-    "liamdennehy/http-signatures-php": "^10.0"
+    "liamdennehy/http-signatures-php": "^10.0",
+    "league/flysystem": "^1.0",
+    "league/flysystem-aws-s3-v3": "^1.0"
   },
   "require-dev": {
     "ergebnis/phpstan-rules": "^0.14.3",

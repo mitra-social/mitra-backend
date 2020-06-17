@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Mitra\ServiceProvider;
 
 use Doctrine\ORM\EntityManagerInterface;
+use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
 use Mitra\CommandBus\EventEmitter;
@@ -19,21 +22,27 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\UndoCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\CommandBus\Handler\Command\UpdateActorIconCommandHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\CommandBus\SymfonyMessengerCommandBus;
 use Mitra\CommandBus\SymfonyMessengerEventBus;
 use Mitra\CommandBus\SymfonyMessengerHandlersLocator;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Interfaces\RouteResolverInterface;
@@ -164,7 +173,8 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             return new FollowCommandHandler(
                 $container['doctrine.orm.em'],
                 $container[ExternalUserResolver::class],
-                $container[SubscriptionRepository::class]
+                $container[SubscriptionRepository::class],
+                $container[EventEmitterInterface::class]
             );
         };
 
@@ -199,6 +209,7 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
         ): PersistActivityStreamContentCommandHandler {
             return new PersistActivityStreamContentCommandHandler(
                 $container[EntityManagerInterface::class],
+                $container[ActivityStreamContentRepositoryInterface::class],
                 $container[EventEmitterInterface::class]
             );
         };
@@ -219,6 +230,32 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container[UriFactoryInterface::class],
                 $container[ActivityPubClientInterface::class],
                 $container[LoggerInterface::class]
+            );
+        };
+
+        $container[UpdateExternalActorCommandHandler::class] = static function (
+            Container $container
+        ): UpdateExternalActorCommandHandler {
+            return new UpdateExternalActorCommandHandler(
+                $container[EventEmitterInterface::class],
+                $container[RemoteObjectResolver::class],
+                $container[ExternalUserResolver::class],
+                $container[LoggerInterface::class]
+            );
+        };
+
+        $container[UpdateActorIconCommandHandler::class] = static function (
+            Container $container
+        ): UpdateActorIconCommandHandler {
+            return new UpdateActorIconCommandHandler(
+                $container[RemoteObjectResolver::class],
+                $container[HashGeneratorInterface::class],
+                $container['api_http_client'],
+                $container[RequestFactoryInterface::class],
+                $container[FilesystemInterface::class],
+                $container[LoggerInterface::class],
+                $container[MediaRepositoryInterface::class],
+                $container['doctrine.orm.em']
             );
         };
     }
@@ -247,6 +284,12 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): ActivityStreamContentPersistedEventHandler {
             return new ActivityStreamContentPersistedEventHandler($container[CommandBusInterface::class]);
+        };
+
+        $container[ExternalUserUpdatedEventHandler::class] = static function (
+            Container $container
+        ): ExternalUserUpdatedEventHandler {
+            return new ExternalUserUpdatedEventHandler($container[CommandBusInterface::class]);
         };
     }
 }

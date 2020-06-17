@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ApiProblem\BadRequestApiProblem;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\EventBusInterface;
@@ -15,6 +16,7 @@ use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -72,6 +74,16 @@ final class InboxWriteController
     private $internalUserRepository;
 
     /**
+     * @var ActivityStreamContentRepositoryInterface
+     */
+    private $activityStreamContentRepository;
+
+    /**
+     * @var HashGeneratorInterface
+     */
+    private $hashGenerator;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -86,6 +98,8 @@ final class InboxWriteController
         DecoderInterface $decoder,
         DtoToEntityMapper $dtoToEntityMapper,
         InternalUserRepository $internalUserRepository,
+        ActivityStreamContentRepositoryInterface $activityStreamContentRepository,
+        HashGeneratorInterface $hashGenerator,
         LoggerInterface $logger
     ) {
         $this->responseFactory = $responseFactory;
@@ -97,6 +111,8 @@ final class InboxWriteController
         $this->activityPubDataToDtoPopulator = $activityPubDataToDtoPopulator;
         $this->dtoToEntityMapper = $dtoToEntityMapper;
         $this->internalUserRepository = $internalUserRepository;
+        $this->activityStreamContentRepository = $activityStreamContentRepository;
+        $this->hashGenerator = $hashGenerator;
         $this->logger = $logger;
     }
 
@@ -136,10 +152,16 @@ final class InboxWriteController
             return $response;
         }
 
+        $objectIdHash = $this->hashGenerator->hash($objectDto->id);
+
+        if (null !== $this->activityStreamContentRepository->getByExternalId($objectDto->id)) {
+            return $this->responseFactory->createResponse(201);
+        }
+
         $activityStreamContent = new ActivityStreamContent(
             Uuid::uuid4()->toString(),
             $objectDto->id,
-            md5($objectDto->id),
+            $objectIdHash,
             $objectDto->type,
             $this->normalizer->normalize($objectDto),
             null,
@@ -147,16 +169,8 @@ final class InboxWriteController
             null !== $objectDto->updated ? new \DateTimeImmutable($objectDto->updated) : null,
         );
 
-        try {
-            $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent($activityStreamContent, $objectDto));
+        $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent($activityStreamContent, $objectDto));
 
-            return $this->responseFactory->createResponse(201);
-        } catch (\Exception $e) {
-            $response = $this->responseFactory->createResponse(500)->withHeader('Content-Type', 'text/plain');
-
-            $response->getBody()->write('ERROR: ' . $e->getMessage() . PHP_EOL . PHP_EOL . $e->getTraceAsString());
-
-            return $response;
-        }
+        return $this->responseFactory->createResponse(201);
     }
 }

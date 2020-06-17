@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Routes;
 
+use Mitra\Controller\System\MediaController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
@@ -12,7 +13,7 @@ use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 
-final class PublicRouterProvider implements RouteProviderInterface
+final class ApiPublicRouterProvider implements RouteProviderInterface
 {
     public function __invoke(RouteCollectorProxyInterface $group): void
     {

@@ -28,7 +28,7 @@ final class CreateUserRequestDtoValidationMapping implements ValidationMappingIn
                 new NotNull(),
                 new NotBlank(),
                 new Length(['min' => 5, 'max' => 32]),
-                new Regex('/^[a-z0-9-_.]+$/')
+                new Regex('/^[a-z0-9_.-]+$/')
             ])
             ->addPropertyConstraints('email', [
                 new Type('string'),

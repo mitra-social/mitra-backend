@@ -7,6 +7,7 @@ namespace Mitra\ServiceProvider;
 use HttpSignatures\Verifier;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
+use Mitra\Middleware\LogErrorMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Pimple\Container;

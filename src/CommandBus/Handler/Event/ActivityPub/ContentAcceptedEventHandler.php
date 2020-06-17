@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Handler\Event\ActivityPub;
 
 use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
+use Mitra\CommandBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
 
@@ -22,9 +23,10 @@ final class ContentAcceptedEventHandler
 
     public function __invoke(ContentAcceptedEvent $event): void
     {
-        $this->commandBus->handle(new PersistActivityStreamContentCommand(
-            $event->getActivityStreamContentEntity(),
-            $event->getActivityStreamDto()
-        ));
+        $entity = $event->getActivityStreamContentEntity();
+        $dto = $event->getActivityStreamDto();
+
+        $this->commandBus->handle(new PersistActivityStreamContentCommand($entity, $dto));
+        $this->commandBus->handle(new UpdateExternalActorCommand($entity, $dto));
     }
 }

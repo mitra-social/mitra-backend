@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
@@ -32,16 +33,23 @@ final class FollowingListController extends AbstractCollectionController
      */
     private $uriGenerator;
 
+    /**
+     * @var EntityToDtoMapper
+     */
+    private $entityToDtoMapper;
+
     public function __construct(
         SubscriptionRepository $subscriptionRepository,
         InternalUserRepository $internalUserRepository,
         UriGenerator $uriGenerator,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        EntityToDtoMapper $entityToDtoMapper
     ) {
         parent::__construct($internalUserRepository, $uriGenerator, $responseFactory);
 
         $this->subscriptionRepository = $subscriptionRepository;
         $this->uriGenerator = $uriGenerator;
+        $this->entityToDtoMapper = $entityToDtoMapper;
     }
 
     /**
@@ -83,10 +91,12 @@ final class FollowingListController extends AbstractCollectionController
             $subscribedActorUser = $subscribedActor->getUser();
 
             if ($subscribedActorUser instanceof ExternalUser) {
-                $actorDto->id = $subscribedActorUser->getExternalId();
-                $actorDto->preferredUsername = $subscribedActorUser->getPreferredUsername();
-                $actorDto->inbox = $subscribedActorUser->getInbox();
-                $actorDto->outbox = $subscribedActorUser->getOutbox();
+                $dtoClass = $subscribedActor instanceof Person ? PersonDto::class : OrganizationDto::class;
+                /** @var ObjectDto $actorDto */
+                $actorDto = $this->entityToDtoMapper->map(
+                    $subscribedActorUser,
+                    $dtoClass
+                );
             } elseif ($subscribedActorUser instanceof InternalUser) {
                 $actorDto->id = $this->uriGenerator->fullUrlFor('user-read', [
                     'username' => $subscribedActorUser->getUsername()
@@ -101,6 +111,10 @@ final class FollowingListController extends AbstractCollectionController
             }
 
             $actorDto->name = $subscribedActor->getName();
+
+            if (null !== $subscribedActor->getIcon()) {
+                $actorDto->icon = $subscribedActor->getIcon()->getOriginalUri();
+            }
 
             $dtoItems[] = $actorDto;
         }

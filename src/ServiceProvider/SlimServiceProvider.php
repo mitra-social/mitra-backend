@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\ActivityPub\HashGenerator;
+use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -57,6 +59,10 @@ final class SlimServiceProvider implements ServiceProviderInterface
             $routeCollector = $container[RouteCollector::class];
 
             return new UriGenerator($uriFactory->createUri($container['baseUrl']), $routeCollector->getRouteParser());
+        };
+
+        $container[HashGeneratorInterface::class] = static function (): HashGeneratorInterface {
+            return new HashGenerator('md5');
         };
     }
 }

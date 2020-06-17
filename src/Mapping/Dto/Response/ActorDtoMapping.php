@@ -47,6 +47,13 @@ abstract class ActorDtoMapping implements EntityToDtoMappingInterface
         $dto->preferredUsername = $entity->getPreferredUsername();
         $dto->name = $actor->getName();
 
+        $dto->inbox = $entity->getInbox();
+        $dto->outbox = $entity->getOutbox();
+
+        if (null !== $actor->getIcon()) {
+            $dto->icon = $actor->getIcon()->getOriginalUri();
+        }
+
         return $dto;
     }
 }
