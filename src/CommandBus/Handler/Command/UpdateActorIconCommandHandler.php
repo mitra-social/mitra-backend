@@ -91,17 +91,12 @@ final class UpdateActorIconCommandHandler
 
     /**
      * @param AbstractUser $externalUser
-     * @param string|ImageDto|array<ImageDto|string> $icon
+     * @param string|ImageDto|LinkDto|array<ImageDto|LinkDto|string> $icon
      * @throws \Psr\Http\Client\ClientExceptionInterface
      */
     private function updateIcon(AbstractUser $externalUser, $icon): void
     {
         $newOriginalIconUrl = $this->extractIconUrl($icon);
-
-        if (null === $newOriginalIconUrl) {
-            return;
-        }
-
         $currentIcon = $externalUser->getActor()->getIcon();
 
         if (null !== $currentIcon && $currentIcon->getOriginalUri() === $newOriginalIconUrl) {
@@ -195,12 +190,12 @@ final class UpdateActorIconCommandHandler
         $externalUser->getActor()->setIcon($iconMedia);
     }
 
-    private function extractIconUrl($icon): ?string
+    /**
+     * @param ImageDto|LinkDto|string|array<string|LinkDto|ImageDto> $icon
+     * @return string
+     */
+    private function extractIconUrl($icon): string
     {
-        if (null === $icon) {
-            return null;
-        }
-
         $icon = is_array($icon) ? $icon[0] : $icon;
 
         if (is_string($icon)) {

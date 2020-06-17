@@ -65,7 +65,7 @@ final class FollowCommandHandler
 
         $objectExternalUser = $this->externalUserResolver->resolve(
             $follow->object,
-            function (ExternalUser $externalUser, ActorInterface $resolvedActorDto) {
+            function (ExternalUser $externalUser, ActorInterface $resolvedActorDto): void {
                 $this->eventEmitter->raise(new ExternalUserUpdatedEvent(
                     $externalUser->getActor(),
                     $resolvedActorDto

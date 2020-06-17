@@ -83,12 +83,12 @@ final class ExternalUserResolver
             $resolvedObject->getOutbox()
         );
 
-        if ('Person' === $resolvedObject->type) {
+        if ('Person' === $resolvedObject->getType()) {
             $actor = new Person($externalUser);
-        } elseif ('Organization' === $resolvedObject->type) {
+        } elseif ('Organization' === $resolvedObject->getType()) {
             $actor = new Organization($externalUser);
         } else {
-            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->type));
+            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->getType()));
         }
 
         $actor->setName($resolvedObject->getName());

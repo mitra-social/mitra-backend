@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityPub\Actor;
 
+use Mitra\Dto\Response\ActivityStreams\ImageDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
-use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 
 interface ActorInterface
 {
@@ -22,7 +22,7 @@ interface ActorInterface
     public function getType(): string;
 
     /**
-     * @return null|string|LinkDto|ObjectDto|array<string|LinkDto|ObjectDto>
+     * @return null|string|LinkDto|ImageDto|array<string|LinkDto|ImageDto>
      */
     public function getIcon();
 }

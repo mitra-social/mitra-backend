@@ -6,6 +6,7 @@ namespace Mitra\CommandBus\Command;
 
 use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\Response\ActivityStreams\ImageDto;
+use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Entity\Actor\Actor;
 
 final class UpdateActorIconCommand implements CommandInterface
@@ -16,13 +17,13 @@ final class UpdateActorIconCommand implements CommandInterface
     private $actorEntity;
 
     /**
-     * @var string|ImageDto|array<ImageDto|string>
+     * @var string|ImageDto|LinkDto|array<ImageDto|LinkDto|string>
      */
     private $icon;
 
     /**
      * @param Actor $actorEntity
-     * @param string|ImageDto|array<ImageDto|string> $icon
+     * @param string|ImageDto|LinkDto|array<ImageDto|LinkDto|string> $icon
      */
     public function __construct(Actor $actorEntity, $icon)
     {
@@ -39,7 +40,7 @@ final class UpdateActorIconCommand implements CommandInterface
     }
 
     /**
-     * @return string|ImageDto|array<ImageDto|string>
+     * @return string|ImageDto|LinkDto|array<ImageDto|LinkDto|string>
      */
     public function getIcon()
     {
