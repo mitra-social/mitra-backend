@@ -39,6 +39,8 @@ final class AppFactory
         /** @var ContainerInterface $container */
         $container = $app->getContainer();
 
+        $app->add(ValidateHttpSignatureMiddleware::class);
+        $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
 
         // Needs to be last middleware to handle all the errors
@@ -50,15 +52,8 @@ final class AppFactory
         );
         $errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
 
-        // API group
-        $app->group('', function () use ($app): void {
-            $app->group('', new ApiPublicRouterProvider());
-            $app->group('', new ApiPrivateRouteProvider())->add(JwtAuthentication::class);
-        })
-            ->add(ValidateHttpSignatureMiddleware::class)
-            ->add(AcceptAndContentTypeMiddleware::class);
-
-        $app->group('', new MediaPublicRouteProvider());
+        $app->group('', new ApiPublicRouterProvider());
+        $app->group('', new ApiPrivateRouteProvider())->add(JwtAuthentication::class);
 
         return $app;
     }
