@@ -123,13 +123,13 @@ final class ActivityPubClient implements ActivityPubClientInterface
             $request = $request->withHeader('Date', (new \DateTimeImmutable())->format(\DateTime::RFC7231));
         }
 
-        $request2 = (new Signer(
+        $request = (new Signer(
             new Key($publicKeyUrl, $privateKey),
             Algorithm::create('rsa-sha256'),
             new HeaderList(['(request-target)', 'Host', 'Date', 'Accept'])
         ))->sign($request);
 
-        $this->logger->info('Sign request: ' . $request2->getHeaderLine('Signature'));
+        $this->logger->info('Sign request: ' . $request->getHeaderLine('Signature'));
 
         return $request;
     }
