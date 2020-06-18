@@ -129,8 +129,6 @@ final class ActivityPubClient implements ActivityPubClientInterface
             new HeaderList(['(request-target)', 'Host', 'Date', 'Accept'])
         ))->sign($request);
 
-        $request = $request->withHeader('Signature', 'foobarbaz');
-
         $this->logger->info('Sign request: ' . $request->getHeaderLine('Signature'));
 
         return $request;
