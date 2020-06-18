@@ -160,7 +160,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
 
             if (0 !== strpos($recipient, $baseUriAsString)) {
                 // External resource
-                try {
+                /*try {
                     $response = $this->activityPubClient->sendRequest(
                         $this->activityPubClient->createRequest('GET', $recipient)
                     );
@@ -175,7 +175,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
                     $actors = array_merge($actors, $this->getRelevantRecipients(
                         new CollectionIterator($this->activityPubClient, $responseObject)
                     ));
-                }
+                }*/
             } else {
                 // Internal resource
                 $actorUrl = $this->uriFactory->createUri($recipient);
