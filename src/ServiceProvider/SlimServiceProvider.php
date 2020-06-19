@@ -6,7 +6,9 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\ActivityPub\HashGenerator;
 use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UuidGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -63,6 +65,10 @@ final class SlimServiceProvider implements ServiceProviderInterface
 
         $container[HashGeneratorInterface::class] = static function (): HashGeneratorInterface {
             return new HashGenerator('md5');
+        };
+
+        $container[IdGeneratorInterface::class] = static function (): IdGeneratorInterface {
+            return new UuidGenerator();
         };
     }
 }

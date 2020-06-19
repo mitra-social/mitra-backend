@@ -6,6 +6,7 @@ namespace Mitra\Tests\Integration;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Tests\Helper\ActivityPub\ActivityPubTestClient;
 use Mitra\Tests\Helper\Container\Http\MockClient;
 use Mitra\Tests\Helper\Container\PimpleTestContainer;
@@ -60,10 +61,11 @@ abstract class IntegrationTestCase extends TestCase
         );
 
         $container = AppContainer::init($env);
-        $container->register(new TestServiceProvider());
 
         self::$container = new PimpleTestContainer($container);
         self::$app = (new AppFactory())->create($container);
+
+        $container->register(new TestServiceProvider());
 
         self::$uriFactory = new UriFactory();
         self::$serverRequestFactory = new ServerRequestFactory(null, self::$uriFactory);
