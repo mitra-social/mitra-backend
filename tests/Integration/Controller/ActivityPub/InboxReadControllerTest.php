@@ -177,7 +177,7 @@ final class InboxReadControllerTest extends IntegrationTestCase
             $uriGenerator->fullUrlFor('user-read', ['username' => $bccUser->getUsername()]),
         ];
 
-        $this->createContent($dto);
+        $this->createContent($dto, $toUser->getActor());
 
         $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=0', $toUser->getUsername()), null, [
             'Authorization' => sprintf('Bearer %s', $token)

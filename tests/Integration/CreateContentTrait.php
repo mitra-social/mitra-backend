@@ -8,6 +8,7 @@ use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\EventBusInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
+use Mitra\Entity\Actor\Actor;
 use Mitra\Normalization\NormalizerInterface;
 use Psr\Container\ContainerInterface;
 use Ramsey\Uuid\Uuid;
@@ -17,7 +18,7 @@ use Ramsey\Uuid\Uuid;
  */
 trait CreateContentTrait
 {
-    public function createContent(ObjectDto $objectDto): ActivityStreamContent
+    public function createContent(ObjectDto $objectDto, ?Actor $recipient): ActivityStreamContent
     {
         /** @var NormalizerInterface $normalizer */
         $normalizer = $this->getContainer()->get(NormalizerInterface::class);
@@ -37,7 +38,8 @@ trait CreateContentTrait
 
         $eventBus->dispatch(new ActivityStreamContentReceivedEvent(
             $activityStreamContentEntity,
-            $objectDto
+            $objectDto,
+            $recipient
         ));
 
         return $activityStreamContentEntity;

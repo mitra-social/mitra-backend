@@ -22,9 +22,10 @@ final class ActivityStreamContentReceivedEventHandler
 
     public function __invoke(ActivityStreamContentReceivedEvent $event): void
     {
-        $dto = $event->getActivityStreamDto();
-        $entity = $event->getActivityStreamContentEntity();
-
-        $this->commandBus->handle(new AttributeActivityStreamContentCommand($entity, $dto));
+        $this->commandBus->handle(new AttributeActivityStreamContentCommand(
+            $event->getActivityStreamContentEntity(),
+            $event->getActivityStreamDto(),
+            $event->getActor()
+        ));
     }
 }

@@ -41,6 +41,6 @@ final class AttributeActivityStreamContentCommandHandler
 
         $entity->setAttributedTo($user->getActor());
 
-        $this->eventEmitter->raise(new ActivityStreamContentAttributedEvent($entity, $dto));
+        $this->eventEmitter->raise(new ActivityStreamContentAttributedEvent($entity, $dto, $command->getActor()));
     }
 }

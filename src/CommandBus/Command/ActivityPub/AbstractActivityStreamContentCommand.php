@@ -7,6 +7,7 @@ namespace Mitra\CommandBus\Command\ActivityPub;
 use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
+use Mitra\Entity\Actor\Actor;
 
 abstract class AbstractActivityStreamContentCommand implements CommandInterface
 {
@@ -20,10 +21,19 @@ abstract class AbstractActivityStreamContentCommand implements CommandInterface
      */
     private $activityStreamDto;
 
-    public function __construct(ActivityStreamContent $activityStreamContentEntity, ObjectDto $activityStreamDto)
-    {
+    /**
+     * @var null|Actor
+     */
+    private $actor;
+
+    public function __construct(
+        ActivityStreamContent $activityStreamContentEntity,
+        ObjectDto $activityStreamDto,
+        ?Actor $actor
+    ) {
         $this->activityStreamContentEntity = $activityStreamContentEntity;
         $this->activityStreamDto = $activityStreamDto;
+        $this->actor = $actor;
     }
 
     public function getActivityStreamContentEntity(): ActivityStreamContent
@@ -31,11 +41,13 @@ abstract class AbstractActivityStreamContentCommand implements CommandInterface
         return $this->activityStreamContentEntity;
     }
 
-    /**
-     * @return ObjectDto
-     */
     public function getActivityStreamDto(): ObjectDto
     {
         return $this->activityStreamDto;
+    }
+
+    public function getActor(): ?Actor
+    {
+        return $this->actor;
     }
 }

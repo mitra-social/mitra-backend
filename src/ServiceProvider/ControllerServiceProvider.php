@@ -10,6 +10,7 @@ use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
 use Mitra\Controller\System\MediaController;
+use Mitra\Controller\System\SharedInboxWriteController;
 use Mitra\Controller\User\FollowingListController;
 use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
@@ -59,6 +60,24 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[ValidatorInterface::class],
                 $container[TokenProvider::class],
                 $container[RequestToDtoTransformer::class]
+            );
+        };
+
+        $container[SharedInboxWriteController::class] = static function (
+            Container $container
+        ): SharedInboxWriteController {
+            return new SharedInboxWriteController(
+                $container[ResponseFactoryInterface::class],
+                $container[NormalizerInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[EventBusInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                $container[DecoderInterface::class],
+                $container[DtoToEntityMapper::class],
+                $container[ActivityStreamContentRepositoryInterface::class],
+                $container[HashGeneratorInterface::class],
+                $container[LoggerInterface::class]
             );
         };
 

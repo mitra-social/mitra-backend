@@ -6,6 +6,7 @@ namespace Mitra\Routes;
 
 use Mitra\Controller\System\MediaController;
 use Mitra\Controller\System\PingController;
+use Mitra\Controller\System\SharedInboxWriteController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\InboxWriteController;
@@ -19,6 +20,7 @@ final class ApiPublicRouterProvider implements RouteProviderInterface
     {
         $group->get('/ping', PingController::class)->setName('ping');
         $group->post('/token', TokenController::class)->setName('token');
+        $group->post('/inbox', SharedInboxWriteController::class)->setName('shared-inbox-write');
         $group->post('/user', CreateUserController::class)->setName('user-create');
         $group->get('/user/{username}', UserReadController::class)->setName('user-read');
         $group->post('/user/{username}/inbox', InboxWriteController::class)->setName('user-inbox-write');

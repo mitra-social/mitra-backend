@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Controller\User;
+namespace Mitra\Controller\System;
 
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ApiProblem\BadRequestApiProblem;
@@ -18,7 +18,6 @@ use Mitra\Entity\ActivityStreamContent;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
-use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ValidatorInterface;
@@ -27,7 +26,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 
-final class InboxWriteController
+final class SharedInboxWriteController
 {
     /**
      * @var EventBusInterface
@@ -70,11 +69,6 @@ final class InboxWriteController
     private $dtoToEntityMapper;
 
     /**
-     * @var InternalUserRepository
-     */
-    private $internalUserRepository;
-
-    /**
      * @var ActivityStreamContentRepositoryInterface
      */
     private $activityStreamContentRepository;
@@ -98,7 +92,6 @@ final class InboxWriteController
         DataToDtoPopulatorInterface $activityPubDataToDtoPopulator,
         DecoderInterface $decoder,
         DtoToEntityMapper $dtoToEntityMapper,
-        InternalUserRepository $internalUserRepository,
         ActivityStreamContentRepositoryInterface $activityStreamContentRepository,
         HashGeneratorInterface $hashGenerator,
         LoggerInterface $logger
@@ -111,7 +104,6 @@ final class InboxWriteController
         $this->eventBus = $eventBus;
         $this->activityPubDataToDtoPopulator = $activityPubDataToDtoPopulator;
         $this->dtoToEntityMapper = $dtoToEntityMapper;
-        $this->internalUserRepository = $internalUserRepository;
         $this->activityStreamContentRepository = $activityStreamContentRepository;
         $this->hashGenerator = $hashGenerator;
         $this->logger = $logger;
@@ -120,16 +112,11 @@ final class InboxWriteController
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
-        $username = $request->getAttribute('username');
-
-        if (null === $inboxUser = $this->internalUserRepository->findByUsername($username)) {
-            return $this->responseFactory->createResponse(404);
-        }
 
         $body = (string) $request->getBody();
         $decodedRequestBody = $this->decoder->decode($body, $accept);
 
-        $this->logger->info(sprintf('Write request to inbox of user %s', $inboxUser->getUsername()), [
+        $this->logger->info('Write request to shared inbox', [
             'request.body' => $body,
             'request.headers' => $request->getHeaders(),
         ]);
@@ -165,7 +152,7 @@ final class InboxWriteController
             $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
                 $activityStreamContent,
                 $objectDto,
-                $inboxUser->getActor()
+                null
             ));
             return $this->responseFactory->createResponse(201);
         }
@@ -184,7 +171,7 @@ final class InboxWriteController
         $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent(
             $activityStreamContent,
             $objectDto,
-            $inboxUser->getActor()
+            null
         ));
 
         return $this->responseFactory->createResponse(201);
