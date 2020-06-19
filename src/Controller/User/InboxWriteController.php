@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ApiProblem\BadRequestApiProblem;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
@@ -26,6 +27,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 
 final class InboxWriteController
 {
@@ -181,11 +183,28 @@ final class InboxWriteController
             null !== $objectDto->updated ? new \DateTimeImmutable($objectDto->updated) : null,
         );
 
-        $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent(
-            $activityStreamContent,
-            $objectDto,
-            $inboxUser->getActor()
-        ));
+        try {
+            $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent(
+                $activityStreamContent,
+                $objectDto,
+                $inboxUser->getActor()
+            ));
+        } catch (HandlerFailedException $e) {
+            if (!$e->getPrevious() instanceof UniqueConstraintViolationException) {
+                throw $e;
+            }
+
+            $activityStreamContent = $this->activityStreamContentRepository->getByExternalId($objectDto->id);
+
+            if (null !== $activityStreamContent) {
+                $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
+                    $activityStreamContent,
+                    $objectDto,
+                    $inboxUser->getActor()
+                ));
+                return $this->responseFactory->createResponse(201);
+            }
+        }
 
         return $this->responseFactory->createResponse(201);
     }
