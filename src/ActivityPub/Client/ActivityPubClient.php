@@ -199,7 +199,11 @@ final class ActivityPubClient implements ActivityPubClientInterface
 
         $negotiator = new EncodingNegotiator();
         /** @var AcceptEncoding|null $mediaType */
-        $mediaType = $negotiator->getBest($contentTypeHeader, ['application/json', 'application/activity+json']);
+        $mediaType = $negotiator->getBest($contentTypeHeader, [
+            'application/activity+json',
+            'application/json',
+            'application/ld+json'
+        ]);
 
         if (null === $mediaType) {
             throw new ActivityPubClientException(
