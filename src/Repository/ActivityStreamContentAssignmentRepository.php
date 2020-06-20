@@ -56,7 +56,7 @@ final class ActivityStreamContentAssignmentRepository
         $qb
             ->select($qb->expr()->count('ca'))
             ->where('ca.actor = :actor')
-            ->setParameter('actor', $actor);
+            ->setParameter('actor', $actor->getUser());
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
