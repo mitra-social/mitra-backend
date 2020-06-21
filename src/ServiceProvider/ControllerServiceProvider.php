@@ -10,6 +10,8 @@ use Mitra\Authentication\TokenProvider;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
 use Mitra\Controller\System\MediaController;
+use Mitra\Controller\System\SharedInboxWriteController;
+use Mitra\Controller\User\ActivityReadController;
 use Mitra\Controller\User\FollowingListController;
 use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
@@ -34,6 +36,7 @@ use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Slim\UriGenerator;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
@@ -59,6 +62,32 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[ValidatorInterface::class],
                 $container[TokenProvider::class],
                 $container[RequestToDtoTransformer::class]
+            );
+        };
+
+        $container[ActivityReadController::class] = static function (
+            Container $container
+        ): ActivityReadController {
+            return new ActivityReadController(
+                $container[ResponseFactoryInterface::class]
+            );
+        };
+
+        $container[SharedInboxWriteController::class] = static function (
+            Container $container
+        ): SharedInboxWriteController {
+            return new SharedInboxWriteController(
+                $container[ResponseFactoryInterface::class],
+                $container[NormalizerInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[EventBusInterface::class],
+                $container[ActivityPubDtoPopulator::class],
+                $container[DecoderInterface::class],
+                $container[DtoToEntityMapper::class],
+                $container[ActivityStreamContentRepositoryInterface::class],
+                $container[HashGeneratorInterface::class],
+                $container[LoggerInterface::class]
             );
         };
 
@@ -101,7 +130,9 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[ActivityPubDtoPopulator::class],
                 $container[DecoderInterface::class],
                 $container[DtoToEntityMapper::class],
-                $container[InternalUserRepository::class]
+                $container[InternalUserRepository::class],
+                $container[UriGenerator::class],
+                $container[IdGeneratorInterface::class]
             );
         };
 

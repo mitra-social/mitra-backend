@@ -6,6 +6,7 @@ namespace Mitra\Config;
 
 use ActivityPhp\Type\Extended\Object\Image;
 use Chubbyphp\Config\ConfigInterface;
+use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
@@ -22,6 +23,7 @@ use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ExternalUserUpdatedEvent;
+use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
@@ -295,6 +297,8 @@ final class Config implements ConfigInterface
                 AttributeActivityStreamContentCommand::class => AttributeActivityStreamContentCommandHandler::class,
                 AssignActivityStreamContentToFollowersCommand::class =>
                     AssignActivityStreamContentToFollowersCommandHandler::class,
+                AssignActivityStreamContentToActorCommand::class =>
+                    AssignActivityStreamContentToActorCommandHandler::class,
                 UpdateExternalActorCommand::class => UpdateExternalActorCommandHandler::class,
                 UpdateActorIconCommand::class => UpdateActorIconCommandHandler::class,
             ],

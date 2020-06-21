@@ -15,6 +15,7 @@ use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\EventBusInterface;
 use Mitra\CommandBus\EventEmitter;
 use Mitra\CommandBus\EventEmitterInterface;
+use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
@@ -230,6 +231,15 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container[UriFactoryInterface::class],
                 $container[ActivityPubClientInterface::class],
                 $container[LoggerInterface::class]
+            );
+        };
+
+        $container[AssignActivityStreamContentToActorCommandHandler::class] = static function (
+            Container $container
+        ): AssignActivityStreamContentToActorCommandHandler {
+            return new AssignActivityStreamContentToActorCommandHandler(
+                $container[EntityManagerInterface::class],
+                $container[EventEmitterInterface::class]
             );
         };
 

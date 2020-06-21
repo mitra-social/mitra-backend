@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Handler\Event\ActivityPub;
 
+use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
@@ -25,6 +26,10 @@ final class ActivityStreamContentPersistedEventHandler
         $dto = $event->getActivityStreamDto();
         $entity = $event->getActivityStreamContentEntity();
 
-        $this->commandBus->handle(new AssignActivityStreamContentToFollowersCommand($entity, $dto));
+        if (null !== $actor = $event->getActor()) {
+            $this->commandBus->handle(new AssignActivityStreamContentToActorCommand($entity, $dto, $actor));
+        } else {
+            $this->commandBus->handle(new AssignActivityStreamContentToFollowersCommand($entity, $dto, null));
+        }
     }
 }

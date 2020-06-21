@@ -45,8 +45,8 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
         $userResponseDto = new UserResponseDto();
 
-        $userResponseDto->internalUserId = $entity->getId();
-        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
+        /*$userResponseDto->internalUserId = $entity->getId();
+        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');*/
 
         $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',

@@ -22,9 +22,12 @@ use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\IdGeneratorInterface;
+use Mitra\Slim\UriGenerator;
 use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Ramsey\Uuid\Uuid;
 
 final class OutboxWriteController
 {
@@ -69,6 +72,16 @@ final class OutboxWriteController
      */
     private $internalUserRepository;
 
+    /**
+     * @var UriGenerator
+     */
+    private $uriGenerator;
+
+    /**
+     * @var IdGeneratorInterface
+     */
+    private $idGenerator;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
@@ -77,7 +90,9 @@ final class OutboxWriteController
         DataToDtoPopulatorInterface $activityPubDataToDtoPopulator,
         DecoderInterface $decoder,
         DtoToEntityMapper $dtoToEntityMapper,
-        InternalUserRepository $internalUserRepository
+        InternalUserRepository $internalUserRepository,
+        UriGenerator $uriGenerator,
+        IdGeneratorInterface $idGenerator
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
@@ -87,6 +102,8 @@ final class OutboxWriteController
         $this->activityPubDataToDtoPopulator = $activityPubDataToDtoPopulator;
         $this->dtoToEntityMapper = $dtoToEntityMapper;
         $this->internalUserRepository = $internalUserRepository;
+        $this->uriGenerator = $uriGenerator;
+        $this->idGenerator = $idGenerator;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -113,6 +130,12 @@ final class OutboxWriteController
         if ($objectDto instanceof AbstractActivity) {
             $this->commandBus->handle(new AssignActorCommand($outboxUser->getActor(), $objectDto));
         }
+
+        // @TODO not just generate a fake URI but actually save the object in the database
+        $objectDto->id = $this->uriGenerator->fullUrlFor(
+            'user-activity-read',
+            ['username' => $outboxUser->getUsername(), 'activityId' => $this->idGenerator->getId()]
+        );
 
         $objectCommand = $this->getCommandForObject($outboxUser->getActor(), $objectDto);
 

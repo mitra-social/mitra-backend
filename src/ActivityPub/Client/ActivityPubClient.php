@@ -123,11 +123,15 @@ final class ActivityPubClient implements ActivityPubClientInterface
             $request = $request->withHeader('Date', (new \DateTimeImmutable())->format(\DateTime::RFC7231));
         }
 
-        return (new Signer(
+        $request = (new Signer(
             new Key($publicKeyUrl, $privateKey),
             Algorithm::create('rsa-sha256'),
             new HeaderList(['(request-target)', 'Host', 'Date', 'Accept'])
         ))->sign($request);
+
+        $this->logger->info('Sign request: ' . $request->getHeaderLine('Signature'));
+
+        return $request;
     }
 
     /**
@@ -195,7 +199,11 @@ final class ActivityPubClient implements ActivityPubClientInterface
 
         $negotiator = new EncodingNegotiator();
         /** @var AcceptEncoding|null $mediaType */
-        $mediaType = $negotiator->getBest($contentTypeHeader, ['application/json', 'application/activity+json']);
+        $mediaType = $negotiator->getBest($contentTypeHeader, [
+            'application/activity+json',
+            'application/json',
+            'application/ld+json'
+        ]);
 
         if (null === $mediaType) {
             throw new ActivityPubClientException(

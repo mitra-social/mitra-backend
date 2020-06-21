@@ -36,9 +36,10 @@ final class ValidateContentCommandHandler
     {
         $dto = $command->getActivityStreamDto();
         $entity = $command->getActivityStreamContentEntity();
+        $actor = $command->getActor();
 
         if ($this->isValid($dto, $entity)) {
-            $this->eventEmitter->raise(new ContentAcceptedEvent($entity, $dto));
+            $this->eventEmitter->raise(new ContentAcceptedEvent($entity, $dto, $actor));
         }
     }
 

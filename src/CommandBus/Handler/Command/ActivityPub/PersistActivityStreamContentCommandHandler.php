@@ -49,7 +49,8 @@ final class PersistActivityStreamContentCommandHandler
         $this->entityManager->persist($entity);
 
         $dto = $command->getActivityStreamDto();
+        $actor = $command->getActor();
 
-        $this->eventEmitter->raise(new ActivityStreamContentPersistedEvent($entity, $dto));
+        $this->eventEmitter->raise(new ActivityStreamContentPersistedEvent($entity, $dto, $actor));
     }
 }

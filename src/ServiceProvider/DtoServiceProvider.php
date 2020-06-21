@@ -12,7 +12,9 @@ use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoTransformer;
+use Mitra\Dto\Response\ActivityStreams\Activity\AcceptDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\DeleteDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
@@ -99,6 +101,8 @@ final class DtoServiceProvider implements ServiceProviderInterface
             CreateDto::class => DataToDtoPopulator::class . CreateDto::class,
             FollowDto::class => DataToDtoPopulator::class . FollowDto::class,
             UndoDto::class => DataToDtoPopulator::class . UndoDto::class,
+            DeleteDto::class => DataToDtoPopulator::class . DeleteDto::class,
+            AcceptDto::class => DataToDtoPopulator::class . AcceptDto::class,
         ];
 
         foreach ($activityStreamDtoClasses as $activityStreamDtoClass => $serviceId) {
