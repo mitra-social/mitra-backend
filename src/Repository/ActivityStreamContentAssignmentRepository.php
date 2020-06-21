@@ -34,6 +34,7 @@ final class ActivityStreamContentAssignmentRepository
     {
         $qb = $this->repository->createQueryBuilder('ca')
             ->select('ca', 'c')
+            ->join('ca.content', 'c')
             ->where('ca.actor = :actor')
             ->setParameter('actor', $actor->getUser());
 
@@ -76,7 +77,16 @@ final class ActivityStreamContentAssignmentRepository
 
         foreach ($filter->getProperties() as $key => $propertyName) {
             if ('attributedTo' === $propertyName) {
-                $qb->join('ca.content', 'c')->join('c.attributedTo', 'a');
+                $aliases = $qb->getAllAliases();
+
+                if (!in_array('c', $aliases)) {
+                    $qb->join('ca.content', 'c');
+                }
+
+                if (!in_array('a', $aliases)) {
+                    $qb->join('c.attributedTo', 'a');
+                }
+
                 $resolvedProperties[$propertyName] = 'a.user';
                 continue;
             }

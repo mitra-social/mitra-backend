@@ -227,8 +227,8 @@ final class InboxReadControllerTest extends IntegrationTestCase
         /** @var UriGenerator $uriGenerator */
         $uriGenerator = $this->getContainer()->get(UriGenerator::class);
 
-        $actorUsername1 = 'bob';
-        $actorUsername2 = 'alice';
+        $actorUsername1 = sprintf('bob.%s', uniqid());
+        $actorUsername2 = sprintf('alice.%s', uniqid());
         $externalUser1 = $this->createExternalUser($actorUsername1);
         $externalUser2 = $this->createExternalUser($actorUsername2);
 
@@ -295,12 +295,12 @@ final class InboxReadControllerTest extends IntegrationTestCase
                         'content' => $dtoContent,
                     ],
                     'actor' => [
-                        'id' => 'https://example.com/user/bob',
-                        'preferredUsername' => 'bob',
+                        'id' => sprintf('https://example.com/user/%s', $actorUsername1),
+                        'preferredUsername' => $actorUsername1,
                         'name' => 'Bob',
                         'type' => 'Person',
-                        'inbox' => 'https://example.com/user/bob/inbox',
-                        'outbox' => 'https://example.com/user/bob/outbox',
+                        'inbox' => sprintf('https://example.com/user/%s/inbox', $actorUsername1),
+                        'outbox' => sprintf('https://example.com/user/%s/outbox', $actorUsername1),
                     ],
                     'id' => $dto->id,
                     'to' => [
