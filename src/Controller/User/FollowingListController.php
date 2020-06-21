@@ -15,6 +15,8 @@ use Mitra\Entity\Actor\Person;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
+use Mitra\Filtering\Filter;
+use Mitra\Filtering\FilterFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
@@ -43,9 +45,10 @@ final class FollowingListController extends AbstractCollectionController
         InternalUserRepository $internalUserRepository,
         UriGenerator $uriGenerator,
         ResponseFactoryInterface $responseFactory,
+        FilterFactoryInterface $filterFactory,
         EntityToDtoMapper $entityToDtoMapper
     ) {
-        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory);
+        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $filterFactory);
 
         $this->subscriptionRepository = $subscriptionRepository;
         $this->uriGenerator = $uriGenerator;
@@ -54,11 +57,11 @@ final class FollowingListController extends AbstractCollectionController
 
     /**
      * @param Actor $actorDto
+     * @param Filter|null $filter
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
-     * @throws \Exception
      */
-    protected function getItems(Actor $actorDto, ?int $page): array
+    protected function getItems(Actor $actorDto, ?Filter $filter, ?int $page): array
     {
         $offset = null;
         $limit = null;
@@ -122,7 +125,7 @@ final class FollowingListController extends AbstractCollectionController
         return $dtoItems;
     }
 
-    protected function getTotalItemCount(Actor $requestedActor): int
+    protected function getTotalItemCount(Actor $requestedActor, ?Filter $filter): int
     {
         return $this->subscriptionRepository->getFollowingCountForActor($requestedActor);
     }

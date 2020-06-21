@@ -102,7 +102,7 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         foreach ([$toUser, $ccUser, $btoUser, $bccUser] as $user) {
             /** @var ActivityStreamContentAssignment[] $userContent */
-            $userContent = $contentAssignmentRepository->findContentForActor($user->getActor(), null, null);
+            $userContent = $contentAssignmentRepository->findContentForActor($user->getActor(), null, null, null);
 
             self::assertCount(1, $userContent);
             self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
@@ -260,7 +260,7 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         foreach ([$toUser, $ccUser, $btoUser, $bccUser] as $user) {
             /** @var ActivityStreamContentAssignment[] $userContent */
-            $userContent = $contentAssignmentRepository->findContentForActor($user->getActor(), null, null);
+            $userContent = $contentAssignmentRepository->findContentForActor($user->getActor(), null, null, null);
 
             self::assertCount(1, $userContent);
             self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
@@ -335,7 +335,7 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
         /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
         $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
 
-        $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null);
+        $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null, null);
 
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);

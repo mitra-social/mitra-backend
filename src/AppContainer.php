@@ -15,6 +15,7 @@ use Mitra\ServiceProvider\CommandBusServiceProvider;
 use Mitra\ServiceProvider\DtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
 use Mitra\ServiceProvider\FilesystemServiceProvider;
+use Mitra\ServiceProvider\FilteringServiceProvider;
 use Mitra\ServiceProvider\HttpClientServiceProvider;
 use Mitra\ServiceProvider\HttpServiceProvider;
 use Mitra\ServiceProvider\MonologServiceProvider;
@@ -48,7 +49,8 @@ final class AppContainer
         // Third party
         $container
             ->register(new DoctrineOrmServiceProvider())
-            ->register(new DoctrineDbalServiceProvider());
+            ->register(new DoctrineDbalServiceProvider())
+        ;
 
         // Own
         $container
@@ -57,6 +59,7 @@ final class AppContainer
             ->register(new CommandBusServiceProvider())
             ->register(new ActivityPubServiceProvider())
             ->register(new ValidatorServiceProvider())
+            ->register(new FilteringServiceProvider())
             ->register(new DoctrineServiceProvider())
             ->register(new ProxyManagerServiceProvider())
             ->register(new DtoServiceProvider())

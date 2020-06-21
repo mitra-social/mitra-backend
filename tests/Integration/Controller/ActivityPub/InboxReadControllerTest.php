@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
+use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Entity\User\InternalUser;
@@ -180,6 +181,98 @@ final class InboxReadControllerTest extends IntegrationTestCase
         $this->createContent($dto, $toUser->getActor());
 
         $request = $this->createRequest('GET', sprintf('/user/%s/inbox?page=0', $toUser->getUsername()), null, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(200, $response);
+
+        $actualPayload = json_decode((string) $response->getBody(), true);
+        $expectedPayload = [
+            '@context' => [
+                'https://www.w3.org/ns/activitystreams',
+                'https://w3id.org/security/v1',
+            ],
+            'type' => 'OrderedCollectionPage',
+            'totalItems' => 1,
+            'orderedItems' => [
+                [
+                    'type' => 'Create',
+                    'object' => [
+                        'type' => 'Note',
+                        'content' => $dtoContent,
+                    ],
+                    'actor' => [
+                        'id' => 'https://example.com/user/bob',
+                        'preferredUsername' => 'bob',
+                        'name' => 'Bob',
+                        'type' => 'Person',
+                        'inbox' => 'https://example.com/user/bob/inbox',
+                        'outbox' => 'https://example.com/user/bob/outbox',
+                    ],
+                    'id' => $dto->id,
+                    'to' => [
+                        $toUserExternalId,
+                    ],
+                ],
+            ],
+            'partOf' => sprintf('http://test.localhost/user/%s/inbox', $toUser->getUsername()),
+        ];
+
+        self::assertEquals($expectedPayload, $actualPayload);
+    }
+
+    public function testReturnsFilteredInboxItems(): void
+    {
+        /** @var UriGenerator $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+
+        $actorUsername1 = 'bob';
+        $actorUsername2 = 'alice';
+        $externalUser1 = $this->createExternalUser($actorUsername1);
+        $externalUser2 = $this->createExternalUser($actorUsername2);
+
+        $toUser = $this->createInternalUser();
+        $toUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser->getUsername()]);
+        $token = $this->createTokenForUser($toUser);
+
+        $this->createSubscription($toUser->getActor(), $externalUser1->getActor());
+        $this->createSubscription($toUser->getActor(), $externalUser2->getActor());
+
+        $dtoContent = 'Foo bar baz';
+
+        $dto = new CreateDto();
+        $dto->id = sprintf('https://example.com/user/%s/post/123456', $actorUsername1);
+        $dto->actor = $externalUser1->getExternalId();
+        $dto->object = new NoteDto();
+        $dto->object->content = $dtoContent;
+        $dto->to = [
+            $toUserExternalId,
+        ];
+
+        $this->createContent($dto, $toUser->getActor());
+
+        $filteredDto = new CreateDto();
+        $filteredDto->id = sprintf('https://example.com/user/%s/post/123456', $actorUsername2);
+        $filteredDto->actor = $externalUser2->getExternalId();
+        $filteredDto->object = new NoteDto();
+        $filteredDto->object->content = 'This one should be filtered';
+        $filteredDto->to = [
+            $toUserExternalId,
+        ];
+
+        $this->createContent($filteredDto, $toUser->getActor());
+
+        /** @var ActivityStreamContentAssignmentRepository $repo */
+        $repo = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+
+        self::assertEquals(2, $repo->getTotalCountForActor($toUser->getActor(), null));
+
+        $request = $this->createRequest('GET', sprintf(
+            '/user/%s/inbox?page=0&filter=%s',
+            $toUser->getUsername(),
+            urlencode('attributedTo=' . $externalUser1->getId())
+        ), null, [
             'Authorization' => sprintf('Bearer %s', $token)
         ]);
         $response = $this->executeRequest($request);
