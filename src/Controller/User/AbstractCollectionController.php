@@ -86,7 +86,7 @@ abstract class AbstractCollectionController
         $pageNo = $request->getQueryParams()['page'] ?? null;
         $filterQuery = $request->getQueryParams()['filter'] ?? null;
 
-        $filter = is_string($filterQuery) ? $this->filterFactory->create(FilterTokenizer::create($filterQuery)) : null;
+        $filter = is_string($filterQuery) ? $this->filterFactory->create($filterQuery) : null;
 
         $requestedUsername = $requestedUser->getUsername();
         $requestedActor = $requestedUser->getActor();

@@ -4,17 +4,34 @@ declare(strict_types=1);
 
 namespace Mitra\Filtering;
 
-final class SqlFilterFactoryInterface implements FilterFactoryInterface
+use Doctrine\ORM\QueryBuilder;
+
+final class SqlFilterRenderer implements FilterRendererInterface
 {
-    public function create(FilterTokenizer $filterTokenizer): Filter
+    /**
+     * @var QueryBuilder
+     */
+    private $queryBuilder;
+
+    /**
+     * @var \Closure
+     */
+    private $propertyResolver;
+
+    public function __construct(QueryBuilder $queryBuilder, \Closure $propertyResolver)
+    {
+        $this->queryBuilder = $queryBuilder;
+        $this->propertyResolver = $propertyResolver;
+    }
+
+    public function apply(Filter $filter): void
     {
         $str = '';
-        $params = [];
-        $properties = [];
+        $paramCount = 0;
         $comparatorRight = false;
         $filterId = uniqid();
 
-        foreach ($filterTokenizer->getTokenStream() as $token) {
+        foreach ($filter->getTokens() as $token) {
             $tokenType = $token[0];
 
             if (FilterTokenizer::TOKEN_GROUP_START === $tokenType) {
@@ -23,14 +40,14 @@ final class SqlFilterFactoryInterface implements FilterFactoryInterface
                 $str .= ')';
             } elseif (FilterTokenizer::TOKEN_TEXT === $tokenType) {
                 if (true === $comparatorRight) {
-                    $paramName = sprintf("filter_%s_param_%d", $filterId, count($params));
+                    $paramName = sprintf("filter_%s_param_%d", $filterId, $paramCount++);
                     $str .= sprintf(':%s', $paramName);
-                    $params[$paramName] = $token[1];
+                    $this->queryBuilder->setParameter($paramName, $token[1]);
                     $comparatorRight = false;
                 } else {
                     $propertyName = $token[1];
-                    $str .= sprintf('{{ %s }}', $propertyName);
-                    $properties[$propertyName] = $propertyName;
+
+                    $str .= ($this->propertyResolver)($propertyName);
                 }
             } elseif (FilterTokenizer::TOKEN_OPERATOR_AND === $tokenType) {
                 $str .= ' AND ';
@@ -45,6 +62,6 @@ final class SqlFilterFactoryInterface implements FilterFactoryInterface
             }
         }
 
-        return new Filter($str, $properties, $params);
+        $this->queryBuilder->andWhere($str);
     }
 }

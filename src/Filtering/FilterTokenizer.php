@@ -29,24 +29,20 @@ final class FilterTokenizer
      */
     private $tokenStream;
 
-    /**
-     * @var string
-     */
-    private $filterInputStr;
-
-    /**
-     * @param string $filterInputStr
-     * @param iterable<array<string>> $tokenStream
-     */
-    private function __construct(string $filterInputStr, iterable $tokenStream)
+    private function __construct()
     {
-        $this->filterInputStr = $filterInputStr;
-        $this->tokenStream = $tokenStream;
     }
 
-    public static function create(string $filter): self
+    /**
+     * @param string $filter
+     * @return array<array<int, string>>
+     */
+    public static function create(string $filter): array
     {
-        return new self($filter, self::tokenize($filter));
+        $tokens = [];
+        array_push($tokens, ...self::tokenize($filter));
+
+        return $tokens;
     }
 
     /**

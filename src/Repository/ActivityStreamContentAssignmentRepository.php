@@ -10,6 +10,7 @@ use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Filtering\Filter;
+use Mitra\Filtering\SqlFilterRenderer;
 
 final class ActivityStreamContentAssignmentRepository
 {
@@ -72,36 +73,33 @@ final class ActivityStreamContentAssignmentRepository
 
     private function addFilter(QueryBuilder $qb, Filter $filter): void
     {
-        $resolvedProperties = [];
         $allowedProperties = ['attributedTo'];
 
-        foreach ($filter->getProperties() as $key => $propertyName) {
-            if ('attributedTo' === $propertyName) {
-                $aliases = $qb->getAllAliases();
+        $filterRenderer = new SqlFilterRenderer(
+            $qb,
+            function (string $propertyName) use ($allowedProperties, $qb): string {
+                if ('attributedTo' === $propertyName) {
+                    $aliases = $qb->getAllAliases();
 
-                if (!in_array('c', $aliases)) {
-                    $qb->join('ca.content', 'c');
+                    if (!in_array('c', $aliases)) {
+                        $qb->join('ca.content', 'c');
+                    }
+
+                    if (!in_array('a', $aliases)) {
+                        $qb->join('c.attributedTo', 'a');
+                    }
+
+                    return 'a.user';
                 }
 
-                if (!in_array('a', $aliases)) {
-                    $qb->join('c.attributedTo', 'a');
-                }
-
-                $resolvedProperties[$propertyName] = 'a.user';
-                continue;
+                throw new \RuntimeException(sprintf(
+                    'Filtering for property `%s` is not defined. Available properties are: %s',
+                    $propertyName,
+                    implode(', ', $allowedProperties)
+                ));
             }
+        );
 
-            throw new \RuntimeException(sprintf(
-                'Filtering for property `%s` is not defined. Available properties are: %s',
-                $propertyName,
-                implode(', ', $allowedProperties)
-            ));
-        }
-
-        $qb->andWhere($filter->render($resolvedProperties));
-
-        foreach ($filter->getParameters() as $name => $value) {
-            $qb->setParameter($name, $value);
-        }
+        $filterRenderer->apply($filter);
     }
 }

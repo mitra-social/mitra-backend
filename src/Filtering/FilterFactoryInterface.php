@@ -6,5 +6,5 @@ namespace Mitra\Filtering;
 
 interface FilterFactoryInterface
 {
-    public function create(FilterTokenizer $filterTokenizer): Filter;
+    public function create(string $filterQueryStr): Filter;
 }
