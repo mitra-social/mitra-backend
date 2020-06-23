@@ -104,9 +104,4 @@ final class FilterTokenizer
     {
         return $this->tokenStream;
     }
-
-    public function getFilterInputStr(): string
-    {
-        return $this->filterInputStr;
-    }
 }

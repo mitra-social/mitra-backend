@@ -12,7 +12,7 @@ final class Filter
     private $tokens;
 
     /**
-     * @var array<string, string|int>
+     * @var string
      */
     private $filterQueryStr;
 

@@ -81,11 +81,11 @@ final class ActivityStreamContentAssignmentRepository
                 if ('attributedTo' === $propertyName) {
                     $aliases = $qb->getAllAliases();
 
-                    if (!in_array('c', $aliases)) {
+                    if (!in_array('c', $aliases, true)) {
                         $qb->join('ca.content', 'c');
                     }
 
-                    if (!in_array('a', $aliases)) {
+                    if (!in_array('a', $aliases, true)) {
                         $qb->join('c.attributedTo', 'a');
                     }
 
