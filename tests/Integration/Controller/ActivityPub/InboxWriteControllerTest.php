@@ -8,6 +8,8 @@ use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Entity\Media;
 use Mitra\Repository\ExternalUserRepository;
+use Mitra\Slim\IdGeneratorInterface;
+use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
@@ -91,6 +93,11 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $normalizer = $this->getContainer()->get(NormalizerInterface::class);
 
         $payload = $encoder->encode($normalizer->normalize($dto), 'application/json');
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setId('c20bd993-5d6c-410e-8a9a-c27ca408b1b6');
 
         $request = $this->createRequest('POST', sprintf('/user/%s/inbox', $toUser->getUsername()), $payload);
         $response = $this->executeRequest($request);

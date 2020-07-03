@@ -27,6 +27,7 @@ use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\RequestToDtoTransformer;
+use Mitra\Factory\ActivityStreamContentFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
@@ -148,7 +149,6 @@ final class ControllerServiceProvider implements ServiceProviderInterface
         $container[InboxWriteController::class] = static function (Container $container): InboxWriteController {
             return new InboxWriteController(
                 $container[ResponseFactoryInterface::class],
-                $container[NormalizerInterface::class],
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[EventBusInterface::class],
@@ -156,8 +156,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[DecoderInterface::class],
                 $container[DtoToEntityMapper::class],
                 $container[InternalUserRepository::class],
+                $container[ActivityStreamContentFactoryInterface::class],
                 $container[ActivityStreamContentRepositoryInterface::class],
-                $container[HashGeneratorInterface::class],
                 $container[LoggerInterface::class]
             );
         };

@@ -12,6 +12,8 @@ use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 final class RemoteObjectResolver
 {
 
+    private const SUPPORTED_SCHEMAS = ['http', 'https'];
+
     /**
      * @var ActivityPubClientInterface
      */
@@ -27,26 +29,32 @@ final class RemoteObjectResolver
      * @return null|ObjectDto
      * @throws RemoteObjectResolverException
      */
-    public function resolve($value): ?ObjectDto
+    public function resolve($value): ObjectDto
     {
+        if ($value instanceof ObjectDto) {
+            return $value;
+        }
+
         $url = null;
 
         if (is_string($value)) {
             $url = $value;
         } elseif ($value instanceof LinkDto) {
             $url = $value->href;
-        } elseif ($value instanceof ObjectDto) {
-            return $value;
         }
 
         if (null === $url) {
-            return null;
+            throw new RemoteObjectResolverException('Could not extract url to resolve');
         }
 
         $scheme = parse_url($url, PHP_URL_SCHEME);
 
-        if (false === $scheme || !in_array(strtolower($scheme), ['http', 'https'], true)) {
-            return null;
+        if (false === $scheme || !in_array(strtolower($scheme), self::SUPPORTED_SCHEMAS, true)) {
+            throw new RemoteObjectResolverException(sprintf(
+                'Uri `%s` has no supported schema. Supported schemas: %s',
+                $url,
+                implode(', ', self::SUPPORTED_SCHEMAS)
+            ));
         }
 
         return $this->fetchRemoteValueByUrl($url);

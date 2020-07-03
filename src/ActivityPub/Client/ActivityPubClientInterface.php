@@ -12,5 +12,10 @@ interface ActivityPubClientInterface
 
     public function signRequest(RequestInterface $request, string $privateKey, string $publicKeyUrl): RequestInterface;
 
+    /**
+     * @param RequestInterface $request
+     * @return ActivityPubClientResponse
+     * @throws ActivityPubClientException
+     */
     public function sendRequest(RequestInterface $request): ActivityPubClientResponse;
 }

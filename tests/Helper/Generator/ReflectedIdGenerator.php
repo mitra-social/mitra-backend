@@ -16,7 +16,7 @@ final class ReflectedIdGenerator implements IdGeneratorInterface
     public function getId(): string
     {
         if (null === $this->id) {
-            throw new \RuntimeException('No id set, set one by calling `setId()`');
+            throw new \RuntimeException('No id set, set one by calling the `setId()` method');
         }
 
         return $this->id;

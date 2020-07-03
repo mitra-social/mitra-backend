@@ -11,9 +11,10 @@ use Mitra\Config\Config;
 use Mitra\Env\Env;
 use Mitra\ServiceProvider\ActivityPubServiceProvider;
 use Mitra\ServiceProvider\AuthenticationServiceProvider;
-use Mitra\ServiceProvider\CommandBusServiceProvider;
+use Mitra\ServiceProvider\MessageBusServiceProvider;
 use Mitra\ServiceProvider\DtoServiceProvider;
 use Mitra\ServiceProvider\DoctrineServiceProvider;
+use Mitra\ServiceProvider\FactoryServiceProvider;
 use Mitra\ServiceProvider\FilesystemServiceProvider;
 use Mitra\ServiceProvider\HttpClientServiceProvider;
 use Mitra\ServiceProvider\HttpServiceProvider;
@@ -54,7 +55,8 @@ final class AppContainer
         $container
             ->register(new HttpServiceProvider())
             ->register(new SerializationServiceProvider())
-            ->register(new CommandBusServiceProvider())
+            ->register(new FactoryServiceProvider())
+            ->register(new MessageBusServiceProvider())
             ->register(new ActivityPubServiceProvider())
             ->register(new ValidatorServiceProvider())
             ->register(new DoctrineServiceProvider())

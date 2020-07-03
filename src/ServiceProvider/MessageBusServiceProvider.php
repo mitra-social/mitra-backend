@@ -6,7 +6,6 @@ namespace Mitra\ServiceProvider;
 
 use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemInterface;
-use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
@@ -19,6 +18,7 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToAc
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\DereferenceObjectCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
@@ -35,6 +35,7 @@ use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\CommandBus\SymfonyMessengerCommandBus;
 use Mitra\CommandBus\SymfonyMessengerEventBus;
 use Mitra\CommandBus\SymfonyMessengerHandlersLocator;
+use Mitra\Factory\ActivityStreamContentFactoryInterface;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
@@ -62,7 +63,7 @@ use Symfony\Component\Messenger\Transport\TransportFactory;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
-final class CommandBusServiceProvider implements ServiceProviderInterface
+final class MessageBusServiceProvider implements ServiceProviderInterface
 {
     /**
      * @param Container $container
@@ -266,6 +267,16 @@ final class CommandBusServiceProvider implements ServiceProviderInterface
                 $container[LoggerInterface::class],
                 $container[MediaRepositoryInterface::class],
                 $container['doctrine.orm.em']
+            );
+        };
+
+        $container[DereferenceObjectCommandHandler::class] = static function (
+            Container $container
+        ): DereferenceObjectCommandHandler {
+            return new DereferenceObjectCommandHandler(
+                $container['doctrine.orm.em'],
+                $container[ActivityStreamContentFactoryInterface::class],
+                $container[RemoteObjectResolver::class]
             );
         };
     }
