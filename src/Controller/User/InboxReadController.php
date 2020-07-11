@@ -9,6 +9,8 @@ use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
+use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDtoInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
@@ -89,9 +91,9 @@ final class InboxReadController extends AbstractOrderedCollectionController
                 $object
             );
 
-            // Inline author infos
             $itemContent = $item->getContent();
 
+            // Inline author infos
             $author = $itemContent->getAttributedTo()->getUser();
             $dtoClass = $author->getActor() instanceof Person ? PersonDto::class : OrganizationDto::class;
             /** @var ObjectDto $actorDto */
@@ -100,6 +102,11 @@ final class InboxReadController extends AbstractOrderedCollectionController
                 $dtoClass
             );
             $dto->actor = $actorDto;
+
+            // TODO: Inline object infos
+            /*if ($dto instanceof ActivityDto && null !== $dto->object) {
+                $dto->object
+            }*/
 
             // Don't leak anonymous recipients
             $dto->bto = null;

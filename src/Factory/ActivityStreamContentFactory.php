@@ -46,7 +46,7 @@ final class ActivityStreamContentFactory implements ActivityStreamContentFactory
             $objectDto->type,
             $this->normalizer->normalize($objectDto),
             null,
-            null !== $objectDto->published ? new \DateTimeImmutable($objectDto->published) : null,
+            new \DateTimeImmutable(null !== $objectDto->published ? $objectDto->published : 'now'),
             null !== $objectDto->updated ? new \DateTimeImmutable($objectDto->updated) : null,
         );
     }
