@@ -114,6 +114,7 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         /** @var InternalUser $user */
         $this->createSubscription($toUser->getActor(), $externalUser->getActor());
 
+        // Object
         $referencedObjectUuid = '237beefe-7259-42eb-84c3-322c4a36ad31';
         $referencedObjectId = sprintf(
             'https://example.com/user/%s/object/%s',
@@ -125,10 +126,25 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $referenceObject->id = $referencedObjectId;
         $referenceObject->content = $referencedObjectContent;
 
+        // InReplyTo
+        $referencedInReplyToUuid = '8dc8dd73-d785-4810-855d-f32323b51f74';
+        $referencedInReplyToId = sprintf(
+            'https://example.com/user/%s/object/%s',
+            $externalUser->getPreferredUsername(),
+            $referencedInReplyToUuid
+        );
+        $referencedInReplyToContent = 'This is a replyTo object.';
+        $referenceInReplyTo = new NoteDto();
+        $referenceInReplyTo->id = $referencedInReplyToId;
+        $referenceInReplyTo->content = $referencedInReplyToContent;
+
         $dto = new CreateDto();
         $dto->id = sprintf('https://example.com/user/%s/post/123456', $externalUser->getPreferredUsername());
         $dto->actor = $externalUser->getExternalId();
         $dto->object = $referencedObjectId;
+        $dto->inReplyTo = [
+            $referencedInReplyToId
+        ];
         $dto->to = [
             $toUserExternalId,
         ];
@@ -140,23 +156,39 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         $payload = $encoder->encode($normalizer->normalize($dto), 'application/json');
         $referencedObjectPayload = $encoder->encode($normalizer->normalize($referenceObject), 'application/json');
+        $referencedInReplyToPayload = $encoder->encode($normalizer->normalize($referenceInReplyTo), 'application/json');
 
         /** @var ReflectedIdGenerator $idGenerator */
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
 
-        $idGenerator->setIds(['afb95f77-fd0b-455c-98d9-4defb13ba650', $referencedObjectUuid]);
+        $idGenerator->setIds([
+            'afb95f77-fd0b-455c-98d9-4defb13ba650',
+            $referencedInReplyToUuid,
+            $referencedObjectUuid,
+        ]);
 
-        $objectAndToResponse = self::$responseFactory->createResponse(200)
+        $objectResponse = self::$responseFactory->createResponse(200)
             ->withHeader('Content-Type', 'application/activity+json');
 
-        $objectAndToResponse->getBody()->write($referencedObjectPayload);
+        $objectResponse->getBody()->write($referencedObjectPayload);
 
-        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $referencedObjectId);
+        $objectRequest = self::$requestFactory->createRequest('GET', $referencedObjectId);
+
+        $inReplyToResponse = self::$responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'application/activity+json');
+
+        $inReplyToResponse->getBody()->write($referencedInReplyToPayload);
+
+        $inReplyToRequest = self::$requestFactory->createRequest('GET', $referencedInReplyToId);
 
         $apiHttpClientMock = $this->getClientMock([
             [
-                $requestResolveExternalActor,
-                $objectAndToResponse,
+                $inReplyToRequest,
+                $inReplyToResponse,
+            ],
+            [
+                $objectRequest,
+                $objectResponse,
             ],
         ]);
 
@@ -170,16 +202,19 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
         $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
 
-
         /** @var ActivityStreamContentAssignment[] $userContent */
         $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null);
 
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
-        self::assertCount(1, $userContent[0]->getContent()->getLinkedObjects());
+        self::assertCount(2, $userContent[0]->getContent()->getLinkedObjects());
 
         /** @var ActivityStreamContent $linkedObject */
         $linkedObject = $userContent[0]->getContent()->getLinkedObjects()[0];
+        self::assertEquals($referencedInReplyToId, $linkedObject->getExternalId());
+
+        /** @var ActivityStreamContent $linkedObject */
+        $linkedObject = $userContent[0]->getContent()->getLinkedObjects()[1];
         self::assertEquals($referencedObjectId, $linkedObject->getExternalId());
     }
 }

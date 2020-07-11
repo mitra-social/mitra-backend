@@ -55,11 +55,16 @@ final class DereferenceObjectCommandHandler
         $entity = $command->getActivityStreamContentEntity();
         $dto = $command->getActivityStreamDto();
 
-        if (!$dto instanceof ActivityDto) {
-            return;
-        }
+        $this->dereferenceObjects($entity, $dto->inReplyTo);
 
-        $objects = is_array($dto->object) ? $dto->object : [$dto->object];
+        if ($dto instanceof ActivityDto) {
+            $this->dereferenceObjects($entity, $dto->object);
+        }
+    }
+
+    private function dereferenceObjects($entity, $objects): void
+    {
+        $objects = is_array($objects) ? $objects : [$objects];
 
         foreach ($objects as $object) {
             if (!is_string($object) && !$object instanceof LinkDto) {
