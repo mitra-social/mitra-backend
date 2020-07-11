@@ -114,18 +114,6 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         /** @var InternalUser $user */
         $this->createSubscription($toUser->getActor(), $externalUser->getActor());
 
-        // Object
-        $referencedObjectUuid = '237beefe-7259-42eb-84c3-322c4a36ad31';
-        $referencedObjectId = sprintf(
-            'https://example.com/user/%s/object/%s',
-            $externalUser->getPreferredUsername(),
-            $referencedObjectUuid
-        );
-        $referencedObjectContent = 'This is a note.';
-        $referenceObject = new NoteDto();
-        $referenceObject->id = $referencedObjectId;
-        $referenceObject->content = $referencedObjectContent;
-
         // InReplyTo
         $referencedInReplyToUuid = '8dc8dd73-d785-4810-855d-f32323b51f74';
         $referencedInReplyToId = sprintf(
@@ -138,13 +126,23 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $referenceInReplyTo->id = $referencedInReplyToId;
         $referenceInReplyTo->content = $referencedInReplyToContent;
 
+        // Object
+        $referencedObjectUuid = '237beefe-7259-42eb-84c3-322c4a36ad31';
+        $referencedObjectId = sprintf(
+            'https://example.com/user/%s/object/%s',
+            $externalUser->getPreferredUsername(),
+            $referencedObjectUuid
+        );
+        $referencedObjectContent = 'This is a note.';
+        $referenceObject = new NoteDto();
+        $referenceObject->id = $referencedObjectId;
+        $referenceObject->content = $referencedObjectContent;
+        $referenceObject->inReplyTo = $referencedInReplyToId;
+
         $dto = new CreateDto();
         $dto->id = sprintf('https://example.com/user/%s/post/123456', $externalUser->getPreferredUsername());
         $dto->actor = $externalUser->getExternalId();
         $dto->object = $referencedObjectId;
-        $dto->inReplyTo = [
-            $referencedInReplyToId
-        ];
         $dto->to = [
             $toUserExternalId,
         ];
@@ -162,9 +160,9 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
 
         $idGenerator->setIds([
-            'afb95f77-fd0b-455c-98d9-4defb13ba650',
-            $referencedInReplyToUuid,
+            'afb95f77-fd0b-455c-98d9-4defb13ba650', // incoming content
             $referencedObjectUuid,
+            $referencedInReplyToUuid,
         ]);
 
         $objectResponse = self::$responseFactory->createResponse(200)
@@ -183,12 +181,12 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         $apiHttpClientMock = $this->getClientMock([
             [
-                $inReplyToRequest,
-                $inReplyToResponse,
-            ],
-            [
                 $objectRequest,
                 $objectResponse,
+            ],
+            [
+                $inReplyToRequest,
+                $inReplyToResponse,
             ],
         ]);
 
@@ -207,14 +205,16 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
-        self::assertCount(2, $userContent[0]->getContent()->getLinkedObjects());
+        self::assertCount(1, $userContent[0]->getContent()->getLinkedObjects());
 
         /** @var ActivityStreamContent $linkedObject */
         $linkedObject = $userContent[0]->getContent()->getLinkedObjects()[0];
-        self::assertEquals($referencedInReplyToId, $linkedObject->getExternalId());
+        self::assertEquals($referencedObjectId, $linkedObject->getExternalId());
+
+        self::assertCount(1, $linkedObject->getLinkedObjects());
 
         /** @var ActivityStreamContent $linkedObject */
-        $linkedObject = $userContent[0]->getContent()->getLinkedObjects()[1];
-        self::assertEquals($referencedObjectId, $linkedObject->getExternalId());
+        $linkedObject = $linkedObject->getLinkedObjects()[0];
+        self::assertEquals($referencedInReplyToId, $linkedObject->getExternalId());
     }
 }

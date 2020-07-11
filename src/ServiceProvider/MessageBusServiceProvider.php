@@ -18,7 +18,7 @@ use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToAc
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
-use Mitra\CommandBus\Handler\Command\ActivityPub\DereferenceObjectCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\DereferenceCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
@@ -31,6 +31,7 @@ use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEv
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\DereferenceEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\CommandBus\SymfonyMessengerCommandBus;
 use Mitra\CommandBus\SymfonyMessengerEventBus;
@@ -270,13 +271,14 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[DereferenceObjectCommandHandler::class] = static function (
+        $container[DereferenceCommandHandler::class] = static function (
             Container $container
-        ): DereferenceObjectCommandHandler {
-            return new DereferenceObjectCommandHandler(
+        ): DereferenceCommandHandler {
+            return new DereferenceCommandHandler(
                 $container['doctrine.orm.em'],
                 $container[ActivityStreamContentFactoryInterface::class],
-                $container[RemoteObjectResolver::class]
+                $container[RemoteObjectResolver::class],
+                $container[EventEmitterInterface::class]
             );
         };
     }
@@ -311,6 +313,12 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): ExternalUserUpdatedEventHandler {
             return new ExternalUserUpdatedEventHandler($container[CommandBusInterface::class]);
+        };
+
+        $container[DereferenceEventHandler::class] = static function (
+            Container $container
+        ): DereferenceEventHandler {
+            return new DereferenceEventHandler($container[CommandBusInterface::class]);
         };
     }
 }

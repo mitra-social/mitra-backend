@@ -10,7 +10,7 @@ use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToActorComma
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
-use Mitra\CommandBus\Command\ActivityPub\DereferenceObjectCommand;
+use Mitra\CommandBus\Command\ActivityPub\DereferenceCommand;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
@@ -23,12 +23,13 @@ use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAttributedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
+use Mitra\CommandBus\Event\ActivityPub\DereferenceEvent;
 use Mitra\CommandBus\Event\ActivityPub\ExternalUserUpdatedEvent;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
-use Mitra\CommandBus\Handler\Command\ActivityPub\DereferenceObjectCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\DereferenceCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
@@ -41,6 +42,7 @@ use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEv
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\DereferenceEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
@@ -303,7 +305,7 @@ final class Config implements ConfigInterface
                     AssignActivityStreamContentToActorCommandHandler::class,
                 UpdateExternalActorCommand::class => UpdateExternalActorCommandHandler::class,
                 UpdateActorIconCommand::class => UpdateActorIconCommandHandler::class,
-                DereferenceObjectCommand::class => DereferenceObjectCommandHandler::class,
+                DereferenceCommand::class => DereferenceCommandHandler::class,
             ],
             'event_handlers' => [
                 ActivityStreamContentReceivedEvent::class => [
@@ -320,6 +322,9 @@ final class Config implements ConfigInterface
                 ],
                 ExternalUserUpdatedEvent::class => [
                     ExternalUserUpdatedEventHandler::class,
+                ],
+                DereferenceEvent::class => [
+                    DereferenceEventHandler::class,
                 ],
             ],
             'routing' => [],
