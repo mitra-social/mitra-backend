@@ -6,6 +6,7 @@ namespace Integration\Controller\ActivityPub;
 
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
+use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\Media;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Slim\IdGeneratorInterface;
@@ -55,17 +56,11 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $uriGenerator = $this->getContainer()->get(UriGenerator::class);
 
         $toUser = $this->createInternalUser();
-        $ccUser = $this->createInternalUser();
         $toUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser->getUsername()]);
-        $ccUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $ccUser->getUsername()]);
-        $bccUser = $this->createInternalUser();
-        $btoUser = $this->createInternalUser();
         $externalUser = $this->createExternalUser();
 
-        foreach ([$toUser, $ccUser, $bccUser, $btoUser] as $user) {
-            /** @var InternalUser $user */
-            $this->createSubscription($user->getActor(), $externalUser->getActor());
-        }
+        /** @var InternalUser $user */
+        $this->createSubscription($toUser->getActor(), $externalUser->getActor());
 
         $dtoContent = 'This is a note.';
 
@@ -76,15 +71,6 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $dto->object->content = $dtoContent;
         $dto->to = [
             $toUserExternalId,
-        ];
-        $dto->cc = [
-            $ccUserExternalId,
-        ];
-        $dto->bto = [
-            $uriGenerator->fullUrlFor('user-read', ['username' => $btoUser->getUsername()]),
-        ];
-        $dto->bcc = [
-            $uriGenerator->fullUrlFor('user-read', ['username' => $bccUser->getUsername()]),
         ];
 
         /** @var EncoderInterface $encoder */
@@ -97,7 +83,7 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         /** @var ReflectedIdGenerator $idGenerator */
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
 
-        $idGenerator->setId('c20bd993-5d6c-410e-8a9a-c27ca408b1b6');
+        $idGenerator->setIds(['c20bd993-5d6c-410e-8a9a-c27ca408b1b6']);
 
         $request = $this->createRequest('POST', sprintf('/user/%s/inbox', $toUser->getUsername()), $payload);
         $response = $this->executeRequest($request);
@@ -113,5 +99,87 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
+    }
+
+
+    public function testDereferencesLinkedObjectSuccessfully(): void
+    {
+        /** @var UriGenerator $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+
+        $toUser = $this->createInternalUser();
+        $toUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser->getUsername()]);
+        $externalUser = $this->createExternalUser();
+
+        /** @var InternalUser $user */
+        $this->createSubscription($toUser->getActor(), $externalUser->getActor());
+
+        $referencedObjectUuid = '237beefe-7259-42eb-84c3-322c4a36ad31';
+        $referencedObjectId = sprintf(
+            'https://example.com/user/%s/object/%s',
+            $externalUser->getPreferredUsername(),
+            $referencedObjectUuid
+        );
+        $referencedObjectContent = 'This is a note.';
+        $referenceObject = new NoteDto();
+        $referenceObject->id = $referencedObjectId;
+        $referenceObject->content = $referencedObjectContent;
+
+        $dto = new CreateDto();
+        $dto->id = sprintf('https://example.com/user/%s/post/123456', $externalUser->getPreferredUsername());
+        $dto->actor = $externalUser->getExternalId();
+        $dto->object = $referencedObjectId;
+        $dto->to = [
+            $toUserExternalId,
+        ];
+
+        /** @var EncoderInterface $encoder */
+        $encoder = $this->getContainer()->get(EncoderInterface::class);
+        /** @var NormalizerInterface $normalizer */
+        $normalizer = $this->getContainer()->get(NormalizerInterface::class);
+
+        $payload = $encoder->encode($normalizer->normalize($dto), 'application/json');
+        $referencedObjectPayload = $encoder->encode($normalizer->normalize($referenceObject), 'application/json');
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds(['afb95f77-fd0b-455c-98d9-4defb13ba650', $referencedObjectUuid]);
+
+        $objectAndToResponse = self::$responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'application/activity+json');
+
+        $objectAndToResponse->getBody()->write($referencedObjectPayload);
+
+        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $referencedObjectId);
+
+        $apiHttpClientMock = $this->getClientMock([
+            [
+                $requestResolveExternalActor,
+                $objectAndToResponse,
+            ],
+        ]);
+
+        $this->getContainer()->get('api_http_client')->setMock($apiHttpClientMock);
+
+        $request = $this->createRequest('POST', sprintf('/user/%s/inbox', $toUser->getUsername()), $payload);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(201, $response);
+
+        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+
+
+        /** @var ActivityStreamContentAssignment[] $userContent */
+        $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null);
+
+        self::assertCount(1, $userContent);
+        self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
+        self::assertCount(1, $userContent[0]->getContent()->getLinkedObjects());
+
+        /** @var ActivityStreamContent $linkedObject */
+        $linkedObject = $userContent[0]->getContent()->getLinkedObjects()[0];
+        self::assertEquals($referencedObjectId, $linkedObject->getExternalId());
     }
 }

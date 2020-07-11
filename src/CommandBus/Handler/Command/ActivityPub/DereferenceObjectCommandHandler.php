@@ -62,7 +62,7 @@ final class DereferenceObjectCommandHandler
         $objects = is_array($dto->object) ? $dto->object : [$dto->object];
 
         foreach ($objects as $object) {
-            if (!$this->isReference($object)) {
+            if (!is_string($object) && !$object instanceof LinkDto) {
                 continue;
             }
 
@@ -72,13 +72,8 @@ final class DereferenceObjectCommandHandler
         }
     }
 
-    private function isReference($object): bool
-    {
-        return is_string($object) || $object instanceof LinkDto;
-    }
-
     /**
-     * @param LinkDto|string $object
+     * @param null|LinkDto|string $object
      * @return ActivityStreamContent
      * @throws RemoteObjectResolverException
      */

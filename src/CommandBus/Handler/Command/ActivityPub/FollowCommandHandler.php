@@ -63,34 +63,38 @@ final class FollowCommandHandler
 
         $follow = $command->getFollowDto();
 
-        $objectExternalUser = $this->externalUserResolver->resolve(
-            $follow->object,
-            function (ExternalUser $externalUser, ActorInterface $resolvedActorDto): void {
-                $this->eventEmitter->raise(new ExternalUserUpdatedEvent(
-                    $externalUser->getActor(),
-                    $resolvedActorDto
-                ));
+        $followObjects = is_array($follow->object) ? $follow->object : [$follow->object];
+
+        foreach ($followObjects as $followObject) {
+            $objectExternalUser = $this->externalUserResolver->resolve(
+                $followObject,
+                function (ExternalUser $externalUser, ActorInterface $resolvedActorDto): void {
+                    $this->eventEmitter->raise(new ExternalUserUpdatedEvent(
+                        $externalUser->getActor(),
+                        $resolvedActorDto
+                    ));
+                }
+            );
+
+            if (null === $objectExternalUser) {
+                throw new \RuntimeException('Could not resolve `$object`');
             }
-        );
 
-        if (null === $objectExternalUser) {
-            throw new \RuntimeException('Could not resolve `$object`');
+            $externalActor = $objectExternalUser->getActor();
+
+            if (null !== $this->subscriptionRepository->getByActors($commandActor, $externalActor)) {
+                return;
+            }
+
+            $subscription = new Subscription(
+                Uuid::uuid4()->toString(),
+                $commandActor,
+                $externalActor,
+                new \DateTime()
+            );
+
+            $this->entityManager->persist($objectExternalUser);
+            $this->entityManager->persist($subscription);
         }
-
-        $externalActor = $objectExternalUser->getActor();
-
-        if (null !== $this->subscriptionRepository->getByActors($commandActor, $externalActor)) {
-            return;
-        }
-
-        $subscription = new Subscription(
-            Uuid::uuid4()->toString(),
-            $commandActor,
-            $externalActor,
-            new \DateTime()
-        );
-
-        $this->entityManager->persist($objectExternalUser);
-        $this->entityManager->persist($subscription);
     }
 }

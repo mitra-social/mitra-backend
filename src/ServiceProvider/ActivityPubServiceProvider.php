@@ -8,8 +8,10 @@ use ActivityPhp\Server;
 use ActivityPhp\Type\TypeResolver;
 use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
+use Cache\Adapter\PHPArray\ArrayCachePool;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
@@ -79,7 +81,11 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
         };
 
         $container[RemoteObjectResolver::class] = static function (Container $container): RemoteObjectResolver {
-            return new RemoteObjectResolver($container[ActivityPubClientInterface::class]);
+            return new RemoteObjectResolver(
+                $container[ActivityPubClientInterface::class],
+                new ArrayCachePool(),
+                $container[HashGeneratorInterface::class]
+            );
         };
 
         $container[ExternalUserResolver::class] = static function (Container $container): ExternalUserResolver {

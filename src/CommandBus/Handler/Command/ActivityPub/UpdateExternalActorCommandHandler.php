@@ -6,6 +6,7 @@ namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
+use Mitra\ActivityPub\Resolver\RemoteObjectResolverException;
 use Mitra\CommandBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\CommandBus\Event\ActivityPub\ExternalUserUpdatedEvent;
 use Mitra\CommandBus\EventEmitterInterface;
@@ -61,10 +62,13 @@ final class UpdateExternalActorCommandHandler
             return;
         }
 
-        if (null === $object = $this->remoteObjectResolver->resolve($dto->object)) {
+        try {
+            $object = $this->remoteObjectResolver->resolve($dto->object);
+        } catch (RemoteObjectResolverException $e) {
             $this->logger->info(sprintf(
-                'Skip updating user as object `%s` could not be resolved',
-                is_string($dto->object) || $dto->object instanceof LinkDto ? (string) $dto->object : '<unknown>'
+                'Skip updating user as object `%s` could not be resolved: %s',
+                is_string($dto->object) || $dto->object instanceof LinkDto ? (string) $dto->object : '<unknown>',
+                $e->getMessage()
             ));
             return;
         }

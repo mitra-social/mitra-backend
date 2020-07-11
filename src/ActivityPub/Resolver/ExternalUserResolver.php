@@ -38,7 +38,7 @@ final class ExternalUserResolver
      * @param string|ObjectDto|LinkDto $object
      * @param \Closure|null $onCreate
      * @return null|ExternalUser
-     * @throws RemoteObjectResolverException
+     * @throws \Exception
      */
     public function resolve($object, ?\Closure $onCreate = null): ?ExternalUser
     {
@@ -58,7 +58,9 @@ final class ExternalUserResolver
             return $externalUser;
         }
 
-        if (null === $resolvedObject = $this->remoteObjectResolver->resolve($object)) {
+        try {
+            $resolvedObject = $this->remoteObjectResolver->resolve($object);
+        } catch (RemoteObjectResolverException $e) {
             return null;
         }
 

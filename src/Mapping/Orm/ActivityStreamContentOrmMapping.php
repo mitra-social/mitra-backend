@@ -6,6 +6,7 @@ namespace Mitra\Mapping\Orm;
 
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\User\AbstractUser;
 
@@ -84,6 +85,26 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
                     'name' => 'attributed_to',
                     'referencedColumnName' => 'user_id',
                     'nullable' => true,
+                ],
+            ],
+        ]);
+
+        $metadata->mapManyToMany([
+            'fieldName' => 'linkedObjects',
+            'targetEntity' => ActivityStreamContent::class,
+            'joinTable' => [
+                'name' => 'activity_stream_content_linked_objects',
+                'joinColumns' => [
+                    [
+                        'name' => 'linked_content_id',
+                        'referencedColumnName' => 'id',
+                    ],
+                ],
+                'inverseJoinColumns' => [
+                    [
+                        'name' => 'parent_content_id',
+                        'referencedColumnName' => 'id',
+                    ],
                 ],
             ],
         ]);

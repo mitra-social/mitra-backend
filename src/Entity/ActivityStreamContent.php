@@ -51,7 +51,7 @@ class ActivityStreamContent
     private $object;
 
     /**
-     * @var Collection
+     * @var Collection<int, ActivityStreamContent>
      */
     private $linkedObjects;
 
