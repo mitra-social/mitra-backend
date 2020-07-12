@@ -47,6 +47,7 @@ use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\AnnounceDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
@@ -278,6 +279,7 @@ final class Config implements ConfigInterface
             PersonDto::class => ObjectDtoValidationMapping::class,
 
             FollowDto::class => ActivityDtoValidationMapping::class,
+            AnnounceDto::class => ActivityDtoValidationMapping::class,
             CreateDto::class => ActivityDtoValidationMapping::class,
             UpdateDto::class => ActivityDtoValidationMapping::class,
         ];
