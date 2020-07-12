@@ -74,8 +74,8 @@ final class DereferenceCommandHandler
         $objects,
         DereferenceCommand $command
     ): void {
-        $currentDereferenceDepth = $command->getCurrentDereferenceDepth() + 1;
-        $emitDereferenceEvents = $currentDereferenceDepth >= $command->getMaxDereferenceDepth();
+        $nextDereferenceDepth = $command->getCurrentDereferenceDepth() + 1;
+        $emitDereferenceEvents = $command->getCurrentDereferenceDepth() <= $command->getMaxDereferenceDepth();
         $objects = is_array($objects) ? $objects : [$objects];
 
         foreach ($objects as $object) {
@@ -97,7 +97,7 @@ final class DereferenceCommandHandler
                     $objectDto,
                     null,
                     $command->getMaxDereferenceDepth(),
-                    $currentDereferenceDepth
+                    $nextDereferenceDepth
                 ));
             }
         }

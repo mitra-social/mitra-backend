@@ -205,16 +205,18 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
-        self::assertCount(1, $userContent[0]->getContent()->getLinkedObjects());
+
+        $linkedObjects = $userContent[0]->getContent()->getLinkedObjects();
+        self::assertCount(1, $linkedObjects);
 
         /** @var ActivityStreamContent $linkedObject */
-        $linkedObject = $userContent[0]->getContent()->getLinkedObjects()[0];
+        $linkedObject = $linkedObjects[0];
         self::assertEquals($referencedObjectId, $linkedObject->getExternalId());
 
         self::assertCount(1, $linkedObject->getLinkedObjects());
 
-        /** @var ActivityStreamContent $linkedObject */
-        $linkedObject = $linkedObject->getLinkedObjects()[0];
-        self::assertEquals($referencedInReplyToId, $linkedObject->getExternalId());
+        /** @var ActivityStreamContent $linkedObject2 */
+        $linkedObject2 = $linkedObject->getLinkedObjects()[0];
+        self::assertEquals($referencedInReplyToId, $linkedObject2->getExternalId());
     }
 }
