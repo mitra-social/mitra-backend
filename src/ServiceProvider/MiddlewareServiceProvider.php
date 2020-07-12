@@ -54,7 +54,8 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
         ): ValidateHttpSignatureMiddleware {
             return new ValidateHttpSignatureMiddleware(
                 $container[Verifier::class],
-                $container[ResponseFactoryInterface::class]
+                $container[ResponseFactoryInterface::class],
+                $container[LoggerInterface::class]
             );
         };
     }
