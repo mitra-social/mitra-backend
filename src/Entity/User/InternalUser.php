@@ -90,4 +90,13 @@ class InternalUser extends AbstractUser implements TimestampableInterface
         $this->publicKey = null;
         $this->privateKey = null;
     }
+
+    public function __toString()
+    {
+        return json_encode([
+            'id' => $this->id,
+            'username' => $this->username,
+            'email' => $this->email,
+        ]);
+    }
 }

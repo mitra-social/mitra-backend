@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Entity;
 
 use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\User\ExternalUser;
 
 class ActivityStreamContentAssignment
 {
@@ -44,5 +45,18 @@ class ActivityStreamContentAssignment
     public function getContent(): ActivityStreamContent
     {
         return $this->content;
+    }
+
+    public function __toString()
+    {
+        $user = $this->actor->getUser();
+
+        return json_encode([
+            'id' => $this->id,
+            'actorId' => $this->actor->getUser()->getId(),
+            'contentId' => $this->content->getId(),
+            'externalActorId' => $user instanceof ExternalUser ? $user->getExternalid() : null,
+            'externalContentId' => $this->content->getExternalId(),
+        ]);
     }
 }

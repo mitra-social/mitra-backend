@@ -89,6 +89,7 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
             ],
         ]);
 
+        // TODO currently the relation is the wrong way around. Switch column names later
         $metadata->mapManyToMany([
             'fieldName' => 'linkedObjects',
             'targetEntity' => ActivityStreamContent::class,

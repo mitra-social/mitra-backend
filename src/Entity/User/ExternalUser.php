@@ -153,4 +153,12 @@ class ExternalUser extends AbstractUser
     {
         $this->publicKey = $publicKey;
     }
+
+    public function __toString()
+    {
+        return json_encode([
+            'id' => $this->id,
+            'externalId' => $this->externalId,
+        ]);
+    }
 }

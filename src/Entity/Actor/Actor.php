@@ -68,4 +68,12 @@ class Actor
     {
         return $this->user;
     }
+
+    public function __toString()
+    {
+        return json_encode([
+            'id' => $this->user->getId(),
+            'name' => $this->name,
+        ]);
+    }
 }
