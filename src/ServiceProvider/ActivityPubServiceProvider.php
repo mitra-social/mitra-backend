@@ -19,6 +19,7 @@ use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -84,7 +85,8 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             return new RemoteObjectResolver(
                 $container[ActivityPubClientInterface::class],
                 new ArrayCachePool(),
-                $container[HashGeneratorInterface::class]
+                $container[HashGeneratorInterface::class],
+                $container[UriGenerator::class]
             );
         };
 

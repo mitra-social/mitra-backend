@@ -9,6 +9,8 @@ use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Entity\User\InternalUser;
+use Mitra\Slim\UriGenerator;
 use Psr\SimpleCache\CacheInterface;
 
 final class RemoteObjectResolver
@@ -31,22 +33,31 @@ final class RemoteObjectResolver
      */
     private $hashGenerator;
 
+    /**
+     * @var UriGenerator
+     */
+    private $uriGenerator;
+
     public function __construct(
         ActivityPubClientInterface $activityPubClient,
         CacheInterface $cache,
-        HashGeneratorInterface $hashGenerator
+        HashGeneratorInterface $hashGenerator,
+        UriGenerator $uriGenerator
     ) {
         $this->activityPubClient = $activityPubClient;
         $this->cache = $cache;
         $this->hashGenerator = $hashGenerator;
+        $this->uriGenerator = $uriGenerator;
     }
 
     /**
      * @param mixed $value
+     * @param InternalUser|null $userContext
      * @return ObjectDto
      * @throws RemoteObjectResolverException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function resolve($value): ObjectDto
+    public function resolve($value, ?InternalUser $userContext = null): ObjectDto
     {
         if ($value instanceof ObjectDto) {
             return $value;
@@ -84,7 +95,7 @@ final class RemoteObjectResolver
             ));
         }
 
-        $resolvedObject = $this->fetchRemoteValueByUrl($url);
+        $resolvedObject = $this->fetchRemoteValueByUrl($url, $userContext);
 
         $this->cache->set($urlHash, $resolvedObject);
 
@@ -93,15 +104,28 @@ final class RemoteObjectResolver
 
     /**
      * @param string $url
+     * @param InternalUser|null $userContext
      * @return ObjectDto|null
      * @throws RemoteObjectResolverException
      */
-    private function fetchRemoteValueByUrl(string $url): ?ObjectDto
+    private function fetchRemoteValueByUrl(string $url, ?InternalUser $userContext): ?ObjectDto
     {
         try {
-            return $this->activityPubClient->sendRequest(
-                $this->activityPubClient->createRequest('GET', $url)
-            )->getReceivedObject();
+            $request = $this->activityPubClient->createRequest('GET', $url);
+
+            if (null !== $userContext) {
+                $userPublicKeyUrl = $this->uriGenerator->fullUrlFor('user-read', [
+                    'username' => $userContext->getUsername(),
+                ]) . '#main-key';
+
+                $request = $this->activityPubClient->signRequest(
+                    $request,
+                    $userContext->getPrivateKey(),
+                    $userPublicKeyUrl
+                );
+            }
+
+            return $this->activityPubClient->sendRequest($request)->getReceivedObject();
         } catch (ActivityPubClientException $e) {
             throw new RemoteObjectResolverException(
                 sprintf('Could not resolve remote object with url `%s`: %s', $url, $e->getMessage()),
