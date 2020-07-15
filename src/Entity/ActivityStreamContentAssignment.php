@@ -55,7 +55,7 @@ class ActivityStreamContentAssignment
             'id' => $this->id,
             'actorId' => $this->actor->getUser()->getId(),
             'contentId' => $this->content->getId(),
-            'externalActorId' => $user instanceof ExternalUser ? $user->getExternalid() : null,
+            'externalActorId' => $user instanceof ExternalUser ? $user->getExternalId() : null,
             'externalContentId' => $this->content->getExternalId(),
         ]);
     }
