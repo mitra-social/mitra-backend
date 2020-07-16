@@ -55,7 +55,6 @@ final class RemoteObjectResolver
      * @param InternalUser|null $userContext
      * @return ObjectDto
      * @throws RemoteObjectResolverException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function resolve($value, ?InternalUser $userContext = null): ObjectDto
     {
@@ -81,7 +80,7 @@ final class RemoteObjectResolver
             if (null !== $cachedObject = $this->cache->get($urlHash)) {
                 return $cachedObject;
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new RemoteObjectResolverException(sprintf('Could not access cache: %s', $e->getMessage()), 0, $e);
         }
 

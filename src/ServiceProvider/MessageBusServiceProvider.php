@@ -194,7 +194,8 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
         ): AttributeActivityStreamContentCommandHandler {
             return new AttributeActivityStreamContentCommandHandler(
                 $container[EventEmitterInterface::class],
-                $container[ExternalUserResolver::class]
+                $container[ExternalUserResolver::class],
+                $container[EntityManagerInterface::class],
             );
         };
 
