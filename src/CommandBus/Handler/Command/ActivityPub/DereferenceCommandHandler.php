@@ -14,6 +14,7 @@ use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Factory\ActivityStreamContentFactoryInterface;
 
 final class DereferenceCommandHandler
@@ -77,6 +78,8 @@ final class DereferenceCommandHandler
         $nextDereferenceDepth = $command->getCurrentDereferenceDepth() + 1;
         $emitDereferenceEvents = $command->getCurrentDereferenceDepth() <= $command->getMaxDereferenceDepth();
         $objects = is_array($objects) ? $objects : [$objects];
+        /** @var InternalUser|null $userContext */
+        $userContext =  $command->getActor() instanceof InternalUser ? $command->getActor()->getUser() : null;
 
         foreach ($objects as $object) {
             if (!is_string($object) && !$object instanceof LinkDto) {
@@ -84,7 +87,7 @@ final class DereferenceCommandHandler
             }
 
             /** @var ObjectDto $objectDto */
-            $objectDto = $this->remoteObjectResolver->resolve($object);
+            $objectDto = $this->remoteObjectResolver->resolve($object, $userContext);
 
             $dereferencedObject = $this->activityStreamContentFactory->createFromDto($objectDto);
             $this->entityManager->persist($dereferencedObject);
