@@ -96,6 +96,8 @@ final class FollowingControllerTest extends IntegrationTestCase
         );
         $subscribedActor = new Person($externalUser);
 
+        $externalUser->setActor($subscribedActor);
+
         $subscription = new Subscription(
             Uuid::uuid4()->toString(),
             $user->getActor(),
@@ -107,7 +109,6 @@ final class FollowingControllerTest extends IntegrationTestCase
         $em = $this->getContainer()->get('doctrine.orm.em');
 
         $em->persist($externalUser);
-        $em->persist($subscribedActor);
         $em->persist($subscription);
         $em->flush();
         $em->clear();
