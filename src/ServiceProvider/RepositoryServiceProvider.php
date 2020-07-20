@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
@@ -31,18 +32,22 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
     public function register(Container $container): void
     {
         $container[InternalUserRepository::class] = static function (Container $container): InternalUserRepository {
-            return new InternalUserRepository($container['doctrine.orm.em']->getRepository(InternalUser::class));
+            return new InternalUserRepository(
+                $container[EntityManagerInterface::class]->getRepository(InternalUser::class)
+            );
         };
 
         $container[ExternalUserRepository::class] = static function (Container $container): ExternalUserRepository {
-            return new ExternalUserRepository($container['doctrine.orm.em']->getRepository(ExternalUser::class));
+            return new ExternalUserRepository(
+                $container[EntityManagerInterface::class]->getRepository(ExternalUser::class)
+            );
         };
 
         $container[ActivityStreamContentAssignmentRepository::class] = static function (
             Container $container
         ): ActivityStreamContentAssignmentRepository {
             return new ActivityStreamContentAssignmentRepository(
-                $container['doctrine.orm.em']->getRepository(ActivityStreamContentAssignment::class)
+                $container[EntityManagerInterface::class]->getRepository(ActivityStreamContentAssignment::class)
             );
         };
 
@@ -50,17 +55,21 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
             Container $container
         ): ActivityStreamContentRepositoryInterface {
             return new ActivityStreamContentRepository(
-                $container['doctrine.orm.em']->getRepository(ActivityStreamContent::class),
+                $container[EntityManagerInterface::class]->getRepository(ActivityStreamContent::class),
                 $container[HashGeneratorInterface::class]
             );
         };
 
         $container[SubscriptionRepository::class] = static function (Container $container): SubscriptionRepository {
-            return new SubscriptionRepository($container['doctrine.orm.em']->getRepository(Subscription::class));
+            return new SubscriptionRepository(
+                $container[EntityManagerInterface::class]->getRepository(Subscription::class)
+            );
         };
 
         $container[MediaRepositoryInterface::class] = static function (Container $container): MediaRepositoryInterface {
-            return new MediaRepository($container['doctrine.orm.em']->getRepository(Media::class));
+            return new MediaRepository(
+                $container[EntityManagerInterface::class]->getRepository(Media::class)
+            );
         };
     }
 }

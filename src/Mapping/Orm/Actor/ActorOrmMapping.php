@@ -61,6 +61,7 @@ final class ActorOrmMapping implements ClassMapMappingInterface
         $metadata->mapManyToOne([
             'fieldName' => 'icon',
             'targetEntity' => Media::class,
+            'cascade' => ['persist', 'remove'],
             'joinColumns' => [
                 [
                     'name' => 'icon',

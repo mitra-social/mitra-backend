@@ -152,7 +152,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
     private function registerCommandHandlers(Container $container): void
     {
         $container[CreateUserCommandHandler::class] = static function (Container $container): CreateUserCommandHandler {
-            return new CreateUserCommandHandler($container['doctrine.orm.em']);
+            return new CreateUserCommandHandler($container[EntityManagerInterface::class]);
         };
 
         $container[AssignActorCommandHandler::class] = static function (
@@ -174,7 +174,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
 
         $container[FollowCommandHandler::class] = static function (Container $container): FollowCommandHandler {
             return new FollowCommandHandler(
-                $container['doctrine.orm.em'],
+                $container[EntityManagerInterface::class],
                 $container[ExternalUserResolver::class],
                 $container[SubscriptionRepository::class],
                 $container[EventEmitterInterface::class]
@@ -184,7 +184,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
         $container[UndoCommandHandler::class] = static function (Container $container): UndoCommandHandler {
             return new UndoCommandHandler(
                 $container[ExternalUserResolver::class],
-                $container['doctrine.orm.em'],
+                $container[EntityManagerInterface::class],
                 $container[SubscriptionRepository::class]
             );
         };
@@ -268,7 +268,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
                 $container[FilesystemInterface::class],
                 $container[LoggerInterface::class],
                 $container[MediaRepositoryInterface::class],
-                $container['doctrine.orm.em']
+                $container[EntityManagerInterface::class]
             );
         };
 
@@ -276,7 +276,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): DereferenceCommandHandler {
             return new DereferenceCommandHandler(
-                $container['doctrine.orm.em'],
+                $container[EntityManagerInterface::class],
                 $container[ActivityStreamContentFactoryInterface::class],
                 $container[RemoteObjectResolver::class],
                 $container[EventEmitterInterface::class]
