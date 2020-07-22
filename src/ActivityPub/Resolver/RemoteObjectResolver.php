@@ -109,24 +109,25 @@ final class RemoteObjectResolver
      */
     private function fetchRemoteValueByUrl(string $url, ?InternalUser $userContext): ?ObjectDto
     {
-        try {
-            $request = $this->activityPubClient->createRequest('GET', $url);
+        $request = $this->activityPubClient->createRequest('GET', $url);
 
-            if (null !== $userContext) {
-                $userPublicKeyUrl = $this->uriGenerator->fullUrlFor('user-read', [
+        if (null !== $userContext) {
+            $userPublicKeyUrl = $this->uriGenerator->fullUrlFor('user-read', [
                     'username' => $userContext->getUsername(),
                 ]) . '#main-key';
 
-                $request = $this->activityPubClient->signRequest(
-                    $request,
-                    $userContext->getPrivateKey(),
-                    $userPublicKeyUrl
-                );
-            }
+            $request = $this->activityPubClient->signRequest(
+                $request,
+                $userContext->getPrivateKey(),
+                $userPublicKeyUrl
+            );
+        }
 
+        try {
             return $this->activityPubClient->sendRequest($request)->getReceivedObject();
         } catch (ActivityPubClientException $e) {
-            throw new RemoteObjectResolverException(
+            throw new RemoteObjectResolverRequestException(
+                $request,
                 sprintf('Could not resolve remote object with url `%s`: %s', $url, $e->getMessage()),
                 0,
                 $e

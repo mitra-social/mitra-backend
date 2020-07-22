@@ -36,6 +36,8 @@ final class AssignActivityStreamContentToActorCommandHandler
         $actor = $command->getActor();
 
         $assignment = new ActivityStreamContentAssignment(Uuid::uuid4()->toString(), $actor, $entity);
+
+        $this->entityManager->persist($actor);
         $this->entityManager->persist($assignment);
 
         $this->eventEmitter->raise(new ActivityStreamContentAssignedEvent($assignment));
