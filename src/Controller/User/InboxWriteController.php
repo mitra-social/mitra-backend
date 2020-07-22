@@ -187,6 +187,8 @@ final class InboxWriteController
                 ));
                 return $this->responseFactory->createResponse(201);
             }
+
+            throw $e;
         }
 
         return $this->responseFactory->createResponse(201);

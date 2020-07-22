@@ -278,6 +278,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             return new DereferenceCommandHandler(
                 $container[EntityManagerInterface::class],
                 $container[ActivityStreamContentFactoryInterface::class],
+                $container[ActivityStreamContentRepositoryInterface::class],
                 $container[RemoteObjectResolver::class],
                 $container[EventEmitterInterface::class]
             );

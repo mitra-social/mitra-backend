@@ -16,6 +16,7 @@ use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Factory\ActivityStreamContentFactoryInterface;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 
 final class DereferenceCommandHandler
 {
@@ -31,6 +32,11 @@ final class DereferenceCommandHandler
     private $activityStreamContentFactory;
 
     /**
+     * @var ActivityStreamContentRepositoryInterface
+     */
+    private $activityStreamContentRepository;
+
+    /**
      * @var RemoteObjectResolver
      */
     private $remoteObjectResolver;
@@ -43,11 +49,13 @@ final class DereferenceCommandHandler
     public function __construct(
         EntityManagerInterface $entityManager,
         ActivityStreamContentFactoryInterface $activityStreamContentFactory,
+        ActivityStreamContentRepositoryInterface $activityStreamContentRepository,
         RemoteObjectResolver $remoteObjectResolver,
         EventEmitterInterface $eventEmitter
     ) {
         $this->entityManager = $entityManager;
         $this->activityStreamContentFactory = $activityStreamContentFactory;
+        $this->activityStreamContentRepository = $activityStreamContentRepository;
         $this->remoteObjectResolver = $remoteObjectResolver;
         $this->eventEmitter = $eventEmitter;
     }
@@ -89,20 +97,25 @@ final class DereferenceCommandHandler
             /** @var ObjectDto $objectDto */
             $objectDto = $this->remoteObjectResolver->resolve($object, $userContext);
 
-            $dereferencedObject = $this->activityStreamContentFactory->createFromDto($objectDto);
-            $this->entityManager->persist($dereferencedObject);
+            $dereferencedObject = $this->activityStreamContentRepository->getByExternalId($objectDto->id);
+
+            // Object is not yet in database
+            if (null === $dereferencedObject) {
+                $dereferencedObject = $this->activityStreamContentFactory->createFromDto($objectDto);
+                $this->entityManager->persist($dereferencedObject);
+
+                if ($emitDereferenceEvents) {
+                    $this->eventEmitter->raise(new DereferenceEvent(
+                        $dereferencedObject,
+                        $objectDto,
+                        null,
+                        $command->getMaxDereferenceDepth(),
+                        $nextDereferenceDepth
+                    ));
+                }
+            }
 
             $entity->addLinkedObject($dereferencedObject);
-
-            if ($emitDereferenceEvents) {
-                $this->eventEmitter->raise(new DereferenceEvent(
-                    $dereferencedObject,
-                    $objectDto,
-                    null,
-                    $command->getMaxDereferenceDepth(),
-                    $nextDereferenceDepth
-                ));
-            }
         }
     }
 }
