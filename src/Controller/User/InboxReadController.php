@@ -14,6 +14,8 @@ use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Person;
+use Mitra\Filtering\Filter;
+use Mitra\Filtering\FilterFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Mapping\Dto\ActivityStreamTypeToDtoClassMapping;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
@@ -39,13 +41,14 @@ final class InboxReadController extends AbstractOrderedCollectionController
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
+        FilterFactoryInterface $filterFactory,
         InternalUserRepository $internalUserRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
         UriGenerator $uriGenerator,
         DataToDtoTransformer $dataToDtoManager,
         EntityToDtoMapper $entityToDtoMapper
     ) {
-        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory);
+        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $filterFactory);
 
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->dataToDtoTransformer = $dataToDtoManager;
@@ -54,11 +57,12 @@ final class InboxReadController extends AbstractOrderedCollectionController
 
     /**
      * @param Actor $actor
+     * @param Filter|null $filter
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
      * @throws \Exception
      */
-    protected function getItems(Actor $actor, ?int $page): array
+    protected function getItems(Actor $actor, ?Filter $filter, ?int $page): array
     {
         $offset = null;
         $limit = null;
@@ -70,6 +74,7 @@ final class InboxReadController extends AbstractOrderedCollectionController
 
         $items = $this->activityStreamContentAssignmentRepository->findContentForActor(
             $actor,
+            $filter,
             $offset,
             $limit
         );
@@ -111,9 +116,9 @@ final class InboxReadController extends AbstractOrderedCollectionController
         return $dtoItems;
     }
 
-    protected function getTotalItemCount(Actor $requestedActor): int
+    protected function getTotalItemCount(Actor $requestedActor, ?Filter $filter): int
     {
-        return $this->activityStreamContentAssignmentRepository->getTotalContentForUserId($requestedActor);
+        return $this->activityStreamContentAssignmentRepository->getTotalCountForActor($requestedActor, $filter);
     }
 
     protected function getCollectionRouteName(): string

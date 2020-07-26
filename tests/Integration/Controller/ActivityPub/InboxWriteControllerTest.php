@@ -102,7 +102,7 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
 
         /** @var ActivityStreamContentAssignment[] $userContent */
-        $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null);
+        $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null, null);
 
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
