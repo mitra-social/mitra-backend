@@ -125,6 +125,11 @@ final class FollowingControllerTest extends IntegrationTestCase
             '@context' => [
                 'https://www.w3.org/ns/activitystreams',
                 'https://w3id.org/security/v1',
+                [
+                    'mitra' => 'https://mitra.social/#',
+                    'registeredAt' => 'mitra:registeredAt',
+                    'internalUserId' => 'mitra:internalUserId',
+                ],
             ],
             'type' => 'CollectionPage',
             'totalItems' => 1,
@@ -134,7 +139,8 @@ final class FollowingControllerTest extends IntegrationTestCase
                     'id' => $externalId,
                     'preferredUsername' => 'paul',
                     'inbox' => sprintf('%/inbox', $externalId),
-                    'outbox' => sprintf('%/outbox', $externalId)
+                    'outbox' => sprintf('%/outbox', $externalId),
+                    'internalUserId' => $externalUser->getId(),
                 ]
             ],
             'partOf' => sprintf('http://test.localhost/user/%s/following', $user->getUsername()),

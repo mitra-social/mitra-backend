@@ -192,6 +192,11 @@ final class InboxReadControllerTest extends IntegrationTestCase
             '@context' => [
                 'https://www.w3.org/ns/activitystreams',
                 'https://w3id.org/security/v1',
+                [
+                    'mitra' => 'https://mitra.social/#',
+                    'registeredAt' => 'mitra:registeredAt',
+                    'internalUserId' => 'mitra:internalUserId',
+                ],
             ],
             'type' => 'OrderedCollectionPage',
             'totalItems' => 1,
@@ -209,6 +214,7 @@ final class InboxReadControllerTest extends IntegrationTestCase
                         'type' => 'Person',
                         'inbox' => 'https://example.com/user/bob/inbox',
                         'outbox' => 'https://example.com/user/bob/outbox',
+                        'internalUserId' => $externalUser->getId(),
                     ],
                     'id' => $dto->id,
                     'to' => [
@@ -284,6 +290,11 @@ final class InboxReadControllerTest extends IntegrationTestCase
             '@context' => [
                 'https://www.w3.org/ns/activitystreams',
                 'https://w3id.org/security/v1',
+                [
+                    'mitra' => 'https://mitra.social/#',
+                    'registeredAt' => 'mitra:registeredAt',
+                    'internalUserId' => 'mitra:internalUserId',
+                ],
             ],
             'type' => 'OrderedCollectionPage',
             'totalItems' => 1,
@@ -301,6 +312,7 @@ final class InboxReadControllerTest extends IntegrationTestCase
                         'type' => 'Person',
                         'inbox' => sprintf('https://example.com/user/%s/inbox', $actorUsername1),
                         'outbox' => sprintf('https://example.com/user/%s/outbox', $actorUsername1),
+                        'internalUserId' => $externalUser1->getId(),
                     ],
                     'id' => $dto->id,
                     'to' => [

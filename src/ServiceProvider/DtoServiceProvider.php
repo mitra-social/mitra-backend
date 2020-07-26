@@ -139,7 +139,7 @@ final class DtoServiceProvider implements ServiceProviderInterface
             return new UserResponseDtoMapping($container[UriGenerator::class]);
         };
 
-        $container[PersonDtoMapping::class] = static function (Container $container): PersonDtoMapping {
+        $container[PersonDtoMapping::class] = static function (): PersonDtoMapping {
             return new PersonDtoMapping();
         };
 
