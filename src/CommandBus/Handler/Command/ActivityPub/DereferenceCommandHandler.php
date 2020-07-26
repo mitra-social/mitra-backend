@@ -18,6 +18,10 @@ use Mitra\Entity\User\InternalUser;
 use Mitra\Factory\ActivityStreamContentFactoryInterface;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 
+/**
+ * This handler dereferences `inReplyTo` and `object` properties of an activity,
+ * stores them in the database and links them to the original activity where they're originating from.
+ */
 final class DereferenceCommandHandler
 {
 
