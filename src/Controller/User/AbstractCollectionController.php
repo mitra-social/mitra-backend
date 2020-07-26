@@ -21,6 +21,9 @@ use Mitra\Entity\Actor\Person;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
+use Mitra\Filtering\Filter;
+use Mitra\Filtering\FilterFactoryInterface;
+use Mitra\Filtering\FilterTokenizer;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
@@ -48,21 +51,27 @@ abstract class AbstractCollectionController
      */
     private $responseFactory;
 
+    /**
+     * @var FilterFactoryInterface
+     */
+    private $filterFactory;
+
     public function __construct(
         InternalUserRepository $internalUserRepository,
         UriGenerator $uriGenerator,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        FilterFactoryInterface $filterFactory
     ) {
         $this->internalUserRepository = $internalUserRepository;
         $this->uriGenerator = $uriGenerator;
         $this->responseFactory = $responseFactory;
+        $this->filterFactory = $filterFactory;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
         $username = $request->getAttribute('username');
-        $pageNo = $request->getQueryParams()['page'] ?? null;
 
         $authenticatedUser = $this->internalUserRepository->resolveFromRequest($request);
 
@@ -74,11 +83,16 @@ abstract class AbstractCollectionController
             return $this->responseFactory->createResponse(401);
         }
 
+        $pageNo = $request->getQueryParams()['page'] ?? null;
+        $filterQuery = $request->getQueryParams()['filter'] ?? null;
+
+        $filter = is_string($filterQuery) ? $this->filterFactory->create($filterQuery) : null;
+
         $requestedUsername = $requestedUser->getUsername();
         $requestedActor = $requestedUser->getActor();
         $collectionRouteName = $this->getCollectionRouteName();
 
-        $totalItems = $this->getTotalItemCount($requestedActor);
+        $totalItems = $this->getTotalItemCount($requestedActor, $filter);
         $totalPages = (int) ceil($totalItems / self::ITEMS_PER_PAGE_LIMIT);
         $lastPageNo = 0 === $totalPages ? 0 : $totalPages - 1;
 
@@ -124,9 +138,9 @@ abstract class AbstractCollectionController
             }
 
             if ($collectionDto instanceof OrderedCollectionInterface) {
-                $collectionDto->setOrderedItems($this->getItems($requestedActor, $pageNo));
+                $collectionDto->setOrderedItems($this->getItems($requestedActor, $filter, $pageNo));
             } else {
-                $collectionDto->setItems($this->getItems($requestedActor, $pageNo));
+                $collectionDto->setItems($this->getItems($requestedActor, $filter, $pageNo));
             }
         }
 
@@ -150,12 +164,13 @@ abstract class AbstractCollectionController
 
     /**
      * @param Actor $requestedActor
+     * @param Filter|null $filter
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
      */
-    abstract protected function getItems(Actor $requestedActor, ?int $page): array;
+    abstract protected function getItems(Actor $requestedActor, ?Filter $filter, ?int $page): array;
 
-    abstract protected function getTotalItemCount(Actor $requestedActor): int;
+    abstract protected function getTotalItemCount(Actor $requestedActor, ?Filter $filter): int;
 
     abstract protected function getCollectionRouteName(): string;
 }
