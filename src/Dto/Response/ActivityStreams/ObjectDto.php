@@ -84,7 +84,7 @@ class ObjectDto implements TypeInterface, LdObjectInterface
     public $image;
 
     /**
-     * @var null|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
+     * @var null|ObjectDto|LinkDto|string|array<string|ObjectDto|LinkDto>
      */
     public $inReplyTo;
 

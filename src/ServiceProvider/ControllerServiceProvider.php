@@ -119,8 +119,8 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepository::class],
                 $container[UriGenerator::class],
-                $container[DataToDtoTransformer::class],
-                $container[EntityToDtoMapper::class]
+                $container[EntityToDtoMapper::class],
+                $container[ActivityPubDtoPopulator::class]
             );
         };
 

@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
-use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
-use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDtoInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Person;
 use Mitra\Filtering\Filter;
 use Mitra\Filtering\FilterFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Mapping\Dto\ActivityStreamTypeToDtoClassMapping;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Slim\UriGenerator;
@@ -32,14 +31,14 @@ final class InboxReadController extends AbstractOrderedCollectionController
     private $activityStreamContentAssignmentRepository;
 
     /**
-     * @var DataToDtoTransformer
-     */
-    private $dataToDtoTransformer;
-
-    /**
      * @var EntityToDtoMapper
      */
     private $entityToDtoMapper;
+
+    /**
+     * @var DataToDtoPopulatorInterface
+     */
+    private $activityPubDataToDtoPopulator;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
@@ -47,14 +46,14 @@ final class InboxReadController extends AbstractOrderedCollectionController
         InternalUserRepository $internalUserRepository,
         ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
         UriGenerator $uriGenerator,
-        DataToDtoTransformer $dataToDtoManager,
-        EntityToDtoMapper $entityToDtoMapper
+        EntityToDtoMapper $entityToDtoMapper,
+        DataToDtoPopulatorInterface $activityPubDataToDtoPopulator
     ) {
         parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $filterFactory);
 
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
-        $this->dataToDtoTransformer = $dataToDtoManager;
         $this->entityToDtoMapper = $entityToDtoMapper;
+        $this->activityPubDataToDtoPopulator = $activityPubDataToDtoPopulator;
     }
 
     /**
@@ -88,13 +87,8 @@ final class InboxReadController extends AbstractOrderedCollectionController
             $content = $item->getContent();
             $object =  $content->getObject();
 
-            unset($object['@context']);
-
             /** @var AbstractActivity $dto */
-            $dto = $this->dataToDtoTransformer->populate(
-                ActivityStreamTypeToDtoClassMapping::map($content->getType()),
-                $object
-            );
+            $dto = $this->activityPubDataToDtoPopulator->populate($object);
 
             $itemContent = $item->getContent();
 
@@ -109,9 +103,15 @@ final class InboxReadController extends AbstractOrderedCollectionController
             $dto->actor = $actorDto;
 
             // TODO: Inline object infos
-            /*if ($dto instanceof ActivityDto && null !== $dto->object) {
-                $dto->object
-            }*/
+            $linkedObjects = [];
+
+            foreach ($item->getContent()->getLinkedObjects() as $linkedObject) {
+                /** @var ActivityStreamContent $linkedObject */
+                $linkedObjects[$linkedObject->getExternalId()] = $linkedObject;
+            }
+
+            $dto->object = $this->resolveLinkedObjects($linkedObjects, $dto->object);
+            $dto->inReplyTo = $this->resolveLinkedObjects($linkedObjects, $dto->inReplyTo);
 
             // Don't leak anonymous recipients
             $dto->bto = null;
@@ -121,6 +121,56 @@ final class InboxReadController extends AbstractOrderedCollectionController
         }
 
         return $dtoItems;
+    }
+
+    /**
+     * @param array<ActivityStreamContent> $linkedObjects
+     * @param null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto> $objects
+     * @param int $level
+     * @return null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
+     * @throws \Mitra\Dto\DataToDtoPopulatorException
+     */
+    protected function resolveLinkedObjects(array $linkedObjects, $objects, int $level = 0)
+    {
+        if (null === $objects || $level > 1) {
+            return $objects;
+        }
+
+        $objects = is_array($objects) ? $objects : [$objects];
+        $resolvedObjects = [];
+
+        foreach ($objects as $object) {
+            $externalId = null;
+
+            if (is_string($object) && isset($linkedObjects[$object])) {
+                $externalId = $object;
+            } elseif ($object instanceof LinkDto) {
+                $externalId = (string) $object;
+            } else {
+                $resolvedObjects[] = $object;
+                continue;
+            }
+
+            $resolvedObject = $this->activityPubDataToDtoPopulator->populate(
+                $linkedObjects[$externalId]->getObject()
+            );
+
+            $resolvedObject->object = $this->resolveLinkedObjects(
+                $linkedObjects,
+                $resolvedObject->object,
+                $level + 1
+            );
+
+            $resolvedObject->inReplyTo = $this->resolveLinkedObjects(
+                $linkedObjects,
+                $resolvedObject->inReplyTo,
+                $level + 1
+            );
+
+            $resolvedObjects[] = $resolvedObject;
+        }
+        
+        return 1 === count($resolvedObjects) ? $resolvedObjects[0] : $resolvedObjects;
     }
 
     protected function getTotalItemCount(Actor $requestedActor, ?Filter $filter): int
