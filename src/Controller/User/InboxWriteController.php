@@ -185,10 +185,7 @@ final class InboxWriteController
                 throw $e;
             }
 
-            echo 'ALREADY EXISTS! GRACEFULLY HANDLE THIS' , PHP_EOL;
-
             $activityStreamContent = $this->activityStreamContentRepository->getByExternalId($objectDto->id);
-            $this->entityManager->merge($activityStreamContent);
 
             if (null !== $activityStreamContent) {
                 $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
