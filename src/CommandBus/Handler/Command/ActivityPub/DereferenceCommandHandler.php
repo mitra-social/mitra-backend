@@ -87,6 +87,10 @@ final class DereferenceCommandHandler
         $objects,
         DereferenceCommand $command
     ): void {
+        if (!$command->shouldDereferenceObjects()) {
+            return;
+        }
+        
         $nextDereferenceDepth = $command->getCurrentDereferenceDepth() + 1;
         $emitDereferenceEvents = $command->getCurrentDereferenceDepth() <= $command->getMaxDereferenceDepth();
         $objects = is_array($objects) ? $objects : [$objects];
@@ -98,13 +102,13 @@ final class DereferenceCommandHandler
                 continue;
             }
 
-            /** @var ObjectDto $objectDto */
-            $objectDto = $this->remoteObjectResolver->resolve($object, $userContext);
-
-            $dereferencedObject = $this->activityStreamContentRepository->getByExternalId($objectDto->id);
+            $dereferencedObject = $this->activityStreamContentRepository->getByExternalId((string) $object);
 
             // Object is not yet in database
             if (null === $dereferencedObject) {
+                /** @var ObjectDto $objectDto */
+                $objectDto = $this->remoteObjectResolver->resolve($object, $userContext);
+
                 $dereferencedObject = $this->activityStreamContentFactory->createFromDto($objectDto);
                 $this->entityManager->persist($dereferencedObject);
 

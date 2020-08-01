@@ -93,6 +93,7 @@ final class ActivityStreamContentOrmMapping implements ClassMapMappingInterface
         $metadata->mapManyToMany([
             'fieldName' => 'linkedObjects',
             'targetEntity' => ActivityStreamContent::class,
+            'cascade' => ['persist', 'remove'],
             'joinTable' => [
                 'name' => 'activity_stream_content_linked_objects',
                 'joinColumns' => [

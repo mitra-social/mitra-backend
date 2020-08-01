@@ -26,14 +26,21 @@ abstract class AbstractActivityStreamContentEvent implements EventInterface
      */
     private $actor;
 
+    /**
+     * @var bool
+     */
+    private $resolveLinkedObjects;
+
     public function __construct(
         ActivityStreamContent $activityStreamContentEntity,
         ObjectDto $activityStreamDto,
-        ?Actor $actor
+        ?Actor $actor,
+        bool $resolveLinkedObjects
     ) {
         $this->activityStreamContentEntity = $activityStreamContentEntity;
         $this->activityStreamDto = $activityStreamDto;
         $this->actor = $actor;
+        $this->resolveLinkedObjects = $resolveLinkedObjects;
     }
 
     public function getActivityStreamContentEntity(): ActivityStreamContent
@@ -52,5 +59,10 @@ abstract class AbstractActivityStreamContentEvent implements EventInterface
     public function getActor(): ?Actor
     {
         return $this->actor;
+    }
+
+    public function shouldDereferenceObjects(): bool
+    {
+        return $this->resolveLinkedObjects;
     }
 }

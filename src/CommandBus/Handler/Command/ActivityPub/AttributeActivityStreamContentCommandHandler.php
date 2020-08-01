@@ -47,11 +47,18 @@ final class AttributeActivityStreamContentCommandHandler
             return;
         }
 
-        $user = $this->externalUserResolver->resolve($dto->actor);
-        $this->entityManager->persist($user);
+        if (null !== $dto->actor) {
+            $user = $this->externalUserResolver->resolve($dto->actor);
+            $this->entityManager->persist($user);
 
-        $entity->setAttributedTo($user->getActor());
+            $entity->setAttributedTo($user->getActor());
+        }
 
-        $this->eventEmitter->raise(new ActivityStreamContentAttributedEvent($entity, $dto, $command->getActor()));
+        $this->eventEmitter->raise(new ActivityStreamContentAttributedEvent(
+            $entity,
+            $dto,
+            $command->getActor(),
+            $command->shouldDereferenceObjects()
+        ));
     }
 }

@@ -22,6 +22,10 @@ final class DereferenceEventHandler
 
     public function __invoke(DereferenceEvent $event): void
     {
+        if (false === $event->shouldDereferenceObjects()) {
+            return;
+        }
+
         $this->commandBus->handle(new DereferenceCommand(
             $event->getActivityStreamContentEntity(),
             $event->getActivityStreamDto(),

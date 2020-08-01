@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Slim\IdGeneratorInterface;
+use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Entity\User\InternalUser;
@@ -142,10 +144,15 @@ final class InboxReadControllerTest extends IntegrationTestCase
         self::assertStatusCode(404, $response);
     }
 
-    public function testReturnsInboxItemsWithBtoAndBccStripped(): void
+    public function testReturnsInboxItemsWithBtoAndBccStrippedAndInlinedObjects(): void
     {
         /** @var UriGenerator $uriGenerator */
         $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds(['a46dfe3f-65dc-41db-a22b-3c3307601402']);
 
         $actorUsername = 'bob';
         $externalUser = $this->createExternalUser($actorUsername);
@@ -161,6 +168,13 @@ final class InboxReadControllerTest extends IntegrationTestCase
             $this->createSubscription($user->getActor(), $externalUser->getActor());
         }
 
+        $inReplyToDto = new CreateDto();
+        $inReplyToDto->id = sprintf('https://example.com/user/%s/post/98754', 'alice');
+        $inReplyToDto->object = new NoteDto();
+        $inReplyToDto->object->content = 'This is the initial note';
+
+        $this->createContent($inReplyToDto, null);
+
         $dtoContent = 'Foo bar baz';
         
         $dto = new CreateDto();
@@ -168,6 +182,7 @@ final class InboxReadControllerTest extends IntegrationTestCase
         $dto->actor = $externalUser->getExternalId();
         $dto->object = new NoteDto();
         $dto->object->content = $dtoContent;
+        $dto->inReplyTo = $inReplyToDto->id;
         $dto->to = [
             $toUserExternalId,
         ];
@@ -219,6 +234,14 @@ final class InboxReadControllerTest extends IntegrationTestCase
                     'id' => $dto->id,
                     'to' => [
                         $toUserExternalId,
+                    ],
+                    'inReplyTo' => [
+                        'type' => 'Create',
+                        'object' => [
+                            'type' => 'Note',
+                            'content' => 'This is the initial note',
+                        ],
+                        'id' => $inReplyToDto->id,
                     ],
                 ],
             ],

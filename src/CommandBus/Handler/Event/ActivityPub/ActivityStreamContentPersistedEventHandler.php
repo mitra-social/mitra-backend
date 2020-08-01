@@ -27,13 +27,24 @@ final class ActivityStreamContentPersistedEventHandler
         $dto = $event->getActivityStreamDto();
         $entity = $event->getActivityStreamContentEntity();
         $actor = $event->getActor();
+        $shouldDereferenceObjects = $event->shouldDereferenceObjects();
 
         if (null !== $actor) {
-            $this->commandBus->handle(new AssignActivityStreamContentToActorCommand($entity, $dto, $actor));
+            $this->commandBus->handle(new AssignActivityStreamContentToActorCommand(
+                $entity,
+                $dto,
+                $actor,
+                $shouldDereferenceObjects
+            ));
         } else {
-            $this->commandBus->handle(new AssignActivityStreamContentToFollowersCommand($entity, $dto, null));
+            $this->commandBus->handle(new AssignActivityStreamContentToFollowersCommand(
+                $entity,
+                $dto,
+                null,
+                $shouldDereferenceObjects
+            ));
         }
 
-        $this->commandBus->handle(new DereferenceCommand($entity, $dto, $actor, 2, 1));
+        $this->commandBus->handle(new DereferenceCommand($entity, $dto, $actor, $shouldDereferenceObjects, 2, 1));
     }
 }

@@ -26,14 +26,21 @@ abstract class AbstractActivityStreamContentCommand implements CommandInterface
      */
     private $actor;
 
+    /**
+     * @var bool
+     */
+    private $dereferenceObjects;
+
     public function __construct(
         ActivityStreamContent $activityStreamContentEntity,
         ObjectDto $activityStreamDto,
-        ?Actor $actor
+        ?Actor $actor,
+        bool $dereferenceObjects
     ) {
         $this->activityStreamContentEntity = $activityStreamContentEntity;
         $this->activityStreamDto = $activityStreamDto;
         $this->actor = $actor;
+        $this->dereferenceObjects = $dereferenceObjects;
     }
 
     public function getActivityStreamContentEntity(): ActivityStreamContent
@@ -49,5 +56,10 @@ abstract class AbstractActivityStreamContentCommand implements CommandInterface
     public function getActor(): ?Actor
     {
         return $this->actor;
+    }
+
+    public function shouldDereferenceObjects(): bool
+    {
+        return $this->dereferenceObjects;
     }
 }

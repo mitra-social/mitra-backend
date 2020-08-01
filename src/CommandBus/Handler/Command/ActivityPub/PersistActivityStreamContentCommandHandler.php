@@ -51,6 +51,11 @@ final class PersistActivityStreamContentCommandHandler
         $dto = $command->getActivityStreamDto();
         $actor = $command->getActor();
 
-        $this->eventEmitter->raise(new ActivityStreamContentPersistedEvent($entity, $dto, $actor));
+        $this->eventEmitter->raise(new ActivityStreamContentPersistedEvent(
+            $entity,
+            $dto,
+            $actor,
+            $command->shouldDereferenceObjects()
+        ));
     }
 }
