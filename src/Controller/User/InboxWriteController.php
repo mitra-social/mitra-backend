@@ -184,7 +184,8 @@ final class InboxWriteController
                 $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
                     $activityStreamContent,
                     $objectDto,
-                    $inboxUser->getActor()
+                    $inboxUser->getActor(),
+                    false
                 ));
                 return $this->responseFactory->createResponse(201);
             }
