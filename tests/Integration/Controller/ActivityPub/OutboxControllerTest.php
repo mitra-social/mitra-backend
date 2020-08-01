@@ -12,7 +12,7 @@ use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Entity\Media;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ExternalUserRepository;
-use Mitra\Repository\SubscriptionRepository;
+use Mitra\Repository\SubscriptionRepositoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
@@ -20,7 +20,6 @@ use Mitra\Tests\Integration\ClientMockTrait;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Psr\Http\Message\RequestFactoryInterface;
-use Ramsey\Uuid\Uuid;
 
 /**
  * @group Integration
@@ -156,8 +155,8 @@ final class OutboxControllerTest extends IntegrationTestCase
             $followedUser->getActor()->getIcon()->getLocalUri()
         );
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
         $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
@@ -261,8 +260,8 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         self::assertNotNull($followedUser);
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
         $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
@@ -358,8 +357,8 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         self::assertNotNull($followedUser);
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
         $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 

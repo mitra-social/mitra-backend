@@ -7,6 +7,7 @@ namespace Integration\Controller\ActivityPub;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Entity\Media;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
@@ -98,7 +99,9 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
         self::assertStatusCode(201, $response);
 
         /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         foreach ([$toUser, $ccUser, $btoUser, $bccUser] as $user) {
             /** @var ActivityStreamContentAssignment[] $userContent */
@@ -194,8 +197,10 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         /** @var ActivityStreamContentAssignment[] $userContent */
         $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null);
@@ -255,8 +260,10 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         foreach ([$toUser, $ccUser, $btoUser, $bccUser] as $user) {
             /** @var ActivityStreamContentAssignment[] $userContent */
@@ -332,8 +339,10 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null, null);
 

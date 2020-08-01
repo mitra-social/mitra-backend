@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Mitra\Dto\DataToDtoPopulatorInterface;
-use Mitra\Dto\DataToDtoTransformer;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
@@ -19,14 +18,14 @@ use Mitra\Entity\Actor\Person;
 use Mitra\Filtering\Filter;
 use Mitra\Filtering\FilterFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
-use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Slim\UriGenerator;
 
 final class InboxReadController extends AbstractOrderedCollectionController
 {
     /**
-     * @var ActivityStreamContentAssignmentRepository
+     * @var ActivityStreamContentAssignmentRepositoryInterface
      */
     private $activityStreamContentAssignmentRepository;
 
@@ -44,7 +43,7 @@ final class InboxReadController extends AbstractOrderedCollectionController
         ResponseFactoryInterface $responseFactory,
         FilterFactoryInterface $filterFactory,
         InternalUserRepository $internalUserRepository,
-        ActivityStreamContentAssignmentRepository $activityStreamContentAssignmentRepository,
+        ActivityStreamContentAssignmentRepositoryInterface $activityStreamContentAssignmentRepository,
         UriGenerator $uriGenerator,
         EntityToDtoMapper $entityToDtoMapper,
         DataToDtoPopulatorInterface $activityPubDataToDtoPopulator

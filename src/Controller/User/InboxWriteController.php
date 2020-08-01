@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ApiProblem\BadRequestApiProblem;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
@@ -19,6 +20,7 @@ use Mitra\Entity\ActivityStreamContent;
 use Mitra\Factory\ActivityStreamContentFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
+use Mitra\Orm\EntityManagerDecorator;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
@@ -87,6 +89,11 @@ final class InboxWriteController
      */
     private $activityStreamContentFactory;
 
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
@@ -98,7 +105,8 @@ final class InboxWriteController
         InternalUserRepository $internalUserRepository,
         ActivityStreamContentFactoryInterface $activityStreamContentFactory,
         ActivityStreamContentRepositoryInterface $activityStreamContentRepository,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;
@@ -111,6 +119,7 @@ final class InboxWriteController
         $this->activityStreamContentFactory = $activityStreamContentFactory;
         $this->activityStreamContentRepository = $activityStreamContentRepository;
         $this->logger = $logger;
+        $this->entityManager = $entityManager;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -155,16 +164,6 @@ final class InboxWriteController
             return $response;
         }
 
-        if (null !== $activityStreamContent = $this->activityStreamContentRepository->getByExternalId($objectDto->id)) {
-            $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
-                $activityStreamContent,
-                $objectDto,
-                $inboxUser->getActor(),
-                false
-            ));
-            return $this->responseFactory->createResponse(201);
-        }
-
         $activityStreamContent = $this->activityStreamContentFactory->createFromDto($objectDto);
 
         try {
@@ -174,11 +173,22 @@ final class InboxWriteController
                 $inboxUser->getActor()
             ));
         } catch (HandlerFailedException $e) {
-            if (!$e->getPrevious() instanceof UniqueConstraintViolationException) {
+            $initialException = $this->getInitialException($e);
+
+            if (!$initialException instanceof UniqueConstraintViolationException) {
                 throw $e;
             }
 
+            if ($this->entityManager instanceof EntityManagerDecorator) {
+                $this->entityManager->restoreIfClosed();
+            } else {
+                throw $e;
+            }
+
+            echo 'ALREADY EXISTS! GRACEFULLY HANDLE THIS' , PHP_EOL;
+
             $activityStreamContent = $this->activityStreamContentRepository->getByExternalId($objectDto->id);
+            $this->entityManager->merge($activityStreamContent);
 
             if (null !== $activityStreamContent) {
                 $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
@@ -194,5 +204,16 @@ final class InboxWriteController
         }
 
         return $this->responseFactory->createResponse(201);
+    }
+
+    private function getInitialException(HandlerFailedException $e): ?\Throwable
+    {
+        $previousException = $e->getPrevious();
+
+        while ($previousException instanceof HandlerFailedException) {
+            $previousException = $previousException->getPrevious();
+        }
+
+        return $previousException;
     }
 }

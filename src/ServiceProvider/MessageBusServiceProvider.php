@@ -40,7 +40,7 @@ use Mitra\Factory\ActivityStreamContentFactoryInterface;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
-use Mitra\Repository\SubscriptionRepository;
+use Mitra\Repository\SubscriptionRepositoryInterface;
 use Mitra\Slim\UriGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -176,7 +176,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             return new FollowCommandHandler(
                 $container[EntityManagerInterface::class],
                 $container[ExternalUserResolver::class],
-                $container[SubscriptionRepository::class],
+                $container[SubscriptionRepositoryInterface::class],
                 $container[EventEmitterInterface::class]
             );
         };
@@ -185,7 +185,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             return new UndoCommandHandler(
                 $container[ExternalUserResolver::class],
                 $container[EntityManagerInterface::class],
-                $container[SubscriptionRepository::class]
+                $container[SubscriptionRepositoryInterface::class]
             );
         };
 
@@ -204,7 +204,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
         ): ValidateContentCommandHandler {
             return new ValidateContentCommandHandler(
                 $container[EventEmitterInterface::class],
-                $container[SubscriptionRepository::class]
+                $container[SubscriptionRepositoryInterface::class]
             );
         };
 
@@ -225,7 +225,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             $uriFactory = $container[UriFactoryInterface::class];
 
             return new AssignActivityStreamContentToFollowersCommandHandler(
-                $container[SubscriptionRepository::class],
+                $container[SubscriptionRepositoryInterface::class],
                 $container[InternalUserRepository::class],
                 $container[EntityManagerInterface::class],
                 $container[EventEmitterInterface::class],

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
-use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
@@ -291,8 +291,8 @@ final class InboxReadControllerTest extends IntegrationTestCase
 
         $this->createContent($filteredDto, $toUser->getActor());
 
-        /** @var ActivityStreamContentAssignmentRepository $repo */
-        $repo = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $repo */
+        $repo = $this->getContainer()->get(ActivityStreamContentAssignmentRepositoryInterface::class);
 
         self::assertEquals(2, $repo->getTotalCountForActor($toUser->getActor(), null));
 

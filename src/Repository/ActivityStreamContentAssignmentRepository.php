@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 namespace Mitra\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
-use Mitra\Entity\User\InternalUser;
 use Mitra\Filtering\Filter;
 use Mitra\Filtering\SqlFilterRenderer;
 
-final class ActivityStreamContentAssignmentRepository
+final class ActivityStreamContentAssignmentRepository implements ActivityStreamContentAssignmentRepositoryInterface
 {
     /**
-     * @var EntityRepository
+     * @var EntityManagerInterface
      */
-    private $repository;
+    private $entityManager;
 
-    public function __construct(EntityRepository $repository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->repository = $repository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -33,8 +32,9 @@ final class ActivityStreamContentAssignmentRepository
      */
     public function findContentForActor(Actor $actor, ?Filter $filter, ?int $offset, ?int $limit): array
     {
-        $qb = $this->repository->createQueryBuilder('ca')
+        $qb = $this->entityManager->createQueryBuilder()
             ->select('ca', 'c')
+            ->from(ActivityStreamContentAssignment::class, 'ca')
             ->join('ca.content', 'c')
             ->where('ca.actor = :actor')
             ->setParameter('actor', $actor->getUser());
@@ -58,9 +58,10 @@ final class ActivityStreamContentAssignmentRepository
 
     public function getTotalCountForActor(Actor $actor, ?Filter $filter): int
     {
-        $qb = $this->repository->createQueryBuilder('ca');
+        $qb = $this->entityManager->createQueryBuilder();
         $qb
             ->select($qb->expr()->count('ca'))
+            ->from(ActivityStreamContentAssignment::class, 'ca')
             ->where('ca.actor = :actor')
             ->setParameter('actor', $actor->getUser());
 

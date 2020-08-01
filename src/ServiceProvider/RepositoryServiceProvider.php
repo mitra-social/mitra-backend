@@ -13,6 +13,7 @@ use Mitra\Entity\Subscription;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\ActivityStreamContentRepository;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\ExternalUserRepository;
@@ -20,6 +21,7 @@ use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepository;
 use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepository;
+use Mitra\Repository\SubscriptionRepositoryInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
@@ -43,11 +45,11 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[ActivityStreamContentAssignmentRepository::class] = static function (
+        $container[ActivityStreamContentAssignmentRepositoryInterface::class] = static function (
             Container $container
-        ): ActivityStreamContentAssignmentRepository {
+        ): ActivityStreamContentAssignmentRepositoryInterface {
             return new ActivityStreamContentAssignmentRepository(
-                $container[EntityManagerInterface::class]->getRepository(ActivityStreamContentAssignment::class)
+                $container[EntityManagerInterface::class]
             );
         };
 
@@ -55,20 +57,22 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
             Container $container
         ): ActivityStreamContentRepositoryInterface {
             return new ActivityStreamContentRepository(
-                $container[EntityManagerInterface::class]->getRepository(ActivityStreamContent::class),
+                $container[EntityManagerInterface::class],
                 $container[HashGeneratorInterface::class]
             );
         };
 
-        $container[SubscriptionRepository::class] = static function (Container $container): SubscriptionRepository {
+        $container[SubscriptionRepositoryInterface::class] = static function (
+            Container $container
+        ): SubscriptionRepositoryInterface {
             return new SubscriptionRepository(
-                $container[EntityManagerInterface::class]->getRepository(Subscription::class)
+                $container[EntityManagerInterface::class]
             );
         };
 
         $container[MediaRepositoryInterface::class] = static function (Container $container): MediaRepositoryInterface {
             return new MediaRepository(
-                $container[EntityManagerInterface::class]->getRepository(Media::class)
+                $container[EntityManagerInterface::class]
             );
         };
     }

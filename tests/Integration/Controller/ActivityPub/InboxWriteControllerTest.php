@@ -8,6 +8,7 @@ use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\Media;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
@@ -50,6 +51,72 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         self::$requestFactory = self::$container->get(RequestFactoryInterface::class);
     }
 
+    public function testReceiveSameContentTwiceForDifferentUsers(): void
+    {
+        /** @var UriGenerator $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+
+        $toUser1 = $this->createInternalUser();
+        $toUser1ExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser1->getUsername()]);
+
+        $toUser2 = $this->createInternalUser();
+        $toUser2ExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser2->getUsername()]);
+
+        $externalUser = $this->createExternalUser();
+
+        /** @var InternalUser $user */
+        $this->createSubscription($toUser1->getActor(), $externalUser->getActor());
+
+        $dtoContent = 'This is a note.';
+
+        $dto = new CreateDto();
+        $dto->id = sprintf('https://example.com/user/%s/post/123456', $externalUser->getPreferredUsername());
+        $dto->actor = $externalUser->getExternalId();
+        $dto->object = new NoteDto();
+        $dto->object->content = $dtoContent;
+        $dto->to = [
+            $toUser1ExternalId,
+            $toUser2ExternalId,
+        ];
+
+        /** @var EncoderInterface $encoder */
+        $encoder = $this->getContainer()->get(EncoderInterface::class);
+        /** @var NormalizerInterface $normalizer */
+        $normalizer = $this->getContainer()->get(NormalizerInterface::class);
+
+        $payload = $encoder->encode($normalizer->normalize($dto), 'application/json');
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds([
+            '9fd9494c-dc99-4efc-ab14-1b502ae75682',
+            'fd6a1576-d012-41c7-8795-4d0dde25f5d3',
+        ]);
+
+        $request1 = $this->createRequest('POST', sprintf('/user/%s/inbox', $toUser1->getUsername()), $payload);
+        $response1 = $this->executeRequest($request1);
+
+        self::assertStatusCode(201, $response1);
+
+        $request2 = $this->createRequest('POST', sprintf('/user/%s/inbox', $toUser2->getUsername()), $payload);
+        $response2 = $this->executeRequest($request2);
+
+        self::assertStatusCode(201, $response2);
+
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
+
+
+        /** @var ActivityStreamContentAssignment[] $userContent */
+        $userContent = $contentAssignmentRepository->findContentForActor($toUser1->getActor(), null, null, null);
+
+        self::assertCount(1, $userContent);
+        self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
+    }
+
     public function testProcessesIncomingContentSuccessfully(): void
     {
         /** @var UriGenerator $uriGenerator */
@@ -90,8 +157,10 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
 
         /** @var ActivityStreamContentAssignment[] $userContent */
@@ -100,7 +169,6 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
     }
-
 
     public function testDereferencesLinkedObjectSuccessfully(): void
     {
@@ -197,8 +265,10 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         /** @var ActivityStreamContentAssignment[] $userContent */
         $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null, null);
