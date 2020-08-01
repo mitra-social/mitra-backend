@@ -30,6 +30,7 @@ final class DereferenceEventHandler
             $event->getActivityStreamContentEntity(),
             $event->getActivityStreamDto(),
             $event->getActor(),
+            $event->shouldDereferenceObjects(),
             $event->getMaxDereferenceDepth(),
             $event->getCurrentDereferenceDepth()
         ));

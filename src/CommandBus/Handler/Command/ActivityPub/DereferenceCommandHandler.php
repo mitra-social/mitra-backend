@@ -117,6 +117,7 @@ final class DereferenceCommandHandler
                         $dereferencedObject,
                         $objectDto,
                         null,
+                        $command->shouldDereferenceObjects(),
                         $command->getMaxDereferenceDepth(),
                         $nextDereferenceDepth
                     ));

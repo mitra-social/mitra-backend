@@ -46,6 +46,7 @@ final class PersistActivityStreamContentCommandHandler
             return;
         }
 
+        
         $this->entityManager->persist($entity);
 
         $dto = $command->getActivityStreamDto();

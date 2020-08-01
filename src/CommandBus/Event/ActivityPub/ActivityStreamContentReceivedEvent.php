@@ -14,8 +14,8 @@ final class ActivityStreamContentReceivedEvent extends AbstractActivityStreamCon
         ActivityStreamContent $activityStreamContentEntity,
         ObjectDto $activityStreamDto,
         ?Actor $actor,
-        bool $resolveLinkedObjects = true
+        bool $dereferenceObjects = true
     ) {
-        parent::__construct($activityStreamContentEntity, $activityStreamDto, $actor, $resolveLinkedObjects);
+        parent::__construct($activityStreamContentEntity, $activityStreamDto, $actor, $dereferenceObjects);
     }
 }

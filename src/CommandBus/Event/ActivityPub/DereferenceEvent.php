@@ -24,10 +24,11 @@ final class DereferenceEvent extends AbstractActivityStreamContentEvent
         ActivityStreamContent $activityStreamContentEntity,
         ObjectDto $activityStreamDto,
         ?Actor $actor,
+        bool $dereferenceObjects,
         int $maxDereferenceDepth,
         int $currentDereferenceDepth
     ) {
-        parent::__construct($activityStreamContentEntity, $activityStreamDto, $actor);
+        parent::__construct($activityStreamContentEntity, $activityStreamDto, $actor, $dereferenceObjects);
 
         $this->currentDereferenceDepth = $currentDereferenceDepth;
         $this->maxDereferenceDepth = $maxDereferenceDepth;
