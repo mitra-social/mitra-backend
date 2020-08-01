@@ -194,10 +194,9 @@ final class InboxWriteController
                     $inboxUser->getActor(),
                     false
                 ));
-                return $this->responseFactory->createResponse(201);
+            } else {
+                throw $e;
             }
-
-            throw $e;
         }
 
         return $this->responseFactory->createResponse(201);
