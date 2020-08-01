@@ -8,7 +8,6 @@ use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
-use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Tests\Integration\CreateContentTrait;
