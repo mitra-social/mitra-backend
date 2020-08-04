@@ -144,6 +144,10 @@ class ActivityStreamContent
 
     public function addLinkedObject(ActivityStreamContent $object): void
     {
+        if ($this->linkedObjects->contains($object)) {
+            return;
+        }
+
         $this->linkedObjects->add($object);
     }
 
