@@ -50,18 +50,25 @@ final class DereferenceCommandHandler
      */
     private $eventEmitter;
 
+    /**
+     * @var InternalUser
+     */
+    private $instanceUser;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         ActivityStreamContentFactoryInterface $activityStreamContentFactory,
         ActivityStreamContentRepositoryInterface $activityStreamContentRepository,
         RemoteObjectResolver $remoteObjectResolver,
-        EventEmitterInterface $eventEmitter
+        EventEmitterInterface $eventEmitter,
+        InternalUser $instanceUser
     ) {
         $this->entityManager = $entityManager;
         $this->activityStreamContentFactory = $activityStreamContentFactory;
         $this->activityStreamContentRepository = $activityStreamContentRepository;
         $this->remoteObjectResolver = $remoteObjectResolver;
         $this->eventEmitter = $eventEmitter;
+        $this->instanceUser = $instanceUser;
     }
 
     public function __invoke(DereferenceCommand $command): void
@@ -95,8 +102,10 @@ final class DereferenceCommandHandler
         $emitDereferenceEvents = $command->getCurrentDereferenceDepth() <= $command->getMaxDereferenceDepth();
         $objects = is_array($objects) ? $objects : [$objects];
 
+        $commandActor = $command->getActor();
+
         /** @var InternalUser|null $userContext */
-        $userContext = $command->getActor() instanceof InternalUser ? $command->getActor()->getUser() : null;
+        $userContext = $commandActor instanceof InternalUser ? $commandActor->getUser() : $this->instanceUser;
 
         foreach ($objects as $object) {
             $objectDto = null;

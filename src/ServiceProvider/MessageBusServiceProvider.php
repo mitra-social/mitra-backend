@@ -280,7 +280,8 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
                 $container[ActivityStreamContentFactoryInterface::class],
                 $container[ActivityStreamContentRepositoryInterface::class],
                 $container[RemoteObjectResolver::class],
-                $container[EventEmitterInterface::class]
+                $container[EventEmitterInterface::class],
+                $container['instanceUser']
             );
         };
     }

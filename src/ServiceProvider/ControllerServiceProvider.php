@@ -20,6 +20,7 @@ use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\InboxWriteController;
+use Mitra\Controller\User\InstanceUserReadController;
 use Mitra\Controller\User\OutboxWriteController;
 use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
@@ -182,6 +183,17 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[ResponseFactoryInterface::class],
                 $container[MediaRepositoryInterface::class],
                 $container[FilesystemInterface::class]
+            );
+        };
+
+        $container[InstanceUserReadController::class] = static function (
+            Container $container
+        ): InstanceUserReadController {
+            return new InstanceUserReadController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[UriGenerator::class],
+                $container['instanceUser']
             );
         };
 

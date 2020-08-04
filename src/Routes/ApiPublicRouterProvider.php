@@ -11,6 +11,7 @@ use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\ActivityReadController;
 use Mitra\Controller\User\CreateUserController;
 use Mitra\Controller\User\InboxWriteController;
+use Mitra\Controller\User\InstanceUserReadController;
 use Mitra\Controller\User\UserReadController;
 use Mitra\Controller\Webfinger\WebfingerController;
 use Slim\Interfaces\RouteCollectorProxyInterface;
@@ -34,6 +35,9 @@ final class ApiPublicRouterProvider implements RouteProviderInterface
         $group
             ->get('/user/{username}', UserReadController::class)
             ->setName('user-read');
+        $group
+            ->get('/instance/user', InstanceUserReadController::class)
+            ->setName('instance-user-read');
         $group
             ->post('/user/{username}/inbox', InboxWriteController::class)
             ->setName('user-inbox-write');
