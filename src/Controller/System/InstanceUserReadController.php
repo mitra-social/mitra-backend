@@ -47,7 +47,9 @@ final class InstanceUserReadController
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        $response = $this->responseFactory->createResponse();
+        $response = $this->responseFactory->createResponse()
+            ->withHeader('Content-Type', 'application/activity+json');
+
         $instanceUserUrl = $this->uriGenerator->fullUrlFor('instance-user-read');
 
         $response->getBody()->write(json_encode([
