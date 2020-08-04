@@ -94,37 +94,44 @@ final class DereferenceCommandHandler
         $nextDereferenceDepth = $command->getCurrentDereferenceDepth() + 1;
         $emitDereferenceEvents = $command->getCurrentDereferenceDepth() <= $command->getMaxDereferenceDepth();
         $objects = is_array($objects) ? $objects : [$objects];
+
         /** @var InternalUser|null $userContext */
-        $userContext =  $command->getActor() instanceof InternalUser ? $command->getActor()->getUser() : null;
+        $userContext = $command->getActor() instanceof InternalUser ? $command->getActor()->getUser() : null;
 
         foreach ($objects as $object) {
-            if (!is_string($object) && !$object instanceof LinkDto) {
+            $objectDto = null;
+
+            if (is_string($object) || $object instanceof LinkDto) {
+                $dereferencedObject = $this->activityStreamContentRepository->getByExternalId((string) $object);
+
+                // Object is not yet in database
+                if (null === $dereferencedObject) {
+                    /** @var ObjectDto $objectDto */
+                    $objectDto = $this->remoteObjectResolver->resolve($object, $userContext);
+
+                    $dereferencedObject = $this->activityStreamContentFactory->createFromDto($objectDto);
+                    $this->entityManager->persist($dereferencedObject);
+
+                }
+
+                $entity->addLinkedObject($dereferencedObject);
+            } elseif ($object instanceof ObjectDto) {
+                $objectDto = $object;
+                $dereferencedObject = $command->getActivityStreamContentEntity();
+            } else {
                 continue;
             }
 
-            $dereferencedObject = $this->activityStreamContentRepository->getByExternalId((string) $object);
-
-            // Object is not yet in database
-            if (null === $dereferencedObject) {
-                /** @var ObjectDto $objectDto */
-                $objectDto = $this->remoteObjectResolver->resolve($object, $userContext);
-
-                $dereferencedObject = $this->activityStreamContentFactory->createFromDto($objectDto);
-                $this->entityManager->persist($dereferencedObject);
-
-                if ($emitDereferenceEvents) {
-                    $this->eventEmitter->raise(new DereferenceEvent(
-                        $dereferencedObject,
-                        $objectDto,
-                        null,
-                        $command->shouldDereferenceObjects(),
-                        $command->getMaxDereferenceDepth(),
-                        $nextDereferenceDepth
-                    ));
-                }
+            if ($emitDereferenceEvents && null !== $objectDto) {
+                $this->eventEmitter->raise(new DereferenceEvent(
+                    $dereferencedObject,
+                    $objectDto,
+                    null,
+                    $command->shouldDereferenceObjects(),
+                    $command->getMaxDereferenceDepth(),
+                    $nextDereferenceDepth
+                ));
             }
-
-            $entity->addLinkedObject($dereferencedObject);
         }
     }
 }

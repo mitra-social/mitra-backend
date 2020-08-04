@@ -141,18 +141,20 @@ final class InboxReadController extends AbstractOrderedCollectionController
         foreach ($objects as $object) {
             $externalId = null;
 
-            if (is_string($object) && isset($linkedObjects[$object])) {
-                $externalId = $object;
-            } elseif ($object instanceof LinkDto) {
+            if (is_string($object) || $object instanceof LinkDto) {
                 $externalId = (string) $object;
-            } else {
-                $resolvedObjects[] = $object;
-                continue;
-            }
 
-            $resolvedObject = $this->activityPubDataToDtoPopulator->populate(
-                $linkedObjects[$externalId]->getObject()
-            );
+                if (null === $externalId || !isset($linkedObjects[$externalId])) {
+                    $resolvedObjects[] = $object;
+                    continue;
+                }
+
+                $resolvedObject = $this->activityPubDataToDtoPopulator->populate(
+                    $linkedObjects[$externalId]->getObject()
+                );
+            } else {
+                $resolvedObject = $object;
+            }
 
             $resolvedObject->object = $this->resolveLinkedObjects(
                 $linkedObjects,

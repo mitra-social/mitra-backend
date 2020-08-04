@@ -173,15 +173,14 @@ final class InboxReadControllerTest extends IntegrationTestCase
         $inReplyToDto->object->content = 'This is the initial note';
 
         $this->createContent($inReplyToDto, null);
-
-        $dtoContent = 'Foo bar baz';
+        $dtoContent = 'This is the reply';
         
         $dto = new CreateDto();
         $dto->id = sprintf('https://example.com/user/%s/post/123456', $actorUsername);
         $dto->actor = $externalUser->getExternalId();
         $dto->object = new NoteDto();
         $dto->object->content = $dtoContent;
-        $dto->inReplyTo = $inReplyToDto->id;
+        $dto->object->inReplyTo = $inReplyToDto->id;
         $dto->to = [
             $toUserExternalId,
         ];
@@ -220,6 +219,14 @@ final class InboxReadControllerTest extends IntegrationTestCase
                     'object' => [
                         'type' => 'Note',
                         'content' => $dtoContent,
+                        'inReplyTo' => [
+                            'type' => 'Create',
+                            'object' => [
+                                'type' => 'Note',
+                                'content' => 'This is the initial note',
+                            ],
+                            'id' => $inReplyToDto->id,
+                        ],
                     ],
                     'actor' => [
                         'id' => 'https://example.com/user/bob',
@@ -233,14 +240,6 @@ final class InboxReadControllerTest extends IntegrationTestCase
                     'id' => $dto->id,
                     'to' => [
                         $toUserExternalId,
-                    ],
-                    'inReplyTo' => [
-                        'type' => 'Create',
-                        'object' => [
-                            'type' => 'Note',
-                            'content' => 'This is the initial note',
-                        ],
-                        'id' => $inReplyToDto->id,
                     ],
                 ],
             ],
