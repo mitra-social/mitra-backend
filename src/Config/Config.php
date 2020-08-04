@@ -138,6 +138,16 @@ final class Config implements ConfigInterface
     /**
      * @var string
      */
+    private const ENV_INSTANCE_PUBLIC_KEY = 'INSTANCE_PUBLIC_KEY';
+
+    /**
+     * @var string
+     */
+    private const ENV_INSTANCE_PRIVATE_KEY = 'INSTANCE_PRIVATE_KEY';
+
+    /**
+     * @var string
+     */
     private $rootDir;
 
     /**
@@ -204,6 +214,10 @@ final class Config implements ConfigInterface
                 sprintf('%s/application.log', $dirs['logs']) => Logger::INFO,
             ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
+            'instance' => [
+                'publicKey' => $this->env->get(self::ENV_INSTANCE_PUBLIC_KEY),
+                'privateKey' => $this->env->get(self::ENV_INSTANCE_PRIVATE_KEY),
+            ],
         ];
 
         if ('prod' === $appEnv) {
