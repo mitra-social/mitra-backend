@@ -129,6 +129,7 @@ OASuU0ph+eTooLukP2mjre/mHSR4/k4F97yRsMiR0lC1zn9a4dAvIlULRNkhh5yj
 8+m1Wjsdrj07n2usnVBvcH48DKwtYvdR2lCvh+RRu7+L33qIC39VvgmLkseCn6/g
 RnGILYgxVo3dz1UpMP0J05k=
 -----END PRIVATE KEY-----
+
 KEY;
 
             $publicKey = <<<KEY
@@ -141,6 +142,7 @@ LByg20rojoJBpGffBUuyIn141Qy9wiUIUaCPFIvVgEMsrcUK0Yf5EVzkew4xH4eZ
 3Dg3edhVu2lqo7YIWYQFgst03bRNNGZ7DIQ1XxRv7TxlD/kE+LVAdiEzGDYQps4o
 cQIDAQAB
 -----END PUBLIC KEY-----
+
 KEY;
 
             $user = new InternalUser(
