@@ -4,26 +4,27 @@ declare(strict_types=1);
 
 namespace Mitra\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Mitra\Entity\User\ExternalUser;
 
 final class ExternalUserRepository
 {
     /**
-     * @var EntityRepository
+     * @var EntityManagerInterface
      */
-    private $entityRepository;
+    private $entityManager;
 
-    public function __construct(EntityRepository $entityRepository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->entityRepository = $entityRepository;
+        $this->entityManager = $entityManager;
     }
 
     public function findOneByExternalId(string $externalId): ?ExternalUser
     {
-        $qb = $this->entityRepository->createQueryBuilder('u');
+        $qb = $this->entityManager->createQueryBuilder();
         $qb
             ->select('u', 'a')
+            ->from(ExternalUser::class, 'u')
             ->leftJoin('u.actor', 'a')
             ->where('u.externalId = :externalId')
             ->setParameter('externalId', $externalId);

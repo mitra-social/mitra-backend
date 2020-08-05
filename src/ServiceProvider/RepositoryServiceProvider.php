@@ -35,13 +35,13 @@ final class RepositoryServiceProvider implements ServiceProviderInterface
     {
         $container[InternalUserRepository::class] = static function (Container $container): InternalUserRepository {
             return new InternalUserRepository(
-                $container[EntityManagerInterface::class]->getRepository(InternalUser::class)
+                $container[EntityManagerInterface::class]
             );
         };
 
         $container[ExternalUserRepository::class] = static function (Container $container): ExternalUserRepository {
             return new ExternalUserRepository(
-                $container[EntityManagerInterface::class]->getRepository(ExternalUser::class)
+                $container[EntityManagerInterface::class]
             );
         };
 
