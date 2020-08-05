@@ -120,7 +120,6 @@ final class DereferenceCommandHandler
 
                     $dereferencedObject = $this->activityStreamContentFactory->createFromDto($objectDto);
                     $this->entityManager->persist($dereferencedObject);
-
                 }
 
                 $entity->addLinkedObject($dereferencedObject);

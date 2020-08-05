@@ -172,10 +172,11 @@ final class ActivityPubClient implements ActivityPubClientInterface
                 $request,
                 $response,
                 sprintf(
-                    'Request `%s %s` to remote server was answered with HTTP status code `%s`',
+                    'Request `%s %s` to remote server was answered with HTTP status code `%s` (body: %s)',
                     $request->getMethod(),
                     (string) $request->getUri(),
-                    $response->getStatusCode()
+                    $response->getStatusCode(),
+                    (string) $response->getBody()
                 ),
                 2
             );
