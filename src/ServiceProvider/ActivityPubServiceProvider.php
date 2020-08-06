@@ -12,6 +12,10 @@ use Cache\Adapter\PHPArray\ArrayCachePool;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\ActivityPub\InternalUserRequestSignerFactory;
+use Mitra\ActivityPub\InternalUserRequestSignerFactoryInterface;
+use Mitra\ActivityPub\RequestSigner;
+use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
@@ -88,7 +92,7 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
                 $container[ActivityPubClientInterface::class],
                 new ArrayCachePool(),
                 $container[HashGeneratorInterface::class],
-                $container[UriGenerator::class]
+                $container[RequestSignerInterface::class]
             );
         };
 
@@ -109,6 +113,16 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             $user->setKeyPair($container['instance']['publicKey'], $container['instance']['privateKey']);
 
             return $user;
+        };
+
+        $container[RequestSignerInterface::class] = static function (
+            Container $container
+        ): RequestSignerInterface {
+            return new RequestSigner(
+                $container[UriGenerator::class],
+                $container['instance']['privateKey'],
+                $container[LoggerInterface::class]
+            );
         };
     }
 }

@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\CommandBus\CommandBusInterface;
@@ -280,8 +281,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
                 $container[ActivityStreamContentFactoryInterface::class],
                 $container[ActivityStreamContentRepositoryInterface::class],
                 $container[RemoteObjectResolver::class],
-                $container[EventEmitterInterface::class],
-                $container['instanceUser']
+                $container[EventEmitterInterface::class]
             );
         };
     }

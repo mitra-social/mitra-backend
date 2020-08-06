@@ -7,6 +7,7 @@ namespace Mitra\ActivityPub\Resolver;
 use Mitra\ActivityPub\Client\ActivityPubClientException;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\User\InternalUser;
@@ -34,20 +35,20 @@ final class RemoteObjectResolver
     private $hashGenerator;
 
     /**
-     * @var UriGenerator
+     * @var RequestSignerInterface
      */
-    private $uriGenerator;
+    private $requestSigner;
 
     public function __construct(
         ActivityPubClientInterface $activityPubClient,
         CacheInterface $cache,
         HashGeneratorInterface $hashGenerator,
-        UriGenerator $uriGenerator
+        RequestSignerInterface $requestSigner
     ) {
         $this->activityPubClient = $activityPubClient;
         $this->cache = $cache;
         $this->hashGenerator = $hashGenerator;
-        $this->uriGenerator = $uriGenerator;
+        $this->requestSigner = $requestSigner;
     }
 
     /**
@@ -110,18 +111,7 @@ final class RemoteObjectResolver
     private function fetchRemoteValueByUrl(string $url, ?InternalUser $userContext): ?ObjectDto
     {
         $request = $this->activityPubClient->createRequest('GET', $url);
-
-        if (null !== $userContext) {
-            $userPublicKeyUrl = $this->uriGenerator->fullUrlFor('user-read', [
-                    'username' => $userContext->getUsername(),
-                ]) . '#main-key';
-
-            $request = $this->activityPubClient->signRequest(
-                $request,
-                $userContext->getPrivateKey(),
-                $userPublicKeyUrl
-            );
-        }
+        $request = $this->requestSigner->signRequest($request, $userContext);
 
         try {
             return $this->activityPubClient->sendRequest($request)->getReceivedObject();

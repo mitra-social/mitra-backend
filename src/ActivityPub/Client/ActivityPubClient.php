@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Mitra\ActivityPub\Client;
 
-use HttpSignatures\Algorithm;
-use HttpSignatures\HeaderList;
-use HttpSignatures\Key;
-use HttpSignatures\Signer;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Normalization\NormalizerInterface;
@@ -109,27 +105,6 @@ final class ActivityPubClient implements ActivityPubClientInterface
                 );
             }
         }
-
-        return $request;
-    }
-
-    public function signRequest(RequestInterface $request, string $privateKey, string $publicKeyUrl): RequestInterface
-    {
-        if (!$request->hasHeader('Host')) {
-            $request = $request->withHeader('Host', $request->getUri()->getHost());
-        }
-
-        if (!$request->hasHeader('Date')) {
-            $request = $request->withHeader('Date', (new \DateTimeImmutable())->format(\DateTime::RFC7231));
-        }
-
-        $request = (new Signer(
-            new Key($publicKeyUrl, $privateKey),
-            Algorithm::create('rsa-sha256'),
-            new HeaderList(['(request-target)', 'Host', 'Date', 'Accept'])
-        ))->sign($request);
-
-        $this->logger->info('Sign request: ' . $request->getHeaderLine('Signature'));
 
         return $request;
     }

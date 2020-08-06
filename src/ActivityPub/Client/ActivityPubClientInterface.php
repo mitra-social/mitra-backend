@@ -10,8 +10,6 @@ interface ActivityPubClientInterface
 {
     public function createRequest(string $method, string $url, ?object $content = null): RequestInterface;
 
-    public function signRequest(RequestInterface $request, string $privateKey, string $publicKeyUrl): RequestInterface;
-
     /**
      * @param RequestInterface $request
      * @return ActivityPubClientResponse
