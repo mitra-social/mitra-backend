@@ -161,11 +161,12 @@ class ActivityStreamContent
 
     public function __toString()
     {
-        return json_encode([
-            'id' => $this->id,
-            'externalId' => $this->externalId,
-            'type' => $this->type,
-            'linkedObjectCount' => $this->linkedObjects->count(),
-        ]);
+        return sprintf(
+            'id:%s, externalId:%s, type:%s, linkObjectCount:%d',
+            $this->id,
+            $this->externalId,
+            $this->type,
+            $this->linkedObjects->count()
+        );
     }
 }

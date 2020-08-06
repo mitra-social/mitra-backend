@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mitra\Controller\User;
+namespace Mitra\Controller\System;
 
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -52,22 +52,28 @@ final class InstanceUserReadController
 
         $instanceUserUrl = $this->uriGenerator->fullUrlFor('instance-user-read');
 
-        $response->getBody()->write(json_encode([
-            '@context' => [
-                'https://www.w3.org/ns/activitystreams',
-                'https://w3id.org/security/v1',
-            ],
-            'type' => 'Application',
-            'id' => $instanceUserUrl,
-            'url' => $instanceUserUrl,
-            'inbox' => $instanceUserUrl . "/inbox",
-            'outbox' => $instanceUserUrl . "/outbox",
-            'publicKey' => [
-                'id' => $instanceUserUrl . "#main-key",
-                'owner' => $instanceUserUrl,
-                'publicKeyPem' => $this->instanceUser->getPublicKey(),
-            ]
-        ]));
+        try {
+            $content = json_encode([
+                '@context' => [
+                    'https://www.w3.org/ns/activitystreams',
+                    'https://w3id.org/security/v1',
+                ],
+                'type' => 'Application',
+                'id' => $instanceUserUrl,
+                'url' => $instanceUserUrl,
+                'inbox' => $instanceUserUrl . "/inbox",
+                'outbox' => $instanceUserUrl . "/outbox",
+                'publicKey' => [
+                    'id' => $instanceUserUrl . "#main-key",
+                    'owner' => $instanceUserUrl,
+                    'publicKeyPem' => $this->instanceUser->getPublicKey(),
+                ]
+            ], JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $content = $e->getMessage();
+        }
+
+        $response->getBody()->write($content);
 
         return $response;
     }

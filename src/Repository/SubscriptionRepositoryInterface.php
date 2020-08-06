@@ -13,6 +13,12 @@ interface SubscriptionRepositoryInterface
 
     public function getFollowingCountForActor(Actor $actor): int;
 
+    /**
+     * @param Actor $actor
+     * @param int|null $offset
+     * @param int|null $limit
+     * @return array<Subscription>
+     */
     public function getFollowersOfActor(Actor $actor, ?int $offset, ?int $limit): array;
 
     public function getFollowerCountForActor(Actor $actor): int;

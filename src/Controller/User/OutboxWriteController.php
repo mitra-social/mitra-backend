@@ -13,7 +13,7 @@ use Mitra\CommandBus\CommandBusInterface;
 use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\DtoToEntityMapper;
-use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
+use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivityDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
@@ -127,7 +127,7 @@ final class OutboxWriteController
             return $this->responseFactory->createResponseFromViolationList($violationList, $request, $accept);
         }
 
-        if ($objectDto instanceof AbstractActivity) {
+        if ($objectDto instanceof AbstractActivityDto) {
             $this->commandBus->handle(new AssignActorCommand($outboxUser->getActor(), $objectDto));
         }
 

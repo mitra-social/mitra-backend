@@ -93,10 +93,11 @@ class InternalUser extends AbstractUser implements TimestampableInterface
 
     public function __toString()
     {
-        return json_encode([
-            'id' => $this->id,
-            'username' => $this->username,
-            'email' => $this->email,
-        ]);
+        return sprintf(
+            'id:%s, username:%s, email:%s',
+            $this->id,
+            $this->username,
+            $this->email,
+        );
     }
 }

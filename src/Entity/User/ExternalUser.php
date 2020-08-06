@@ -156,9 +156,10 @@ class ExternalUser extends AbstractUser
 
     public function __toString()
     {
-        return json_encode([
-            'id' => $this->id,
-            'externalId' => $this->externalId,
-        ]);
+        return sprintf(
+            'id:%s, externalId:%s',
+            $this->id,
+            $this->externalId
+        );
     }
 }

@@ -72,9 +72,10 @@ class Actor
 
     public function __toString()
     {
-        return json_encode([
-            'id' => $this->user->getId(),
-            'name' => $this->name,
-        ]);
+        return sprintf(
+            'id:%s, name:%s',
+            $this->user->getId(),
+            $this->name
+        );
     }
 }

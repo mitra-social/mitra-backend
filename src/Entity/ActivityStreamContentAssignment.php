@@ -51,12 +51,13 @@ class ActivityStreamContentAssignment
     {
         $user = $this->actor->getUser();
 
-        return json_encode([
-            'id' => $this->id,
-            'actorId' => $this->actor->getUser()->getId(),
-            'contentId' => $this->content->getId(),
-            'externalActorId' => $user instanceof ExternalUser ? $user->getExternalId() : null,
-            'externalContentId' => $this->content->getExternalId(),
-        ]);
+        return sprintf(
+            'id:%s, actorId:%s, contentId:%s, externalActorId:%s, externalContentId:%s',
+            $this->id,
+            $this->actor->getUser()->getId(),
+            $this->content->getId(),
+            $user instanceof ExternalUser ? $user->getExternalId() : null,
+            $this->content->getExternalId(),
+        );
     }
 }

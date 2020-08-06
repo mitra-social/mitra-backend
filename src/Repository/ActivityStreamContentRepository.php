@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Repository;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
@@ -33,10 +34,10 @@ final class ActivityStreamContentRepository implements ActivityStreamContentRepo
         $query = $this->entityManager->createQuery(sprintf(
             'SELECT c FROM %s c WHERE c.externalIdHash = :externalIdHash AND c.externalId = :externalId',
             ActivityStreamContent::class
-        ))->setParameters([
+        ))->setParameters(new ArrayCollection([
             'externalIdHash' => $this->hashGenerator->hash($externalId),
             'externalId' => $externalId,
-        ]);
+        ]));
 
         /** @var ActivityStreamContent|null $content */
         $content = $query = $query->getOneOrNullResult();

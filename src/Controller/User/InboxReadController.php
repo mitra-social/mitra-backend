@@ -8,7 +8,8 @@ use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
-use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
+use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivityDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
@@ -86,20 +87,10 @@ final class InboxReadController extends AbstractOrderedCollectionController
             $content = $item->getContent();
             $object =  $content->getObject();
 
-            /** @var AbstractActivity $dto */
+            /** @var ObjectDto|LinkDto $dto */
             $dto = $this->activityPubDataToDtoPopulator->populate($object);
 
             $itemContent = $item->getContent();
-
-            // Inline author infos
-            $author = $itemContent->getAttributedTo()->getUser();
-            $dtoClass = $author->getActor() instanceof Person ? PersonDto::class : OrganizationDto::class;
-            /** @var ObjectDto $actorDto */
-            $actorDto = $this->entityToDtoMapper->map(
-                $author,
-                $dtoClass
-            );
-            $dto->actor = $actorDto;
 
             // TODO: Inline object infos
             $linkedObjects = [];
@@ -109,12 +100,27 @@ final class InboxReadController extends AbstractOrderedCollectionController
                 $linkedObjects[$linkedObject->getExternalId()] = $linkedObject;
             }
 
-            $dto->object = $this->resolveLinkedObjects($linkedObjects, $dto->object);
-            $dto->inReplyTo = $this->resolveLinkedObjects($linkedObjects, $dto->inReplyTo);
+            if ($dto instanceof ObjectDto) {
+                $dto->inReplyTo = $this->resolveLinkedObjects($linkedObjects, $dto->inReplyTo);
+            }
 
-            // Don't leak anonymous recipients
-            $dto->bto = null;
-            $dto->bcc = null;
+            if ($dto instanceof ActivityDto) {
+                $dto->object = $this->resolveLinkedObjects($linkedObjects, $dto->object);
+
+                // Don't leak anonymous recipients
+                $dto->bto = null;
+                $dto->bcc = null;
+
+                // Inline author infos
+                $author = $itemContent->getAttributedTo()->getUser();
+                $dtoClass = $author->getActor() instanceof Person ? PersonDto::class : OrganizationDto::class;
+                /** @var ObjectDto $actorDto */
+                $actorDto = $this->entityToDtoMapper->map(
+                    $author,
+                    $dtoClass
+                );
+                $dto->actor = $actorDto;
+            }
 
             $dtoItems[]  = $dto;
         }
@@ -129,7 +135,7 @@ final class InboxReadController extends AbstractOrderedCollectionController
      * @return null|string|ObjectDto|LinkDto|array<string|ObjectDto|LinkDto>
      * @throws \Mitra\Dto\DataToDtoPopulatorException
      */
-    protected function resolveLinkedObjects(array $linkedObjects, $objects, int $level = 0)
+    private function resolveLinkedObjects(array $linkedObjects, $objects, int $level = 0)
     {
         if (null === $objects || $level > 1) {
             return $objects;
@@ -144,11 +150,12 @@ final class InboxReadController extends AbstractOrderedCollectionController
             if (is_string($object) || $object instanceof LinkDto) {
                 $externalId = (string) $object;
 
-                if (null === $externalId || !isset($linkedObjects[$externalId])) {
+                if (!isset($linkedObjects[$externalId])) {
                     $resolvedObjects[] = $object;
                     continue;
                 }
 
+                /** @var ObjectDto|LinkDto $resolvedObject */
                 $resolvedObject = $this->activityPubDataToDtoPopulator->populate(
                     $linkedObjects[$externalId]->getObject()
                 );
@@ -156,17 +163,21 @@ final class InboxReadController extends AbstractOrderedCollectionController
                 $resolvedObject = $object;
             }
 
-            $resolvedObject->object = $this->resolveLinkedObjects(
-                $linkedObjects,
-                $resolvedObject->object,
-                $level + 1
-            );
+            if ($resolvedObject instanceof ActivityDto) {
+                $resolvedObject->object = $this->resolveLinkedObjects(
+                    $linkedObjects,
+                    $resolvedObject->object,
+                    $level + 1
+                );
+            }
 
-            $resolvedObject->inReplyTo = $this->resolveLinkedObjects(
-                $linkedObjects,
-                $resolvedObject->inReplyTo,
-                $level + 1
-            );
+            if ($resolvedObject instanceof ObjectDto) {
+                $resolvedObject->inReplyTo = $this->resolveLinkedObjects(
+                    $linkedObjects,
+                    $resolvedObject->inReplyTo,
+                    $level + 1
+                );
+            }
 
             $resolvedObjects[] = $resolvedObject;
         }

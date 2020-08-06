@@ -14,6 +14,12 @@ final class RemoteObjectResolverRequestException extends RemoteObjectResolverExc
      */
     private $request;
 
+    /**
+     * @param RequestInterface $request
+     * @param string $message
+     * @param int $code
+     * @param Throwable|null $previous
+     */
     public function __construct(RequestInterface $request, $message = "", $code = 0, Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);

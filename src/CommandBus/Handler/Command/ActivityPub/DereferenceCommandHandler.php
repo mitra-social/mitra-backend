@@ -96,9 +96,11 @@ final class DereferenceCommandHandler
         $objects = is_array($objects) ? $objects : [$objects];
 
         $commandActor = $command->getActor();
+        $userContext = null;
 
-        /** @var InternalUser|null $userContext */
-        $userContext = $commandActor instanceof InternalUser ? $commandActor->getUser() : null;
+        if (null !== $commandActor && $commandActor->getUser() instanceof InternalUser) {
+            $userContext = $commandActor->getUser();
+        }
 
         foreach ($objects as $object) {
             $objectDto = null;
