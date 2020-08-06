@@ -34,10 +34,9 @@ final class ActivityStreamContentRepository implements ActivityStreamContentRepo
         $query = $this->entityManager->createQuery(sprintf(
             'SELECT c FROM %s c WHERE c.externalIdHash = :externalIdHash AND c.externalId = :externalId',
             ActivityStreamContent::class
-        ))->setParameters(new ArrayCollection([
-            'externalIdHash' => $this->hashGenerator->hash($externalId),
-            'externalId' => $externalId,
-        ]));
+        ))
+            ->setParameter('externalIdHash', $this->hashGenerator->hash($externalId))
+            ->setParameter('externalId', $externalId);
 
         /** @var ActivityStreamContent|null $content */
         $content = $query = $query->getOneOrNullResult();

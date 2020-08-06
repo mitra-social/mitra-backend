@@ -121,7 +121,8 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             return new RequestSigner(
                 $container[UriGenerator::class],
                 $container['instance']['privateKey'],
-                $container[LoggerInterface::class]
+                $container[LoggerInterface::class],
+                ['Host', 'Date', 'Accept']
             );
         };
     }

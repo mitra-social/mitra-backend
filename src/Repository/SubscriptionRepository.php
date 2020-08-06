@@ -67,7 +67,7 @@ final class SubscriptionRepository implements SubscriptionRepositoryInterface
             ->select('s', 'a')
             ->innerJoin('s.subscribedActor', 'a')
             ->where('s.subscribingActor = :actor')
-            ->setParameters(['actor' => $actor]);
+            ->setParameter('actor', $actor);
 
         if (null !== $offset) {
             $qb->setFirstResult($offset);
@@ -94,7 +94,7 @@ final class SubscriptionRepository implements SubscriptionRepositoryInterface
             ->select('s', 'a')
             ->innerJoin('s.subscribingActor', 'a')
             ->where('s.subscribedActor = :actor')
-            ->setParameters(['actor' => $actor]);
+            ->setParameter('actor', $actor);
 
         if (null !== $offset) {
             $qb->setFirstResult($offset);

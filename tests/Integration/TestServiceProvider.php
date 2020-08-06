@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration;
 
-use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\RequestSigner;
+use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\Slim\IdGeneratorInterface;
-use Mitra\Tests\Helper\ActivityPub\ActivityPubTestClient;
+use Mitra\Slim\UriGenerator;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Helper\Http\MockClient;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Log\LoggerInterface;
 
 final class TestServiceProvider implements ServiceProviderInterface
 {
@@ -20,13 +22,17 @@ final class TestServiceProvider implements ServiceProviderInterface
             return new MockClient();
         };
 
-        $originalFactory = $container->raw(ActivityPubClientInterface::class);
-
-        $container[ActivityPubClientInterface::class] = function (Container $container) use ($originalFactory) {
-            return new ActivityPubTestClient($originalFactory($container));
+        $container[RequestSignerInterface::class] = static function (
+            Container $container
+        ): RequestSignerInterface {
+            return new RequestSigner(
+                $container[UriGenerator::class],
+                $container['instance']['privateKey'],
+                $container[LoggerInterface::class],
+                ['Host', 'Accept']
+            );
         };
 
         $container[IdGeneratorInterface::class] =  new ReflectedIdGenerator();
-
     }
 }
