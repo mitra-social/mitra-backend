@@ -9,7 +9,6 @@ use Mitra\Entity\User\AbstractUser;
 
 class Actor
 {
-
     /**
      * An optional display name of the actor
      * @var null|string
