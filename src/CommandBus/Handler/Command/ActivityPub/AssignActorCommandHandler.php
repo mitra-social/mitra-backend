@@ -6,17 +6,17 @@ namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\Entity\User\InternalUser;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Webmozart\Assert\Assert;
 
 final class AssignActorCommandHandler
 {
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
-    public function __construct(UriGenerator $uriGenerator)
+    public function __construct(UriGeneratorInterface $uriGenerator)
     {
         $this->uriGenerator = $uriGenerator;
     }

@@ -9,6 +9,7 @@ use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Entity\Media;
 use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\ExternalUserRepository;
+use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
@@ -18,7 +19,6 @@ use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
-use Mitra\Slim\UriGenerator;
 use Mitra\Tests\Integration\ClientMockTrait;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
@@ -50,8 +50,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
     public function testProcessesIncomingContentSuccessfully(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $ccUser = $this->createInternalUser();
@@ -115,8 +115,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
     public function testContentAssignmentSuccessfulForUserInSubCollection(): void
     {
         self::markTestIncomplete('First implement proper recipient resolving');
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $externalUser = $this->createExternalUser();
@@ -212,8 +212,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
     public function testDoNotHandleAlreadyHandledContentTwice(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $ccUser = $this->createInternalUser();
@@ -281,8 +281,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
     public function testUpdateExternalActorOnUpdateContainingAnActorObject(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $toUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser->getUsername()]);

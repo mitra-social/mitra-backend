@@ -10,7 +10,7 @@ use HttpSignatures\Key;
 use HttpSignatures\KeyException;
 use HttpSignatures\Signer;
 use Mitra\Entity\User\InternalUser;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 
@@ -27,7 +27,7 @@ final class RequestSigner implements RequestSignerInterface
     private $instanceKey;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
@@ -37,14 +37,13 @@ final class RequestSigner implements RequestSignerInterface
     private $headersToSign;
 
     /**
-     * RequestSigner constructor.
-     * @param UriGenerator $uriGenerator
+     * @param UriGeneratorInterface $uriGenerator
      * @param string $instancePrivateKey
      * @param LoggerInterface $logger
      * @param array<string> $headersToSign
      */
     public function __construct(
-        UriGenerator $uriGenerator,
+        UriGeneratorInterface $uriGenerator,
         string $instancePrivateKey,
         LoggerInterface $logger,
         array $headersToSign

@@ -42,7 +42,7 @@ use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepositoryInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
@@ -159,7 +159,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
         $container[AssignActorCommandHandler::class] = static function (
             Container $container
         ): AssignActorCommandHandler {
-            return new AssignActorCommandHandler($container[UriGenerator::class]);
+            return new AssignActorCommandHandler($container[UriGeneratorInterface::class]);
         };
 
         $container[SendObjectToRecipientsCommandHandler::class] = static function (
@@ -169,7 +169,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
                 $container[ActivityPubClientInterface::class],
                 $container[RequestSignerInterface::class],
                 $container[ExternalUserResolver::class],
-                $container[UriGenerator::class],
+                $container[UriGeneratorInterface::class],
                 $container[LoggerInterface::class]
             );
         };

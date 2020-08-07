@@ -8,6 +8,7 @@ use Mitra\ActivityPub\HashGenerator;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Slim\UuidGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -54,7 +55,7 @@ final class SlimServiceProvider implements ServiceProviderInterface
             return new RouteResolver($container[RouteCollector::class]);
         };
 
-        $container[UriGenerator::class] = static function (Container $container): UriGenerator {
+        $container[UriGeneratorInterface::class] = static function (Container $container): UriGeneratorInterface {
             /** @var UriFactoryInterface $uriFactory */
             $uriFactory = $container[UriFactoryInterface::class];
             /** @var RouteCollectorInterface $routeCollector */

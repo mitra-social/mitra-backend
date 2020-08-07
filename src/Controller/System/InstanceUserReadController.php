@@ -7,7 +7,7 @@ namespace Mitra\Controller\System;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -24,7 +24,7 @@ final class InstanceUserReadController
     private $encoder;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
@@ -36,7 +36,7 @@ final class InstanceUserReadController
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
-        UriGenerator $uriGenerator,
+        UriGeneratorInterface $uriGenerator,
         InternalUser $instanceUser
     ) {
         $this->responseFactory = $responseFactory;

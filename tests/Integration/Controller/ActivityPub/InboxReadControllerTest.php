@@ -6,6 +6,7 @@ namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
 use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Slim\IdGeneratorInterface;
+use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\Entity\User\InternalUser;
@@ -13,7 +14,6 @@ use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Tests\Integration\CreateContentTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
-use Mitra\Slim\UriGenerator;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -145,8 +145,8 @@ final class InboxReadControllerTest extends IntegrationTestCase
 
     public function testReturnsInboxItemsWithBtoAndBccStrippedAndInlinedObjects(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         /** @var ReflectedIdGenerator $idGenerator */
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
@@ -263,8 +263,8 @@ final class InboxReadControllerTest extends IntegrationTestCase
 
     public function testReturnsFilteredInboxItems(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $actorUsername1 = sprintf('bob.%s', uniqid());
         $actorUsername2 = sprintf('alice.%s', uniqid());

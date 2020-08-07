@@ -7,7 +7,7 @@ namespace Mitra\Slim;
 use Psr\Http\Message\UriInterface;
 use Slim\Interfaces\RouteParserInterface;
 
-final class UriGenerator
+final class UriGenerator implements UriGeneratorInterface
 {
     /**
      * @var UriInterface

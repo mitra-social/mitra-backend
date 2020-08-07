@@ -11,7 +11,6 @@ use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\User\InternalUser;
-use Mitra\Slim\UriGenerator;
 use Psr\SimpleCache\CacheInterface;
 
 final class RemoteObjectResolver
