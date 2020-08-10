@@ -7,7 +7,7 @@ namespace Mitra\Tests\Integration;
 use Mitra\ActivityPub\RequestSigner;
 use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\Slim\IdGeneratorInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Helper\Http\MockClient;
 use Pimple\Container;
@@ -26,7 +26,7 @@ final class TestServiceProvider implements ServiceProviderInterface
             Container $container
         ): RequestSignerInterface {
             return new RequestSigner(
-                $container[UriGenerator::class],
+                $container[UriGeneratorInterface::class],
                 $container['instance']['privateKey'],
                 $container[LoggerInterface::class],
                 ['Host', 'Accept']

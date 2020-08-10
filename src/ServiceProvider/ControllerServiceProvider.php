@@ -40,7 +40,7 @@ use Mitra\Repository\SubscriptionRepositoryInterface;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\IdGeneratorInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Validator\ValidatorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -119,7 +119,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[FilterFactoryInterface::class],
                 $container[InternalUserRepository::class],
                 $container[ActivityStreamContentAssignmentRepositoryInterface::class],
-                $container[UriGenerator::class],
+                $container[UriGeneratorInterface::class],
                 $container[EntityToDtoMapper::class],
                 $container[ActivityPubDtoPopulator::class]
             );
@@ -135,7 +135,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[DecoderInterface::class],
                 $container[DtoToEntityMapper::class],
                 $container[InternalUserRepository::class],
-                $container[UriGenerator::class],
+                $container[UriGeneratorInterface::class],
                 $container[IdGeneratorInterface::class]
             );
         };
@@ -145,7 +145,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[InternalUserRepository::class],
-                $container[UriGenerator::class]
+                $container[UriGeneratorInterface::class]
             );
         };
 
@@ -170,7 +170,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new FollowingListController(
                 $container[SubscriptionRepositoryInterface::class],
                 $container[InternalUserRepository::class],
-                $container[UriGenerator::class],
+                $container[UriGeneratorInterface::class],
                 $container[ResponseFactoryInterface::class],
                 $container[FilterFactoryInterface::class],
                 $container[EntityToDtoMapper::class]
@@ -191,7 +191,7 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             return new InstanceUserReadController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
-                $container[UriGenerator::class],
+                $container[UriGeneratorInterface::class],
                 $container['instanceUser']
             );
         };

@@ -11,17 +11,16 @@ use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
-use Mitra\Slim\UriGenerator;
-use Psr\Http\Message\ServerRequestInterface;
+use Mitra\Slim\UriGeneratorInterface;
 
 final class PersonDtoMapping implements EntityToDtoMappingInterface
 {
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
-    public function __construct(UriGenerator $uriGenerator)
+    public function __construct(UriGeneratorInterface $uriGenerator)
     {
         $this->uriGenerator = $uriGenerator;
     }

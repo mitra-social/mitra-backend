@@ -20,8 +20,7 @@ use Mitra\Filtering\FilterFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
-use Mitra\Serialization\Encode\EncoderInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 
 final class FollowingListController extends AbstractCollectionController
 {
@@ -31,7 +30,7 @@ final class FollowingListController extends AbstractCollectionController
     private $subscriptionRepository;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
@@ -43,7 +42,7 @@ final class FollowingListController extends AbstractCollectionController
     public function __construct(
         SubscriptionRepository $subscriptionRepository,
         InternalUserRepository $internalUserRepository,
-        UriGenerator $uriGenerator,
+        UriGeneratorInterface $uriGenerator,
         ResponseFactoryInterface $responseFactory,
         FilterFactoryInterface $filterFactory,
         EntityToDtoMapper $entityToDtoMapper

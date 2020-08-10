@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use Doctrine\Common\Util\Debug;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
@@ -23,11 +22,10 @@ use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\IdGeneratorInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Ramsey\Uuid\Uuid;
 
 final class OutboxWriteController
 {
@@ -73,7 +71,7 @@ final class OutboxWriteController
     private $internalUserRepository;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
@@ -91,7 +89,7 @@ final class OutboxWriteController
         DecoderInterface $decoder,
         DtoToEntityMapper $dtoToEntityMapper,
         InternalUserRepository $internalUserRepository,
-        UriGenerator $uriGenerator,
+        UriGeneratorInterface $uriGenerator,
         IdGeneratorInterface $idGenerator
     ) {
         $this->responseFactory = $responseFactory;

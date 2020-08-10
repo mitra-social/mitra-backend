@@ -10,10 +10,8 @@ use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolverException;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
-use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
-use Mitra\Entity\User\ExternalUser;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Psr\Log\LoggerInterface;
 
 final class SendObjectToRecipientsCommandHandler
@@ -34,7 +32,7 @@ final class SendObjectToRecipientsCommandHandler
     private $externalUserResolver;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
@@ -47,7 +45,7 @@ final class SendObjectToRecipientsCommandHandler
         ActivityPubClientInterface $activityPubClient,
         RequestSignerInterface $requestSigner,
         ExternalUserResolver $externalUserResolver,
-        UriGenerator $uriGenerator,
+        UriGeneratorInterface $uriGenerator,
         LoggerInterface $logger
     ) {
         $this->activityPubClient = $activityPubClient;

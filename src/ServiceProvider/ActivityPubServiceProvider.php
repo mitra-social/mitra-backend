@@ -12,8 +12,6 @@ use Cache\Adapter\PHPArray\ArrayCachePool;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
-use Mitra\ActivityPub\InternalUserRequestSignerFactory;
-use Mitra\ActivityPub\InternalUserRequestSignerFactoryInterface;
 use Mitra\ActivityPub\RequestSigner;
 use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
@@ -25,7 +23,7 @@ use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -119,7 +117,7 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             Container $container
         ): RequestSignerInterface {
             return new RequestSigner(
-                $container[UriGenerator::class],
+                $container[UriGeneratorInterface::class],
                 $container['instance']['privateKey'],
                 $container[LoggerInterface::class],
                 ['Host', 'Date', 'Accept']
