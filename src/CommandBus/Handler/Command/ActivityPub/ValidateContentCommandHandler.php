@@ -39,7 +39,12 @@ final class ValidateContentCommandHandler
         $actor = $command->getActor();
 
         if ($this->isValid($dto, $entity)) {
-            $this->eventEmitter->raise(new ContentAcceptedEvent($entity, $dto, $actor));
+            $this->eventEmitter->raise(new ContentAcceptedEvent(
+                $entity,
+                $dto,
+                $actor,
+                $command->shouldDereferenceObjects()
+            ));
         }
     }
 
@@ -48,6 +53,10 @@ final class ValidateContentCommandHandler
         // Only accept activities
         if (!$dto instanceof ActivityDto) {
             return false;
+        }
+
+        if (null === $entity->getAttributedTo()) {
+            return true;
         }
 
         // Only accept content from an user who is actually followed by any user on our server

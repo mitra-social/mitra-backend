@@ -10,6 +10,7 @@ use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToActorComma
 use Mitra\CommandBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\CommandBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
+use Mitra\CommandBus\Command\ActivityPub\DereferenceCommand;
 use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\Command\ActivityPub\PersistActivityStreamContentCommand;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
@@ -22,11 +23,13 @@ use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentAttributedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
 use Mitra\CommandBus\Event\ActivityPub\ContentAcceptedEvent;
+use Mitra\CommandBus\Event\ActivityPub\DereferenceEvent;
 use Mitra\CommandBus\Event\ActivityPub\ExternalUserUpdatedEvent;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
+use Mitra\CommandBus\Handler\Command\ActivityPub\DereferenceCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
 use Mitra\CommandBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHandler;
@@ -39,10 +42,12 @@ use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEv
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ContentAcceptedEventHandler;
+use Mitra\CommandBus\Handler\Event\ActivityPub\DereferenceEventHandler;
 use Mitra\CommandBus\Handler\Event\ActivityPub\ExternalUserUpdatedEventHandler;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\AnnounceDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
@@ -133,6 +138,16 @@ final class Config implements ConfigInterface
     /**
      * @var string
      */
+    private const ENV_INSTANCE_PUBLIC_KEY = 'INSTANCE_PUBLIC_KEY';
+
+    /**
+     * @var string
+     */
+    private const ENV_INSTANCE_PRIVATE_KEY = 'INSTANCE_PRIVATE_KEY';
+
+    /**
+     * @var string
+     */
     private $rootDir;
 
     /**
@@ -199,6 +214,10 @@ final class Config implements ConfigInterface
                 sprintf('%s/application.log', $dirs['logs']) => Logger::INFO,
             ],
             'jwt.secret' => $this->env->get(self::ENV_JWT_SECRET),
+            'instance' => [
+                'publicKey' => $this->env->get(self::ENV_INSTANCE_PUBLIC_KEY),
+                'privateKey' => $this->env->get(self::ENV_INSTANCE_PRIVATE_KEY),
+            ],
         ];
 
         if ('prod' === $appEnv) {
@@ -274,6 +293,7 @@ final class Config implements ConfigInterface
             PersonDto::class => ObjectDtoValidationMapping::class,
 
             FollowDto::class => ActivityDtoValidationMapping::class,
+            AnnounceDto::class => ActivityDtoValidationMapping::class,
             CreateDto::class => ActivityDtoValidationMapping::class,
             UpdateDto::class => ActivityDtoValidationMapping::class,
         ];
@@ -301,6 +321,7 @@ final class Config implements ConfigInterface
                     AssignActivityStreamContentToActorCommandHandler::class,
                 UpdateExternalActorCommand::class => UpdateExternalActorCommandHandler::class,
                 UpdateActorIconCommand::class => UpdateActorIconCommandHandler::class,
+                DereferenceCommand::class => DereferenceCommandHandler::class,
             ],
             'event_handlers' => [
                 ActivityStreamContentReceivedEvent::class => [
@@ -317,6 +338,9 @@ final class Config implements ConfigInterface
                 ],
                 ExternalUserUpdatedEvent::class => [
                     ExternalUserUpdatedEventHandler::class,
+                ],
+                DereferenceEvent::class => [
+                    DereferenceEventHandler::class,
                 ],
             ],
             'routing' => [],

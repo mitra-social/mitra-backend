@@ -25,7 +25,8 @@ final class ActivityStreamContentAttributedEventHandler
         $this->commandBus->handle(new ValidateContentCommand(
             $event->getActivityStreamContentEntity(),
             $event->getActivityStreamDto(),
-            $event->getActor()
+            $event->getActor(),
+            $event->shouldDereferenceObjects()
         ));
     }
 }

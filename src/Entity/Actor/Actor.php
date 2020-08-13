@@ -68,4 +68,13 @@ class Actor
     {
         return $this->user;
     }
+
+    public function __toString()
+    {
+        return sprintf(
+            'id:%s, name:%s',
+            $this->user->getId(),
+            $this->name
+        );
+    }
 }

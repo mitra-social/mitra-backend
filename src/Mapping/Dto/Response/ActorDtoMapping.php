@@ -6,6 +6,7 @@ namespace Mitra\Mapping\Dto\Response;
 
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\ExternalUser;
@@ -33,7 +34,8 @@ abstract class ActorDtoMapping implements EntityToDtoMappingInterface
         $actor = $entity->getActor();
 
         if ($actor instanceof Person) {
-            $dto = new PersonDto();
+            $dto = new UserResponseDto();
+            $dto->internalUserId = $actor->getUser()->getId();
         } elseif ($actor instanceof Organization) {
             $dto = new OrganizationDto();
         } else {

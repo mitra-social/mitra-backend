@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
-use Mitra\Repository\ActivityStreamContentAssignmentRepository;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
+use Mitra\Slim\IdGeneratorInterface;
+use Mitra\Slim\UriGeneratorInterface;
+use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
-use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Tests\Integration\CreateContentTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
-use Mitra\Slim\UriGenerator;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -142,10 +143,15 @@ final class InboxReadControllerTest extends IntegrationTestCase
         self::assertStatusCode(404, $response);
     }
 
-    public function testReturnsInboxItemsWithBtoAndBccStripped(): void
+    public function testReturnsInboxItemsWithBtoAndBccStrippedAndInlinedObjects(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds(['a46dfe3f-65dc-41db-a22b-3c3307601402']);
 
         $actorUsername = 'bob';
         $externalUser = $this->createExternalUser($actorUsername);
@@ -161,13 +167,22 @@ final class InboxReadControllerTest extends IntegrationTestCase
             $this->createSubscription($user->getActor(), $externalUser->getActor());
         }
 
-        $dtoContent = 'Foo bar baz';
-        
+        $inReplyToDto = new CreateDto();
+        $inReplyToDto->id = sprintf('https://example.com/user/%s/post/98754', 'alice');
+        $inReplyToDto->object = new NoteDto();
+        $inReplyToDto->object->content = 'This is the initial note';
+
+        $this->createContent($inReplyToDto, null);
+        $dtoContent = 'This is the reply';
+
+        $inlinedDto = new NoteDto();
+        $inlinedDto->content = $dtoContent;
+        $inlinedDto->inReplyTo = $inReplyToDto->id;
+
         $dto = new CreateDto();
         $dto->id = sprintf('https://example.com/user/%s/post/123456', $actorUsername);
         $dto->actor = $externalUser->getExternalId();
-        $dto->object = new NoteDto();
-        $dto->object->content = $dtoContent;
+        $dto->object = [$inlinedDto, $inReplyToDto->id];
         $dto->to = [
             $toUserExternalId,
         ];
@@ -192,6 +207,11 @@ final class InboxReadControllerTest extends IntegrationTestCase
             '@context' => [
                 'https://www.w3.org/ns/activitystreams',
                 'https://w3id.org/security/v1',
+                [
+                    'mitra' => 'https://mitra.social/#',
+                    'registeredAt' => 'mitra:registeredAt',
+                    'internalUserId' => 'mitra:internalUserId',
+                ],
             ],
             'type' => 'OrderedCollectionPage',
             'totalItems' => 1,
@@ -199,8 +219,26 @@ final class InboxReadControllerTest extends IntegrationTestCase
                 [
                     'type' => 'Create',
                     'object' => [
-                        'type' => 'Note',
-                        'content' => $dtoContent,
+                        [
+                            'type' => 'Note',
+                            'content' => $dtoContent,
+                            'inReplyTo' => [
+                                'type' => 'Create',
+                                'object' => [
+                                    'type' => 'Note',
+                                    'content' => 'This is the initial note',
+                                ],
+                                'id' => $inReplyToDto->id,
+                            ],
+                        ],
+                        [
+                            'type' => 'Create',
+                            'object' => [
+                                'type' => 'Note',
+                                'content' => 'This is the initial note',
+                            ],
+                            'id' => $inReplyToDto->id,
+                        ],
                     ],
                     'actor' => [
                         'id' => 'https://example.com/user/bob',
@@ -209,6 +247,7 @@ final class InboxReadControllerTest extends IntegrationTestCase
                         'type' => 'Person',
                         'inbox' => 'https://example.com/user/bob/inbox',
                         'outbox' => 'https://example.com/user/bob/outbox',
+                        'internalUserId' => $externalUser->getId(),
                     ],
                     'id' => $dto->id,
                     'to' => [
@@ -224,8 +263,8 @@ final class InboxReadControllerTest extends IntegrationTestCase
 
     public function testReturnsFilteredInboxItems(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $actorUsername1 = sprintf('bob.%s', uniqid());
         $actorUsername2 = sprintf('alice.%s', uniqid());
@@ -263,8 +302,8 @@ final class InboxReadControllerTest extends IntegrationTestCase
 
         $this->createContent($filteredDto, $toUser->getActor());
 
-        /** @var ActivityStreamContentAssignmentRepository $repo */
-        $repo = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $repo */
+        $repo = $this->getContainer()->get(ActivityStreamContentAssignmentRepositoryInterface::class);
 
         self::assertEquals(2, $repo->getTotalCountForActor($toUser->getActor(), null));
 
@@ -284,6 +323,11 @@ final class InboxReadControllerTest extends IntegrationTestCase
             '@context' => [
                 'https://www.w3.org/ns/activitystreams',
                 'https://w3id.org/security/v1',
+                [
+                    'mitra' => 'https://mitra.social/#',
+                    'registeredAt' => 'mitra:registeredAt',
+                    'internalUserId' => 'mitra:internalUserId',
+                ],
             ],
             'type' => 'OrderedCollectionPage',
             'totalItems' => 1,
@@ -301,6 +345,7 @@ final class InboxReadControllerTest extends IntegrationTestCase
                         'type' => 'Person',
                         'inbox' => sprintf('https://example.com/user/%s/inbox', $actorUsername1),
                         'outbox' => sprintf('https://example.com/user/%s/outbox', $actorUsername1),
+                        'internalUserId' => $externalUser1->getId(),
                     ],
                     'id' => $dto->id,
                     'to' => [

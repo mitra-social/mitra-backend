@@ -54,12 +54,13 @@ final class ActivityStreamTypeToDtoClassMapping
         'Person' => PersonDto::class,
 
         // Activities
+        'Accept' => AcceptDto::class,
+        'Announce' => FollowDto::class,
         'Create' => CreateDto::class,
+        'Delete' => DeleteDto::class,
         'Follow' => FollowDto::class,
         'Undo' => UndoDto::class,
         'Update' => UpdateDto::class,
-        'Delete' => DeleteDto::class,
-        'Accept' => AcceptDto::class,
 
         'Collection' => CollectionDto::class,
         'OrderedCollection' => OrderedCollectionDto::class,

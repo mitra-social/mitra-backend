@@ -33,7 +33,7 @@ use Mitra\Mapping\Dto\Response\ViolationListDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationDtoMapping;
 use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
 use Mitra\Serialization\Decode\DecoderInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -136,10 +136,10 @@ final class DtoServiceProvider implements ServiceProviderInterface
         };
 
         $container[UserResponseDtoMapping::class] = static function (Container $container): UserResponseDtoMapping {
-            return new UserResponseDtoMapping($container[UriGenerator::class]);
+            return new UserResponseDtoMapping($container[UriGeneratorInterface::class]);
         };
 
-        $container[PersonDtoMapping::class] = static function (Container $container): PersonDtoMapping {
+        $container[PersonDtoMapping::class] = static function (): PersonDtoMapping {
             return new PersonDtoMapping();
         };
 

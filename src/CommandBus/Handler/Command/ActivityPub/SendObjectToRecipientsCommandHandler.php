@@ -6,13 +6,12 @@ namespace Mitra\CommandBus\Handler\Command\ActivityPub;
 
 use Mitra\ActivityPub\Client\ActivityPubClientException;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolverException;
 use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
-use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
-use Mitra\Entity\User\ExternalUser;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Psr\Log\LoggerInterface;
 
 final class SendObjectToRecipientsCommandHandler
@@ -23,12 +22,17 @@ final class SendObjectToRecipientsCommandHandler
     private $activityPubClient;
 
     /**
+     * @var RequestSignerInterface
+     */
+    private $requestSigner;
+
+    /**
      * @var ExternalUserResolver
      */
     private $externalUserResolver;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
@@ -39,11 +43,13 @@ final class SendObjectToRecipientsCommandHandler
 
     public function __construct(
         ActivityPubClientInterface $activityPubClient,
+        RequestSignerInterface $requestSigner,
         ExternalUserResolver $externalUserResolver,
-        UriGenerator $uriGenerator,
+        UriGeneratorInterface $uriGenerator,
         LoggerInterface $logger
     ) {
         $this->activityPubClient = $activityPubClient;
+        $this->requestSigner = $requestSigner;
         $this->externalUserResolver = $externalUserResolver;
         $this->uriGenerator = $uriGenerator;
         $this->logger = $logger;
@@ -54,17 +60,13 @@ final class SendObjectToRecipientsCommandHandler
         $object = $command->getObject();
         $sender = $command->getSender();
 
-        $senderPublicKeyUrl = $this->uriGenerator->fullUrlFor('user-read', [
-            'username' => $sender->getUsername(),
-        ]) . '#main-key';
         $inboxUrls = $this->getInboxUrls($object);
 
         foreach ($inboxUrls as $inboxUrl) {
             try {
-                $request = $this->activityPubClient->signRequest(
+                $request = $this->requestSigner->signRequest(
                     $this->activityPubClient->createRequest('POST', $inboxUrl, $object),
-                    $sender->getPrivateKey(),
-                    $senderPublicKeyUrl
+                    $sender
                 );
 
                 $response = $this->activityPubClient->sendRequest($request);

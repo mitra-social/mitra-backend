@@ -8,16 +8,16 @@ use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 {
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
-    public function __construct(UriGenerator $uriGenerator)
+    public function __construct(UriGeneratorInterface $uriGenerator)
     {
         $this->uriGenerator = $uriGenerator;
     }
@@ -45,8 +45,8 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
         $userResponseDto = new UserResponseDto();
 
-        /*$userResponseDto->internalUserId = $entity->getId();
-        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');*/
+        $userResponseDto->internalUserId = $entity->getId();
+        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
 
         $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',

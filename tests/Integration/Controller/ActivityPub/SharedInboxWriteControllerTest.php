@@ -7,7 +7,9 @@ namespace Integration\Controller\ActivityPub;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Entity\Media;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\ExternalUserRepository;
+use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
@@ -17,7 +19,6 @@ use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
-use Mitra\Slim\UriGenerator;
 use Mitra\Tests\Integration\ClientMockTrait;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
@@ -49,8 +50,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
     public function testProcessesIncomingContentSuccessfully(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $ccUser = $this->createInternalUser();
@@ -98,7 +99,9 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
         self::assertStatusCode(201, $response);
 
         /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         foreach ([$toUser, $ccUser, $btoUser, $bccUser] as $user) {
             /** @var ActivityStreamContentAssignment[] $userContent */
@@ -112,8 +115,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
     public function testContentAssignmentSuccessfulForUserInSubCollection(): void
     {
         self::markTestIncomplete('First implement proper recipient resolving');
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $externalUser = $this->createExternalUser();
@@ -194,8 +197,10 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         /** @var ActivityStreamContentAssignment[] $userContent */
         $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null);
@@ -207,8 +212,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
     public function testDoNotHandleAlreadyHandledContentTwice(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $ccUser = $this->createInternalUser();
@@ -255,8 +260,10 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         foreach ([$toUser, $ccUser, $btoUser, $bccUser] as $user) {
             /** @var ActivityStreamContentAssignment[] $userContent */
@@ -274,8 +281,8 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
     public function testUpdateExternalActorOnUpdateContainingAnActorObject(): void
     {
-        /** @var UriGenerator $uriGenerator */
-        $uriGenerator = $this->getContainer()->get(UriGenerator::class);
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
 
         $toUser = $this->createInternalUser();
         $toUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser->getUsername()]);
@@ -332,8 +339,10 @@ final class SharedInboxWriteControllerTest extends IntegrationTestCase
 
         self::assertStatusCode(201, $response);
 
-        /** @var ActivityStreamContentAssignmentRepository $contentAssignmentRepository */
-        $contentAssignmentRepository = $this->getContainer()->get(ActivityStreamContentAssignmentRepository::class);
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
 
         $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null, null);
 

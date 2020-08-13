@@ -25,7 +25,8 @@ final class ActivityStreamContentReceivedEventHandler
         $this->commandBus->handle(new AttributeActivityStreamContentCommand(
             $event->getActivityStreamContentEntity(),
             $event->getActivityStreamDto(),
-            $event->getActor()
+            $event->getActor(),
+            $event->shouldDereferenceObjects()
         ));
     }
 }

@@ -7,7 +7,7 @@ namespace Mitra\Dto\Response\ActivityStreams\Activity;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 
-abstract class AbstractActivity extends ObjectDto implements ActivityDtoInterface
+abstract class AbstractActivityDto extends ObjectDto implements ActivityDtoInterface
 {
     /**
      * Describes one or more entities that either performed or are expected to perform the activity. Any single activity

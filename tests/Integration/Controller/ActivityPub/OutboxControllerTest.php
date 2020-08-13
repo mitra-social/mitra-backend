@@ -12,7 +12,7 @@ use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Entity\Media;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ExternalUserRepository;
-use Mitra\Repository\SubscriptionRepository;
+use Mitra\Repository\SubscriptionRepositoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
@@ -20,7 +20,6 @@ use Mitra\Tests\Integration\ClientMockTrait;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 use Psr\Http\Message\RequestFactoryInterface;
-use Ramsey\Uuid\Uuid;
 
 /**
  * @group Integration
@@ -55,6 +54,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
         $iconUri = 'http://example.com/image/123.jpg';
+        $activityUuid = 'f9a132ac-fd72-4705-a0bf-2d2e5827fe68';
 
         $objectAndTo = new PersonDto();
         $objectAndTo->id = $externalUserId;
@@ -89,7 +89,9 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var ReflectedIdGenerator $idGenerator */
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
 
-        $idGenerator->setId('f9a132ac-fd72-4705-a0bf-2d2e5827fe68');
+        $idGenerator->setIds([
+            $activityUuid,
+        ]);
 
         $requestSendFollowToRecipient->getBody()->write($encoder->encode([
             '@context' => 'https://www.w3.org/ns/activitystreams',
@@ -99,7 +101,7 @@ final class OutboxControllerTest extends IntegrationTestCase
             'id' => sprintf(
                 'http://test.localhost/user/%s/activity/%s',
                 $followingUser->getUsername(),
-                $idGenerator->getId()
+                $activityUuid
             ),
             'to' => $objectAndTo->id,
         ], 'application/json'));
@@ -153,8 +155,8 @@ final class OutboxControllerTest extends IntegrationTestCase
             $followedUser->getActor()->getIcon()->getLocalUri()
         );
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
         $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
@@ -167,6 +169,7 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
+        $activityUuid = 'f73b1760-767e-46e3-9924-50cdcfea6b88';
 
         $objectAndTo = new PersonDto();
         $objectAndTo->id = $externalUserId;
@@ -198,7 +201,10 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var ReflectedIdGenerator $idGenerator */
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
 
-        $idGenerator->setId('f73b1760-767e-46e3-9924-50cdcfea6b88');
+        $idGenerator->setIds([
+            $activityUuid,
+            $activityUuid,
+        ]);
 
         $requestSendFollowToRecipient->getBody()->write($encoder->encode([
             '@context' => 'https://www.w3.org/ns/activitystreams',
@@ -208,7 +214,7 @@ final class OutboxControllerTest extends IntegrationTestCase
             'id' => sprintf(
                 'http://test.localhost/user/%s/activity/%s',
                 $followingUser->getUsername(),
-                $idGenerator->getId()
+                $activityUuid
             ),
             'to' => $objectAndTo->id,
         ], 'application/json'));
@@ -254,8 +260,8 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         self::assertNotNull($followedUser);
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
         $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
@@ -274,6 +280,8 @@ final class OutboxControllerTest extends IntegrationTestCase
         $objectAndTo->id = $externalUserId;
         $objectAndTo->inbox = $externalUserId . '/inbox';
         $objectAndTo->outbox = $externalUserId . '/outbox';
+
+        $activityUuid = '68a48176-9847-4806-8227-65199a2da6a3';
 
         $objectAndToResponseBody = sprintf(
             '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s"}',
@@ -300,7 +308,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         /** @var ReflectedIdGenerator $idGenerator */
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
 
-        $idGenerator->setId('68a48176-9847-4806-8227-65199a2da6a3');
+        $idGenerator->setIds([$activityUuid]);
 
         $followDto = new FollowDto();
         $followDto->to = $objectAndTo->id;
@@ -318,7 +326,7 @@ final class OutboxControllerTest extends IntegrationTestCase
             'id' => sprintf(
                 'http://test.localhost/user/%s/activity/%s',
                 $followingUser->getUsername(),
-                $idGenerator->getId()
+                $activityUuid
             ),
             'to' => $objectAndTo->id,
         ], 'application/json'));
@@ -349,8 +357,8 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         self::assertNotNull($followedUser);
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
         $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 

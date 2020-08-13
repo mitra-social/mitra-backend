@@ -152,7 +152,8 @@ final class SharedInboxWriteController
             $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
                 $activityStreamContent,
                 $objectDto,
-                null
+                null,
+                true
             ));
             return $this->responseFactory->createResponse(201);
         }

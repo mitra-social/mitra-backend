@@ -5,10 +5,6 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
-use Mitra\ActivityPub\Client\ActivityPubClientInterface;
-use Mitra\Slim\IdGeneratorInterface;
-use Mitra\Tests\Helper\ActivityPub\ActivityPubTestClient;
-use Mitra\Tests\Helper\Container\Http\MockClient;
 use Mitra\Tests\Helper\Container\PimpleTestContainer;
 use Mitra\AppContainer;
 use Mitra\AppFactory;
@@ -20,7 +16,6 @@ use Mitra\Env\Writer\NullWriter;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use Mitra\Tests\Helper\Container\TestContainerInterface;
 use PHPUnit\Framework\TestCase;
-use Pimple\Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;

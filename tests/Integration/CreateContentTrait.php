@@ -18,8 +18,10 @@ use Ramsey\Uuid\Uuid;
  */
 trait CreateContentTrait
 {
-    public function createContent(ObjectDto $objectDto, ?Actor $recipient): ActivityStreamContent
-    {
+    public function createContent(
+        ObjectDto $objectDto,
+        ?Actor $recipient
+    ): ActivityStreamContent {
         /** @var NormalizerInterface $normalizer */
         $normalizer = $this->getContainer()->get(NormalizerInterface::class);
         /** @var EventBusInterface $eventBus */

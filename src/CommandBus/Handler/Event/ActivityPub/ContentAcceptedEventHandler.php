@@ -26,8 +26,14 @@ final class ContentAcceptedEventHandler
         $entity = $event->getActivityStreamContentEntity();
         $dto = $event->getActivityStreamDto();
         $actor = $event->getActor();
+        $shouldDereferenceObjects = $event->shouldDereferenceObjects();
 
-        $this->commandBus->handle(new PersistActivityStreamContentCommand($entity, $dto, $actor));
-        $this->commandBus->handle(new UpdateExternalActorCommand($entity, $dto, $actor));
+        $this->commandBus->handle(new PersistActivityStreamContentCommand(
+            $entity,
+            $dto,
+            $actor,
+            $shouldDereferenceObjects
+        ));
+        $this->commandBus->handle(new UpdateExternalActorCommand($entity, $dto, $actor, $shouldDereferenceObjects));
     }
 }

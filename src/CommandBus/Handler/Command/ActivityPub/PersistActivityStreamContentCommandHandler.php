@@ -42,15 +42,23 @@ final class PersistActivityStreamContentCommandHandler
     {
         $entity = $command->getActivityStreamContentEntity();
 
-        if (null !== $this->activityStreamContentRepository->getByExternalId($entity->getExternalId())) {
-            return;
-        }
+        // TODO how to ensure no other process has written the same record till flush after this command happens
+        $existingEntity = $this->activityStreamContentRepository->getByExternalId($entity->getExternalId());
 
-        $this->entityManager->persist($entity);
+        if (null === $existingEntity) {
+            $this->entityManager->persist($entity);
+        } else {
+            $entity = $existingEntity;
+        }
 
         $dto = $command->getActivityStreamDto();
         $actor = $command->getActor();
 
-        $this->eventEmitter->raise(new ActivityStreamContentPersistedEvent($entity, $dto, $actor));
+        $this->eventEmitter->raise(new ActivityStreamContentPersistedEvent(
+            $entity,
+            $dto,
+            $actor,
+            $command->shouldDereferenceObjects()
+        ));
     }
 }

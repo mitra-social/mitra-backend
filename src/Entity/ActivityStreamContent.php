@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Mitra\Entity\Actor\Actor;
 
 class ActivityStreamContent
@@ -49,6 +51,11 @@ class ActivityStreamContent
     private $object;
 
     /**
+     * @var Collection<int, ActivityStreamContent>
+     */
+    private $linkedObjects;
+
+    /**
      * ActivityStreamContent constructor.
      * @param string $id
      * @param string $externalId
@@ -77,6 +84,7 @@ class ActivityStreamContent
         $this->updated = $updated;
         $this->object = $object;
         $this->attributedTo = $attributedTo;
+        $this->linkedObjects = new ArrayCollection();
     }
 
     /**
@@ -132,5 +140,33 @@ class ActivityStreamContent
     public function setAttributedTo(?Actor $attributedTo): void
     {
         $this->attributedTo = $attributedTo;
+    }
+
+    public function addLinkedObject(ActivityStreamContent $object): void
+    {
+        if ($this->linkedObjects->contains($object)) {
+            return;
+        }
+
+        $this->linkedObjects->add($object);
+    }
+
+    /**
+     * @return array<ActivityStreamContent>
+     */
+    public function getLinkedObjects(): array
+    {
+        return $this->linkedObjects->toArray();
+    }
+
+    public function __toString()
+    {
+        return sprintf(
+            'id:%s, externalId:%s, type:%s, linkObjectCount:%d',
+            $this->id,
+            $this->externalId,
+            $this->type,
+            $this->linkedObjects->count()
+        );
     }
 }

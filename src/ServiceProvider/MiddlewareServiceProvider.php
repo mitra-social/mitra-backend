@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Doctrine\ORM\EntityManagerInterface;
 use HttpSignatures\Verifier;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
@@ -27,7 +28,7 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
             Container $container
         ): RequestCycleCleanupMiddleware {
             return new RequestCycleCleanupMiddleware(
-                $container['doctrine.orm.em'],
+                $container[EntityManagerInterface::class],
                 $container[LoggerInterface::class]
             );
         };
@@ -54,7 +55,8 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
         ): ValidateHttpSignatureMiddleware {
             return new ValidateHttpSignatureMiddleware(
                 $container[Verifier::class],
-                $container[ResponseFactoryInterface::class]
+                $container[ResponseFactoryInterface::class],
+                $container[LoggerInterface::class]
             );
         };
     }

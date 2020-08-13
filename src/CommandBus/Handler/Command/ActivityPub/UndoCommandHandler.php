@@ -50,20 +50,29 @@ final class UndoCommandHandler
 
         $undo = $command->getUndoDto();
 
-        if ($undo->object instanceof FollowDto) {
-            $followObject = $undo->object;
+        $undoObjects = is_array($undo->object) ? $undo->object : [$undo->object];
 
-            if (null === $objectExternalUser = $this->externalUserResolver->resolve($followObject->object)) {
-                throw new \RuntimeException('Could not resolve `$object`');
+        foreach ($undoObjects as $undoObject) {
+            if ($undoObject instanceof FollowDto) {
+                $followObjects = is_array($undoObject->object) ? $undoObject->object : [$undoObject->object];
+
+                foreach ($followObjects as $followObject) {
+                    if (null === $objectExternalUser = $this->externalUserResolver->resolve($followObject)) {
+                        throw new \RuntimeException('Could not resolve `$object`');
+                    }
+
+                    $subscription = $this->subscriptionRepository->getByActors(
+                        $commandActor,
+                        $objectExternalUser->getActor()
+                    );
+
+                    if (null === $subscription) {
+                        return;
+                    }
+
+                    $this->entityManager->remove($subscription);
+                }
             }
-
-            $subscription = $this->subscriptionRepository->getByActors($commandActor, $objectExternalUser->getActor());
-
-            if (null === $subscription) {
-                return;
-            }
-
-            $this->entityManager->remove($subscription);
         }
     }
 }

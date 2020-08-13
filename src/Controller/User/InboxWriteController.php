@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitra\Controller\User;
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ApiProblem\BadRequestApiProblem;
 use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
@@ -16,8 +17,10 @@ use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Response\ActivityStreams\Activity\ActivityDtoInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
+use Mitra\Factory\ActivityStreamContentFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Normalization\NormalizerInterface;
+use Mitra\Orm\EntityManagerDecorator;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
@@ -35,11 +38,6 @@ final class InboxWriteController
      * @var EventBusInterface
      */
     private $eventBus;
-
-    /**
-     * @var NormalizerInterface
-     */
-    private $normalizer;
 
     /**
      * @var EncoderInterface
@@ -82,18 +80,22 @@ final class InboxWriteController
     private $activityStreamContentRepository;
 
     /**
-     * @var HashGeneratorInterface
-     */
-    private $hashGenerator;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
+    /**
+     * @var ActivityStreamContentFactoryInterface
+     */
+    private $activityStreamContentFactory;
+
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        NormalizerInterface $normalizer,
         EncoderInterface $encoder,
         ValidatorInterface $validator,
         EventBusInterface $eventBus,
@@ -101,12 +103,12 @@ final class InboxWriteController
         DecoderInterface $decoder,
         DtoToEntityMapper $dtoToEntityMapper,
         InternalUserRepository $internalUserRepository,
+        ActivityStreamContentFactoryInterface $activityStreamContentFactory,
         ActivityStreamContentRepositoryInterface $activityStreamContentRepository,
-        HashGeneratorInterface $hashGenerator,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager
     ) {
         $this->responseFactory = $responseFactory;
-        $this->normalizer = $normalizer;
         $this->encoder = $encoder;
         $this->decoder = $decoder;
         $this->validator = $validator;
@@ -114,9 +116,10 @@ final class InboxWriteController
         $this->activityPubDataToDtoPopulator = $activityPubDataToDtoPopulator;
         $this->dtoToEntityMapper = $dtoToEntityMapper;
         $this->internalUserRepository = $internalUserRepository;
+        $this->activityStreamContentFactory = $activityStreamContentFactory;
         $this->activityStreamContentRepository = $activityStreamContentRepository;
-        $this->hashGenerator = $hashGenerator;
         $this->logger = $logger;
+        $this->entityManager = $entityManager;
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -161,27 +164,7 @@ final class InboxWriteController
             return $response;
         }
 
-        $objectIdHash = $this->hashGenerator->hash($objectDto->id);
-
-        if (null !== $activityStreamContent = $this->activityStreamContentRepository->getByExternalId($objectDto->id)) {
-            $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
-                $activityStreamContent,
-                $objectDto,
-                $inboxUser->getActor()
-            ));
-            return $this->responseFactory->createResponse(201);
-        }
-
-        $activityStreamContent = new ActivityStreamContent(
-            Uuid::uuid4()->toString(),
-            $objectDto->id,
-            $objectIdHash,
-            $objectDto->type,
-            $this->normalizer->normalize($objectDto),
-            null,
-            null !== $objectDto->published ? new \DateTimeImmutable($objectDto->published) : null,
-            null !== $objectDto->updated ? new \DateTimeImmutable($objectDto->updated) : null,
-        );
+        $activityStreamContent = $this->activityStreamContentFactory->createFromDto($objectDto);
 
         try {
             $this->eventBus->dispatch(new ActivityStreamContentReceivedEvent(
@@ -190,7 +173,15 @@ final class InboxWriteController
                 $inboxUser->getActor()
             ));
         } catch (HandlerFailedException $e) {
-            if (!$e->getPrevious() instanceof UniqueConstraintViolationException) {
+            $initialException = $this->getInitialException($e);
+
+            if (!$initialException instanceof UniqueConstraintViolationException) {
+                throw $e;
+            }
+
+            if ($this->entityManager instanceof EntityManagerDecorator) {
+                $this->entityManager->restoreIfClosed();
+            } else {
                 throw $e;
             }
 
@@ -200,12 +191,25 @@ final class InboxWriteController
                 $this->eventBus->dispatch(new ActivityStreamContentPersistedEvent(
                     $activityStreamContent,
                     $objectDto,
-                    $inboxUser->getActor()
+                    $inboxUser->getActor(),
+                    false
                 ));
-                return $this->responseFactory->createResponse(201);
+            } else {
+                throw $e;
             }
         }
 
         return $this->responseFactory->createResponse(201);
+    }
+
+    private function getInitialException(HandlerFailedException $e): ?\Throwable
+    {
+        $previousException = $e->getPrevious();
+
+        while ($previousException instanceof HandlerFailedException) {
+            $previousException = $previousException->getPrevious();
+        }
+
+        return $previousException;
     }
 }

@@ -9,24 +9,42 @@ use Mitra\Slim\IdGeneratorInterface;
 final class ReflectedIdGenerator implements IdGeneratorInterface
 {
     /**
-     * @var string
+     * @var array<string>
      */
-    private $id;
+    private $ids = [];
+
+    /**
+     * @var int
+     */
+    private $idCount = 0;
+
+    /**
+     * @var int
+     */
+    private $currentPosition = 0;
 
     public function getId(): string
     {
-        if (null === $this->id) {
-            throw new \RuntimeException('No id set, set one by calling `setId()`');
+        ++$this->currentPosition;
+
+        if ([] === $this->ids) {
+            throw new \OutOfBoundsException(sprintf(
+                'Requested %d ids but only %d ids were available.',
+                $this->currentPosition,
+                $this->idCount
+            ));
         }
 
-        return $this->id;
+        return array_shift($this->ids);
     }
 
     /**
-     * @param string $id
+     * @param array<string> $ids
      */
-    public function setId(string $id): void
+    public function setIds(array $ids): void
     {
-        $this->id = $id;
+        $this->ids = $ids;
+        $this->idCount = count($ids);
+        $this->currentPosition = 0;
     }
 }

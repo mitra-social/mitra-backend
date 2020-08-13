@@ -4,10 +4,7 @@ namespace Mitra\Tests\Integration;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Firebase\JWT\JWT;
-use HttpSignatures\Algorithm;
-use HttpSignatures\HeaderList;
-use HttpSignatures\Key;
-use HttpSignatures\Signer;
+use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\CommandBus\Command\CreateUserCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Entity\Actor\Organization;
@@ -86,10 +83,9 @@ trait CreateUserTrait
 
     protected function signRequest(InternalUser $user, RequestInterface $request): RequestInterface
     {
-        return (new Signer(
-            new Key(sprintf('http://test.localhost/user/%s#main-key', $user->getUsername()), $user->getPrivateKey()),
-            Algorithm::create('rsa-sha256'),
-            new HeaderList(['(request-target)', 'Host', 'Accept'])
-        ))->sign($request);
+        /** @var RequestSignerInterface $requestSigner */
+        $requestSigner = $this->getContainer()->get(RequestSignerInterface::class);
+
+        return $requestSigner->signRequest($request, $user);
     }
 }

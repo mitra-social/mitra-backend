@@ -153,4 +153,13 @@ class ExternalUser extends AbstractUser
     {
         $this->publicKey = $publicKey;
     }
+
+    public function __toString()
+    {
+        return sprintf(
+            'id:%s, externalId:%s',
+            $this->id,
+            $this->externalId
+        );
+    }
 }
