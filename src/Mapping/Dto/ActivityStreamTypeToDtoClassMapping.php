@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace Mitra\Mapping\Dto;
 
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\AcceptDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\DeleteDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\UpdateDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
 use Mitra\Dto\Response\ActivityStreams\AudioDto;
+use Mitra\Dto\Response\ActivityStreams\CollectionDto;
+use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\DocumentDto;
 use Mitra\Dto\Response\ActivityStreams\EventDto;
 use Mitra\Dto\Response\ActivityStreams\ImageDto;
@@ -17,6 +22,8 @@ use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\MentionDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionDto;
+use Mitra\Dto\Response\ActivityStreams\OrderedCollectionPageDto;
 use Mitra\Dto\Response\ActivityStreams\PlaceDto;
 use Mitra\Dto\Response\ActivityStreams\ProfileDto;
 use Mitra\Dto\Response\ActivityStreams\RelationshipDto;
@@ -36,8 +43,6 @@ final class ActivityStreamTypeToDtoClassMapping
         'Document' => DocumentDto::class,
         'Event' => EventDto::class,
         'Image' => ImageDto::class,
-        'Link' => LinkDto::class,
-        'Mention' => MentionDto::class,
         'Note' => NoteDto::class,
         'Place' => PlaceDto::class,
         'Profile' => ProfileDto::class,
@@ -49,9 +54,26 @@ final class ActivityStreamTypeToDtoClassMapping
         'Person' => PersonDto::class,
 
         // Activities
+        'Accept' => AcceptDto::class,
+        'Announce' => FollowDto::class,
         'Create' => CreateDto::class,
+        'Delete' => DeleteDto::class,
         'Follow' => FollowDto::class,
         'Undo' => UndoDto::class,
+        'Update' => UpdateDto::class,
+
+        'Collection' => CollectionDto::class,
+        'OrderedCollection' => OrderedCollectionDto::class,
+        'CollectionPage' => CollectionPageDto::class,
+        'OrderedCollectionPage' => OrderedCollectionPageDto::class,
+
+        // Link
+        'Link' => LinkDto::class,
+        'Mention' => MentionDto::class,
+
+        // TODO these is a hack to support hashtags. The final goal is to strip/replace unknown/non-standard types
+        'Hashtag' => LinkDto::class,
+        'Tag' => LinkDto::class,
     ];
 
     public static function map(string $activityStreamType): string

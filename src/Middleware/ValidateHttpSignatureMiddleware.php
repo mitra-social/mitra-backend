@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 final class ValidateHttpSignatureMiddleware
 {
@@ -23,12 +24,19 @@ final class ValidateHttpSignatureMiddleware
      */
     private $responseFactory;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         Verifier $verifier,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        LoggerInterface $logger
     ) {
         $this->verifier = $verifier;
         $this->responseFactory = $responseFactory;
+        $this->logger = $logger;
     }
 
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -39,24 +47,36 @@ final class ValidateHttpSignatureMiddleware
 
         try {
             if (!$this->verifier->isSigned($request)) {
-                $response = $this->responseFactory->createResponse(401);
-
-                $response->getBody()->write(sprintf(
+                $reason = sprintf(
                     'Could not verify signature header with value `%s`: %s',
                     $request->getHeaderLine('signature'),
                     implode(', ', $this->verifier->getStatus())
-                ));
+                );
+
+                $this->logger->info($reason, [
+                    'request.headers' => $request->getHeaders(),
+                    'request.body' => (string) $request->getBody(),
+                ]);
+
+                $response = $this->responseFactory->createResponse(401);
+                $response->getBody()->write($reason);
 
                 return $response;
             }
         } catch (\Exception $e) {
-            $response = $this->responseFactory->createResponse(401);
-
-            $response->getBody()->write(sprintf(
+            $reason = sprintf(
                 'Could not verify signature header with value `%s`: %s',
                 $request->getHeaderLine('signature'),
                 $e->getMessage()
-            ));
+            );
+
+            $this->logger->info($reason, [
+                'request.headers' => $request->getHeaders(),
+                'request.body' => (string) $request->getBody(),
+            ]);
+
+            $response = $this->responseFactory->createResponse(401);
+            $response->getBody()->write($reason);
 
             return $response;
         }

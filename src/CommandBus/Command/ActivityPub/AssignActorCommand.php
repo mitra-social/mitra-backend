@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Mitra\CommandBus\Command\ActivityPub;
 
-use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivity;
+use Mitra\CommandBus\CommandInterface;
+use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivityDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\Actor\Actor;
 
 /**
  * Sets the provided actor as the actor of the provided activity
  */
-final class AssignActorCommand
+final class AssignActorCommand implements CommandInterface
 {
     /**
      * @var Actor
@@ -19,11 +20,11 @@ final class AssignActorCommand
     private $actor;
 
     /**
-     * @var AbstractActivity
+     * @var AbstractActivityDto
      */
     private $activity;
 
-    public function __construct(Actor $actor, AbstractActivity $activity)
+    public function __construct(Actor $actor, AbstractActivityDto $activity)
     {
         $this->actor = $actor;
         $this->activity = $activity;
@@ -38,7 +39,7 @@ final class AssignActorCommand
     }
 
     /**
-     * @return AbstractActivity
+     * @return AbstractActivityDto
      */
     public function getActivity(): ObjectDto
     {

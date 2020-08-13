@@ -12,7 +12,9 @@ use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\Request\TokenRequestDto;
 use Mitra\Dto\RequestToDtoTransformer;
+use Mitra\Dto\Response\ActivityStreams\Activity\AcceptDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
+use Mitra\Dto\Response\ActivityStreams\Activity\DeleteDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\UndoDto;
 use Mitra\Dto\Response\ActivityStreams\ArticleDto;
@@ -22,13 +24,16 @@ use Mitra\Dto\Response\ActivityStreams\EventDto;
 use Mitra\Dto\Response\ActivityStreams\ImageDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
 use Mitra\Dto\Response\ActivityStreams\VideoDto;
-use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
-use Mitra\Mapping\Dto\Response\ActivityPub\PersonDtoMapping;
+use Mitra\Mapping\Dto\Response\ApiProblemDtoMapping;
+use Mitra\Mapping\Dto\Response\BadRequestApiProblemDtoMapping;
+use Mitra\Mapping\Dto\Response\OrganizationDtoMapping;
+use Mitra\Mapping\Dto\Response\PersonDtoMapping;
 use Mitra\Mapping\Dto\Response\UserResponseDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationListDtoMapping;
 use Mitra\Mapping\Dto\Response\ViolationDtoMapping;
+use Mitra\Mapping\Dto\Request\CreateUserRequestDtoMapping;
 use Mitra\Serialization\Decode\DecoderInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -50,9 +55,12 @@ final class DtoServiceProvider implements ServiceProviderInterface
         $container[EntityToDtoMapper::class] = static function (Container $container): EntityToDtoMapper {
             return new EntityToDtoMapper($container[ContainerInterface::class], [
                 PersonDtoMapping::class,
+                OrganizationDtoMapping::class,
                 UserResponseDtoMapping::class,
                 ViolationListDtoMapping::class,
                 ViolationDtoMapping::class,
+                ApiProblemDtoMapping::class,
+                BadRequestApiProblemDtoMapping::class,
             ]);
         };
 
@@ -93,6 +101,8 @@ final class DtoServiceProvider implements ServiceProviderInterface
             CreateDto::class => DataToDtoPopulator::class . CreateDto::class,
             FollowDto::class => DataToDtoPopulator::class . FollowDto::class,
             UndoDto::class => DataToDtoPopulator::class . UndoDto::class,
+            DeleteDto::class => DataToDtoPopulator::class . DeleteDto::class,
+            AcceptDto::class => DataToDtoPopulator::class . AcceptDto::class,
         ];
 
         foreach ($activityStreamDtoClasses as $activityStreamDtoClass => $serviceId) {
@@ -126,11 +136,19 @@ final class DtoServiceProvider implements ServiceProviderInterface
         };
 
         $container[UserResponseDtoMapping::class] = static function (Container $container): UserResponseDtoMapping {
-            return new UserResponseDtoMapping($container[UriGenerator::class]);
+            return new UserResponseDtoMapping($container[UriGeneratorInterface::class]);
         };
 
-        $container[PersonDtoMapping::class] = static function (Container $container): PersonDtoMapping {
-            return new PersonDtoMapping($container[UriGenerator::class]);
+        $container[PersonDtoMapping::class] = static function (): PersonDtoMapping {
+            return new PersonDtoMapping();
+        };
+
+        $container[ApiProblemDtoMapping::class] = static function (): ApiProblemDtoMapping {
+            return new ApiProblemDtoMapping();
+        };
+
+        $container[BadRequestApiProblemDtoMapping::class] = static function (): BadRequestApiProblemDtoMapping {
+            return new BadRequestApiProblemDtoMapping();
         };
     }
 }

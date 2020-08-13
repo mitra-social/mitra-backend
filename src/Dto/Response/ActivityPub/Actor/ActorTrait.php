@@ -65,7 +65,7 @@ trait ActorTrait
     public $endpoints;
 
     /**
-     * @var null|array<string, string>
+     * @var null|array<string, null|string>
      */
     public $publicKey;
 
@@ -97,5 +97,10 @@ trait ActorTrait
     public function getType(): string
     {
         return $this->type;
+    }
+
+    public function getIcon()
+    {
+        return $this->icon;
     }
 }

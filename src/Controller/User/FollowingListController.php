@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ActivityPub\Actor\OrganizationDto;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
@@ -14,11 +15,12 @@ use Mitra\Entity\Actor\Person;
 use Mitra\Entity\Subscription;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Entity\User\InternalUser;
+use Mitra\Filtering\Filter;
+use Mitra\Filtering\FilterFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
-use Mitra\Serialization\Encode\EncoderInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 
 final class FollowingListController extends AbstractCollectionController
 {
@@ -28,30 +30,37 @@ final class FollowingListController extends AbstractCollectionController
     private $subscriptionRepository;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
+
+    /**
+     * @var EntityToDtoMapper
+     */
+    private $entityToDtoMapper;
 
     public function __construct(
         SubscriptionRepository $subscriptionRepository,
         InternalUserRepository $internalUserRepository,
-        UriGenerator $uriGenerator,
+        UriGeneratorInterface $uriGenerator,
         ResponseFactoryInterface $responseFactory,
-        EncoderInterface $encoder
+        FilterFactoryInterface $filterFactory,
+        EntityToDtoMapper $entityToDtoMapper
     ) {
-        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $encoder);
+        parent::__construct($internalUserRepository, $uriGenerator, $responseFactory, $filterFactory);
 
         $this->subscriptionRepository = $subscriptionRepository;
         $this->uriGenerator = $uriGenerator;
+        $this->entityToDtoMapper = $entityToDtoMapper;
     }
 
     /**
      * @param Actor $actorDto
+     * @param Filter|null $filter
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
-     * @throws \Exception
      */
-    protected function getItems(Actor $actorDto, ?int $page): array
+    protected function getItems(Actor $actorDto, ?Filter $filter, ?int $page): array
     {
         $offset = null;
         $limit = null;
@@ -61,7 +70,7 @@ final class FollowingListController extends AbstractCollectionController
             $limit = self::ITEMS_PER_PAGE_LIMIT;
         }
 
-        $items = $this->subscriptionRepository->findFollowingActorsForActor(
+        $items = $this->subscriptionRepository->getFollowingActorsForActor(
             $actorDto,
             $offset,
             $limit
@@ -84,10 +93,12 @@ final class FollowingListController extends AbstractCollectionController
             $subscribedActorUser = $subscribedActor->getUser();
 
             if ($subscribedActorUser instanceof ExternalUser) {
-                $actorDto->id = $subscribedActorUser->getExternalId();
-                $actorDto->preferredUsername = $subscribedActorUser->getPreferredUsername();
-                $actorDto->inbox = $subscribedActorUser->getInbox();
-                $actorDto->outbox = $subscribedActorUser->getOutbox();
+                $dtoClass = $subscribedActor instanceof Person ? PersonDto::class : OrganizationDto::class;
+                /** @var ObjectDto $actorDto */
+                $actorDto = $this->entityToDtoMapper->map(
+                    $subscribedActorUser,
+                    $dtoClass
+                );
             } elseif ($subscribedActorUser instanceof InternalUser) {
                 $actorDto->id = $this->uriGenerator->fullUrlFor('user-read', [
                     'username' => $subscribedActorUser->getUsername()
@@ -103,13 +114,17 @@ final class FollowingListController extends AbstractCollectionController
 
             $actorDto->name = $subscribedActor->getName();
 
+            if (null !== $subscribedActor->getIcon()) {
+                $actorDto->icon = $subscribedActor->getIcon()->getOriginalUri();
+            }
+
             $dtoItems[] = $actorDto;
         }
 
         return $dtoItems;
     }
 
-    protected function getTotalItemCount(Actor $requestedActor): int
+    protected function getTotalItemCount(Actor $requestedActor, ?Filter $filter): int
     {
         return $this->subscriptionRepository->getFollowingCountForActor($requestedActor);
     }

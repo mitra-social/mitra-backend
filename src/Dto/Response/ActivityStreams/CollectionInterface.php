@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Dto\Response\ActivityStreams;
 
-interface CollectionInterface extends ObjectInterface
+interface CollectionInterface extends LdObjectInterface
 {
     /**
      * @param array<ObjectDto|LinkDto|string>|null $items

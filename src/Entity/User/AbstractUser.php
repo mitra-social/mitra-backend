@@ -11,7 +11,7 @@ abstract class AbstractUser
     /**
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
      * @var null|Actor

@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
-use Mitra\ActivityPub\Client\ActivityPubClientInterface;
-use Mitra\Tests\Helper\ActivityPub\ActivityPubTestClient;
-use Mitra\Tests\Helper\Container\Http\MockClient;
 use Mitra\Tests\Helper\Container\PimpleTestContainer;
 use Mitra\AppContainer;
 use Mitra\AppFactory;
@@ -19,7 +16,6 @@ use Mitra\Env\Writer\NullWriter;
 use Mitra\Tests\Helper\Constraint\ResponseStatusCodeConstraint;
 use Mitra\Tests\Helper\Container\TestContainerInterface;
 use PHPUnit\Framework\TestCase;
-use Pimple\Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
@@ -60,10 +56,11 @@ abstract class IntegrationTestCase extends TestCase
         );
 
         $container = AppContainer::init($env);
-        $container->register(new TestServiceProvider());
 
         self::$container = new PimpleTestContainer($container);
         self::$app = (new AppFactory())->create($container);
+
+        $container->register(new TestServiceProvider());
 
         self::$uriFactory = new UriFactory();
         self::$serverRequestFactory = new ServerRequestFactory(null, self::$uriFactory);

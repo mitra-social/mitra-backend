@@ -6,6 +6,7 @@ namespace Mitra\Mapping\Orm\Actor;
 
 use Chubbyphp\DoctrineDbServiceProvider\Driver\ClassMapMappingInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Mitra\Entity\Media;
 use Mitra\Entity\User\AbstractUser;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Organization;
@@ -43,25 +44,30 @@ final class ActorOrmMapping implements ClassMapMappingInterface
             'nullable' => true,
         ]);
 
-        $metadata->mapField([
-            'fieldName' => 'icon',
-            'type' => 'string',
-            'length' => 255,
-            'nullable' => true,
-        ]);
-
         $metadata->mapOneToOne([
             'fieldName' => 'user',
             'id' => true,
             'targetEntity' => AbstractUser::class,
             'inversedBy' => 'actor',
-            'cascade' => ['all'],
+            'cascade' => ['persist', 'remove'],
             'joinColumns' => [
                 [
                     'name' => 'user_id',
-                    'referencedColumnName' => 'id',
                     'nullable' => false,
-                ]
+                ],
+            ],
+        ]);
+
+        $metadata->mapManyToOne([
+            'fieldName' => 'icon',
+            'targetEntity' => Media::class,
+            'cascade' => ['persist', 'remove'],
+            'joinColumns' => [
+                [
+                    'name' => 'icon',
+                    'referencedColumnName' => 'id',
+                    'nullable' => true,
+                ],
             ],
         ]);
     }

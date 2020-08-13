@@ -9,10 +9,13 @@ use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
 use Mitra\CommandBus\CommandBusInterface;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
+use Mitra\Entity\Media;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ExternalUserRepository;
-use Mitra\Repository\SubscriptionRepository;
+use Mitra\Repository\SubscriptionRepositoryInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\IdGeneratorInterface;
+use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Integration\ClientMockTrait;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
@@ -46,21 +49,25 @@ final class OutboxControllerTest extends IntegrationTestCase
 
     public function testSuccessfulFollow(): void
     {
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
+        $iconUri = 'http://example.com/image/123.jpg';
+        $activityUuid = 'f9a132ac-fd72-4705-a0bf-2d2e5827fe68';
 
         $objectAndTo = new PersonDto();
         $objectAndTo->id = $externalUserId;
         $objectAndTo->inbox = $externalUserId . '/inbox';
         $objectAndTo->outbox = $externalUserId . '/outbox';
+        $objectAndTo->icon = $iconUri;
 
         $objectAndToResponseBody = sprintf(
-            '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s"}',
+            '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s", "icon": "%s"}',
             $externalUserId,
             $objectAndTo->inbox,
-            $objectAndTo->outbox
+            $objectAndTo->outbox,
+            $iconUri
         );
 
         $objectAndToResponse = self::$responseFactory->createResponse(200)
@@ -68,36 +75,55 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $objectAndToResponse->getBody()->write($objectAndToResponseBody);
 
-        $request1 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request2 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request3 = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
+        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $externalUserId);
+        $requestSendFollowToRecipient = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
             ->withHeader('Host', 'example.com')
             ->withHeader('Accept', 'application/activity+json');
+        $requestActorIcon = self::$requestFactory->createRequest('GET', $iconUri);
 
-        $request3 = $this->signRequest($followingUser, $request3);
+        $requestSendFollowToRecipient = $this->signRequest($followingUser, $requestSendFollowToRecipient);
 
         /** @var EncoderInterface $encoder */
         $encoder = $this->getContainer()->get(EncoderInterface::class);
 
-        $request3->getBody()->write($encoder->encode([
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds([
+            $activityUuid,
+        ]);
+
+        $requestSendFollowToRecipient->getBody()->write($encoder->encode([
             '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'Follow',
             'object' => $objectAndTo->id,
             'actor' => $actorId,
+            'id' => sprintf(
+                'http://test.localhost/user/%s/activity/%s',
+                $followingUser->getUsername(),
+                $activityUuid
+            ),
             'to' => $objectAndTo->id,
         ], 'application/json'));
 
+        $iconData = 'jpegIconDataHere';
+
+        $responseIcon = self::$responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'image/jpeg');
+
+        $responseIcon->getBody()->write($iconData);
+
         $apiHttpClientMock = $this->getClientMock([
             [
-                $request1,
+                $requestResolveExternalActor,
                 $objectAndToResponse,
             ],
             [
-                $request2,
-                $objectAndToResponse,
+                $requestActorIcon,
+                $responseIcon,
             ],
             [
-                $request3,
+                $requestSendFollowToRecipient,
                 self::$responseFactory->createResponse(201),
             ],
         ]);
@@ -122,22 +148,28 @@ final class OutboxControllerTest extends IntegrationTestCase
         $followedUser = $externalUserRepository->findOneByExternalId($externalUserId);
 
         self::assertNotNull($followedUser);
+        self::assertInstanceOf(Media::class, $followedUser->getActor()->getIcon());
+        self::assertEquals($iconUri, $followedUser->getActor()->getIcon()->getOriginalUri());
+        self::assertEquals(
+            sprintf('icons/%s.jpg', md5($iconData)),
+            $followedUser->getActor()->getIcon()->getLocalUri()
+        );
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
     }
 
-    public function testSuccessfulUnfollow(): void
+    public function testFollowingSameUserSecondTimeDoesNothing(): void
     {
-        // Prepare
-        $followingUser = $this->createUser();
+        $followingUser = $this->createInternalUser();
 
         $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
         $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
+        $activityUuid = 'f73b1760-767e-46e3-9924-50cdcfea6b88';
 
         $objectAndTo = new PersonDto();
         $objectAndTo->id = $externalUserId;
@@ -156,22 +188,133 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         $objectAndToResponse->getBody()->write($objectAndToResponseBody);
 
-        $request1 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request2 = self::$requestFactory->createRequest('GET', $externalUserId);
-        $request3 = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
+        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $externalUserId);
+        $requestSendFollowToRecipient = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
             ->withHeader('Host', 'example.com')
             ->withHeader('Accept', 'application/activity+json');
 
-        $request3 = $this->signRequest($followingUser, $request3);
+        $requestSendFollowToRecipient = $this->signRequest($followingUser, $requestSendFollowToRecipient);
 
         /** @var EncoderInterface $encoder */
         $encoder = $this->getContainer()->get(EncoderInterface::class);
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds([
+            $activityUuid,
+            $activityUuid,
+        ]);
+
+        $requestSendFollowToRecipient->getBody()->write($encoder->encode([
+            '@context' => 'https://www.w3.org/ns/activitystreams',
+            'type' => 'Follow',
+            'object' => $objectAndTo->id,
+            'actor' => $actorId,
+            'id' => sprintf(
+                'http://test.localhost/user/%s/activity/%s',
+                $followingUser->getUsername(),
+                $activityUuid
+            ),
+            'to' => $objectAndTo->id,
+        ], 'application/json'));
+
+        $apiHttpClientMock = $this->getClientMock([
+            [
+                $requestResolveExternalActor,
+                $objectAndToResponse,
+            ],
+            [
+                $requestSendFollowToRecipient,
+                self::$responseFactory->createResponse(201),
+            ],
+            [
+                $requestSendFollowToRecipient,
+                self::$responseFactory->createResponse(201),
+            ],
+        ]);
+
+        $this->getContainer()->get('api_http_client')->setMock($apiHttpClientMock);
+
+        $body = '{"@context": "https://www.w3.org/ns/activitystreams","type": "Follow", ' .
+            '"to": "' . $externalUserId . '", "object": "' . $externalUserId . '"}';
+
+        $token = $this->createTokenForUser($followingUser);
+
+        $request = $this->createRequest('POST', sprintf('/user/%s/outbox', $followingUser->getUsername()), $body, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(201, $response);
+
+        // Follow same actor again
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(201, $response);
+
+        /** @var ExternalUserRepository $externalUserRepository */
+        $externalUserRepository = $this->getContainer()->get(ExternalUserRepository::class);
+
+        $followedUser = $externalUserRepository->findOneByExternalId($externalUserId);
+
+        self::assertNotNull($followedUser);
+
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
+
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
+
+        self::assertNotNull($subscription);
+    }
+
+    public function testSuccessfulUnfollow(): void
+    {
+        // Prepare
+        $followingUser = $this->createInternalUser();
+
+        $actorId = sprintf('http://test.localhost/user/%s', $followingUser->getUsername());
+        $externalUserId = 'https://example.com/user/pascalmyself.' . uniqid();
+
+        $objectAndTo = new PersonDto();
+        $objectAndTo->id = $externalUserId;
+        $objectAndTo->inbox = $externalUserId . '/inbox';
+        $objectAndTo->outbox = $externalUserId . '/outbox';
+
+        $activityUuid = '68a48176-9847-4806-8227-65199a2da6a3';
+
+        $objectAndToResponseBody = sprintf(
+            '{"type": "Person", "id": "%s", "inbox": "%s", "outbox": "%s"}',
+            $externalUserId,
+            $objectAndTo->inbox,
+            $objectAndTo->outbox
+        );
+
+        $objectAndToResponse = self::$responseFactory->createResponse(200)
+            ->withHeader('Content-Type', 'application/activity+json');
+
+        $objectAndToResponse->getBody()->write($objectAndToResponseBody);
+
+        $requestResolveExternalActor = self::$requestFactory->createRequest('GET', $externalUserId);
+        $requestSendUnfollowToRecipient = self::$requestFactory->createRequest('POST', $objectAndTo->inbox)
+            ->withHeader('Host', 'example.com')
+            ->withHeader('Accept', 'application/activity+json');
+
+        $requestSendUnfollowToRecipient = $this->signRequest($followingUser, $requestSendUnfollowToRecipient);
+
+        /** @var EncoderInterface $encoder */
+        $encoder = $this->getContainer()->get(EncoderInterface::class);
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds([$activityUuid]);
 
         $followDto = new FollowDto();
         $followDto->to = $objectAndTo->id;
         $followDto->object = $objectAndTo->id;
 
-        $request3->getBody()->write($encoder->encode([
+        $requestSendUnfollowToRecipient->getBody()->write($encoder->encode([
             '@context' => 'https://www.w3.org/ns/activitystreams',
             'type' => 'Undo',
             'object' => [
@@ -180,20 +323,21 @@ final class OutboxControllerTest extends IntegrationTestCase
                 'to' => $objectAndTo->id,
             ],
             'actor' => $actorId,
+            'id' => sprintf(
+                'http://test.localhost/user/%s/activity/%s',
+                $followingUser->getUsername(),
+                $activityUuid
+            ),
             'to' => $objectAndTo->id,
         ], 'application/json'));
 
         $apiHttpClientMock = $this->getClientMock([
             [
-                $request1,
+                $requestResolveExternalActor,
                 $objectAndToResponse,
             ],
             [
-                $request2,
-                $objectAndToResponse,
-            ],
-            [
-                $request3,
+                $requestSendUnfollowToRecipient,
                 self::$responseFactory->createResponse(201),
             ],
         ]);
@@ -213,10 +357,10 @@ final class OutboxControllerTest extends IntegrationTestCase
 
         self::assertNotNull($followedUser);
 
-        /** @var SubscriptionRepository $subscriptionRepository */
-        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepository::class);
+        /** @var SubscriptionRepositoryInterface $subscriptionRepository */
+        $subscriptionRepository = $this->getContainer()->get(SubscriptionRepositoryInterface::class);
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNotNull($subscription);
         self::assertNull($subscription->getEndDate());
@@ -246,7 +390,7 @@ final class OutboxControllerTest extends IntegrationTestCase
         $em = $this->getContainer()->get('doctrine.orm.em');
         $em->clear();
 
-        $subscription = $subscriptionRepository->findByActors($followingUser->getActor(), $followedUser->getActor());
+        $subscription = $subscriptionRepository->getByActors($followingUser->getActor(), $followedUser->getActor());
 
         self::assertNull($subscription);
     }

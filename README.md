@@ -3,7 +3,7 @@ The backend powering Mitra - the distributed social network.
 
 ## Install dependencies
 ```
-$ cd docker && docker-compose run composer install
+$ docker-compose run composer install
 ```
 
 ## Run
@@ -28,7 +28,7 @@ $ ssh-keygen
 
 #### Start up docker
 ```
-$ cd docker && docker-compose up
+$ docker-compose up
 ```
 
 ### Fixtures

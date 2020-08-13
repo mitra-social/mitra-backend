@@ -21,7 +21,7 @@ final class FollowingControllerTest extends IntegrationTestCase
 
     public function testReturnsForbiddenIfNotLoggedIn(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
 
         $request = $this->createRequest('GET', sprintf('/user/%s/following', $user->getUsername()));
         $response = $this->executeRequest($request);
@@ -31,7 +31,7 @@ final class FollowingControllerTest extends IntegrationTestCase
 
     public function testReturnsNotFoundForUnknownUser(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
         $token = $this->createTokenForUser($user);
 
         $request = $this->createRequest('GET', sprintf('/user/%s/following', 'not.found.username'), null, [
@@ -44,8 +44,8 @@ final class FollowingControllerTest extends IntegrationTestCase
 
     public function testReturnsForbiddenForDifferentUser(): void
     {
-        $user1 = $this->createUser();
-        $user2 = $this->createUser();
+        $user1 = $this->createInternalUser();
+        $user2 = $this->createInternalUser();
         $token = $this->createTokenForUser($user1);
 
         $request = $this->createRequest('GET', sprintf('/user/%s/following', $user2->getUsername()), null, [
@@ -58,7 +58,7 @@ final class FollowingControllerTest extends IntegrationTestCase
 
     public function testReturnsFollowingActorsAsCollection(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
         $token = $this->createTokenForUser($user);
 
         $request = $this->createRequest('GET', sprintf('/user/%s/following', $user->getUsername()), null, [
@@ -82,7 +82,7 @@ final class FollowingControllerTest extends IntegrationTestCase
 
     public function testReturnsFollowingActorsAsCollectionPageWithParameterPage(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
         $token = $this->createTokenForUser($user);
 
         $externalId = 'http://example.com/user/paul';
@@ -96,6 +96,8 @@ final class FollowingControllerTest extends IntegrationTestCase
         );
         $subscribedActor = new Person($externalUser);
 
+        $externalUser->setActor($subscribedActor);
+
         $subscription = new Subscription(
             Uuid::uuid4()->toString(),
             $user->getActor(),
@@ -107,7 +109,6 @@ final class FollowingControllerTest extends IntegrationTestCase
         $em = $this->getContainer()->get('doctrine.orm.em');
 
         $em->persist($externalUser);
-        $em->persist($subscribedActor);
         $em->persist($subscription);
         $em->flush();
         $em->clear();
@@ -121,7 +122,15 @@ final class FollowingControllerTest extends IntegrationTestCase
 
         $actualPayload = json_decode((string) $response->getBody(), true);
         $expectedPayload = [
-            '@context' => 'https://www.w3.org/ns/activitystreams',
+            '@context' => [
+                'https://www.w3.org/ns/activitystreams',
+                'https://w3id.org/security/v1',
+                [
+                    'mitra' => 'https://mitra.social/#',
+                    'registeredAt' => 'mitra:registeredAt',
+                    'internalUserId' => 'mitra:internalUserId',
+                ],
+            ],
             'type' => 'CollectionPage',
             'totalItems' => 1,
             'items' => [
@@ -130,7 +139,8 @@ final class FollowingControllerTest extends IntegrationTestCase
                     'id' => $externalId,
                     'preferredUsername' => 'paul',
                     'inbox' => sprintf('%/inbox', $externalId),
-                    'outbox' => sprintf('%/outbox', $externalId)
+                    'outbox' => sprintf('%/outbox', $externalId),
+                    'internalUserId' => $externalUser->getId(),
                 ]
             ],
             'partOf' => sprintf('http://test.localhost/user/%s/following', $user->getUsername()),
@@ -141,7 +151,7 @@ final class FollowingControllerTest extends IntegrationTestCase
 
     public function testReturnsNotFoundOnNotExistingPage(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
         $token = $this->createTokenForUser($user);
 
         $request = $this->createRequest('GET', sprintf('/user/%s/following?page=1', $user->getUsername()), null, [

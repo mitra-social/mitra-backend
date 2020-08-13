@@ -52,7 +52,7 @@ final class TokenControllerTest extends IntegrationTestCase
     public function testIssuingTokenSuccessful(): void
     {
         $password = 's0mePässw0rd';
-        $user = $this->createUser($password);
+        $user = $this->createInternalUser($password);
 
         $data = [
             'username' => $user->getUsername(),

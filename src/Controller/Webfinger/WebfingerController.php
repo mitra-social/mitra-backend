@@ -9,7 +9,7 @@ use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Serialization\Encode\EncoderInterface;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -32,7 +32,7 @@ final class WebfingerController
     private $userRepository;
 
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
@@ -40,7 +40,7 @@ final class WebfingerController
         ResponseFactoryInterface $responseFactory,
         EncoderInterface $encoder,
         InternalUserRepository $userRepository,
-        UriGenerator $uriGenerator
+        UriGeneratorInterface $uriGenerator
     ) {
         $this->responseFactory = $responseFactory;
         $this->encoder = $encoder;

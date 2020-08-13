@@ -8,16 +8,16 @@ use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
-use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 {
     /**
-     * @var UriGenerator
+     * @var UriGeneratorInterface
      */
     private $uriGenerator;
 
-    public function __construct(UriGenerator $uriGenerator)
+    public function __construct(UriGeneratorInterface $uriGenerator)
     {
         $this->uriGenerator = $uriGenerator;
     }
@@ -45,13 +45,8 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
         $userResponseDto = new UserResponseDto();
 
-        $userResponseDto->context = [
-            'https://www.w3.org/ns/activitystreams',
-            'https://w3id.org/security/v1'
-        ];
-        /*$userResponseDto->userId = $entity->getId();
-        $userResponseDto->email = $entity->getEmail();
-        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');*/
+        $userResponseDto->internalUserId = $entity->getId();
+        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
 
         $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',
@@ -74,11 +69,14 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
             ['username' => $entity->getUsername()]
         );
         $userResponseDto->url = $userUrl;
-        $userResponseDto->publicKey = [
-            'id' => $userUrl . '#main-key',
-            'owner' =>  $userResponseDto->url,
-            'publicKeyPem' => $entity->getPublicKey(),
-        ];
+
+        if (null !== $publicKey = $entity->getPublicKey()) {
+            $userResponseDto->publicKey = [
+                'id' => $userUrl . '#main-key',
+                'owner' =>  $userResponseDto->id,
+                'publicKeyPem' => $publicKey,
+            ];
+        }
 
         return $userResponseDto;
     }

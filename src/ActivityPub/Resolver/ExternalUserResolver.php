@@ -7,7 +7,6 @@ namespace Mitra\ActivityPub\Resolver;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
-use Mitra\Entity\Actor\Actor;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\ExternalUser;
@@ -37,10 +36,11 @@ final class ExternalUserResolver
 
     /**
      * @param string|ObjectDto|LinkDto $object
+     * @param \Closure|null $onCreate
      * @return null|ExternalUser
-     * @throws \Mitra\ActivityPub\Resolver\RemoteObjectResolverException
+     * @throws \Exception
      */
-    public function resolve($object): ?ExternalUser
+    public function resolve($object, ?\Closure $onCreate = null): ?ExternalUser
     {
         Assert::notNull($object);
 
@@ -58,11 +58,15 @@ final class ExternalUserResolver
             return $externalUser;
         }
 
-        if (null === $resolvedObject = $this->remoteObjectResolver->resolve($object)) {
+        try {
+            $resolvedObject = $this->remoteObjectResolver->resolve($object);
+        } catch (RemoteObjectResolverException $e) {
             return null;
         }
 
         Assert::isInstanceOf($resolvedObject, ActorInterface::class);
+
+        /** @var ActorInterface $resolvedObject */
 
         $externalId = $resolvedObject->getId();
 
@@ -81,18 +85,21 @@ final class ExternalUserResolver
             $resolvedObject->getOutbox()
         );
 
-        if ('Person' === $resolvedObject->type) {
+        if ('Person' === $resolvedObject->getType()) {
             $actor = new Person($externalUser);
-        } elseif ('Organization' === $resolvedObject->type) {
+        } elseif ('Organization' === $resolvedObject->getType()) {
             $actor = new Organization($externalUser);
         } else {
-            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->type));
+            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->getType()));
         }
 
         $actor->setName($resolvedObject->getName());
-        //$actor->setIcon($resolvedObject->getIcon()); could be array... which one to choose then?
 
         $externalUser->setActor($actor);
+
+        if (null !== $onCreate) {
+            $onCreate($externalUser, $resolvedObject);
+        }
 
         return $externalUser;
     }

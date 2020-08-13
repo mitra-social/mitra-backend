@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Mitra;
 
-use Mitra\Env\Env;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
-use Mitra\Routes\PrivateRouteProvider;
-use Mitra\Routes\PublicRouterProvider;
+use Mitra\Routes\ApiPrivateRouteProvider;
+use Mitra\Routes\ApiPublicRouterProvider;
+use Mitra\Routes\MediaPublicRouteProvider;
 use Mitra\ServiceProvider\ControllerServiceProvider;
 use Mitra\ServiceProvider\ErrorHandlerServiceProvider;
 use Mitra\ServiceProvider\MiddlewareServiceProvider;
@@ -17,9 +17,11 @@ use Mitra\ServiceProvider\SlimServiceProvider;
 use Mitra\Slim\ErrorHandler\HttpErrorHandler;
 use Pimple\Container;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\CallableResolver;
 use Slim\Exception\HttpException;
+use Slim\Interfaces\RouteResolverInterface;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
 use Tuupola\Middleware\JwtAuthentication;
@@ -37,21 +39,32 @@ final class AppFactory
         /** @var ContainerInterface $container */
         $container = $app->getContainer();
 
-        $app->add(ValidateHttpSignatureMiddleware::class);
-        $app->add(AcceptAndContentTypeMiddleware::class);
         $app->add(RequestCycleCleanupMiddleware::class);
 
         // Needs to be last middleware to handle all the errors
-        $errorMiddleware = $app->addErrorMiddleware($container->get('debug'), true, true);
+        $errorMiddleware = $app->addErrorMiddleware(
+            $container->get('debug'),
+            true,
+            true,
+            $container->get(LoggerInterface::class)
+        );
         $errorMiddleware->setErrorHandler(HttpException::class, HttpErrorHandler::class, true);
 
-        $app->group('', new PublicRouterProvider());
-        $app->group('', new PrivateRouteProvider())->add(JwtAuthentication::class);
+        // API group
+        $app->group('', function () use ($app): void {
+            $app->group('', new ApiPublicRouterProvider());
+            $app->group('', new ApiPrivateRouteProvider())->add(JwtAuthentication::class);
+        })
+            ->add(ValidateHttpSignatureMiddleware::class)
+            ->add(AcceptAndContentTypeMiddleware::class);
+
+        $app->group('', new MediaPublicRouteProvider());
 
         return $app;
     }
 
     /**
+     * @param Container $container
      * @return App
      */
     private function createApp(Container $container): App
@@ -67,7 +80,8 @@ final class AppFactory
             $container[ResponseFactory::class],
             $container[ContainerInterface::class],
             $container[CallableResolver::class],
-            $container[RouteCollector::class]
+            $container[RouteCollector::class],
+            $container[RouteResolverInterface::class]
         );
     }
 }

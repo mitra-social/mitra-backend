@@ -24,7 +24,6 @@ test:
 
 test-unit:
 	${PHPSPEC} --no-coverage
-	${PHPUNIT} --group=Unit
 
 test-integration:
 	${PHPUNIT} --group=Integration

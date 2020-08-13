@@ -1,5 +1,6 @@
 {
   "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://example.com/content/11d77c86-2226-4725-bd1e-bade116d976d",
   "type": "Image",
   "name": "Cat Jumping on Wagon",
   "url": [

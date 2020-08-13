@@ -1,5 +1,6 @@
 {
   "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://example.com/content/8718c9af-3a3d-4918-9c2c-9f02fe3eafd2",
   "type": "Note",
   "name": "A Word of Warning",
   "content": "Looks like it is going to rain today. Bring an umbrella!",

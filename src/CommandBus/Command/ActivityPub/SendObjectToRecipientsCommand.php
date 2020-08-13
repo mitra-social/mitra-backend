@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Mitra\CommandBus\Command\ActivityPub;
 
 use Doctrine\Common\Util\Debug;
+use Mitra\CommandBus\CommandInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\User\InternalUser;
 
 /**
  * Analyzes the objects, bto to, cc, bcc normalizes the list and sends out the object
  */
-final class SendObjectToRecipientsCommand
+final class SendObjectToRecipientsCommand implements CommandInterface
 {
     /**
      * @var ObjectDto

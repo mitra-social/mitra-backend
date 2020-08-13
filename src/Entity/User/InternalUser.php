@@ -90,4 +90,14 @@ class InternalUser extends AbstractUser implements TimestampableInterface
         $this->publicKey = null;
         $this->privateKey = null;
     }
+
+    public function __toString()
+    {
+        return sprintf(
+            'id:%s, username:%s, email:%s',
+            $this->id,
+            $this->username,
+            $this->email,
+        );
+    }
 }
