@@ -300,7 +300,6 @@ final class InboxWriteControllerTest extends IntegrationTestCase
 
         $toUser = $this->createInternalUser();
         $toUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser->getUsername()]);
-        $token = $this->createTokenForUser($toUser);
 
         $this->createSubscription($toUser->getActor(), $externalUser->getActor());
 
@@ -336,10 +335,6 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         self::assertCount(1, $userContent);
         self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
 
-        /** @var EntityManagerInterface $em */
-        $em = $this->getContainer()->get(EntityManagerInterface::class);
-        $em->clear();
-
         /** @var ReflectedIdGenerator $idGenerator */
         $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
 
@@ -366,7 +361,6 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         $response = $this->executeRequest($request);
 
         self::assertStatusCode(201, $response);
-
 
         $content = $contentRepository->getByExternalId($dto->id);
         self::assertNull($content);
