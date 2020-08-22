@@ -15,6 +15,7 @@ use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\RequestSigner;
 use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
+use Mitra\ActivityPub\Resolver\ObjectIdDeterminer;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Entity\Actor\Person;
@@ -94,10 +95,15 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             );
         };
 
+        $container[ObjectIdDeterminer::class] = static function (): ObjectIdDeterminer {
+            return new ObjectIdDeterminer();
+        };
+
         $container[ExternalUserResolver::class] = static function (Container $container): ExternalUserResolver {
             return new ExternalUserResolver(
                 $container[RemoteObjectResolver::class],
-                $container[ExternalUserRepository::class]
+                $container[ExternalUserRepository::class],
+                $container[ObjectIdDeterminer::class],
             );
         };
 

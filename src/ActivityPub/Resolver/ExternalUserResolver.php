@@ -26,12 +26,19 @@ final class ExternalUserResolver
      */
     private $externalUserRepository;
 
+    /**
+     * @var ObjectIdDeterminer
+     */
+    private $objectIdDeterminer;
+
     public function __construct(
         RemoteObjectResolver $remoteObjectResolver,
-        ExternalUserRepository $externalUserRepository
+        ExternalUserRepository $externalUserRepository,
+        ObjectIdDeterminer $objectIdDeterminer
     ) {
         $this->remoteObjectResolver = $remoteObjectResolver;
         $this->externalUserRepository = $externalUserRepository;
+        $this->objectIdDeterminer = $objectIdDeterminer;
     }
 
     /**
@@ -44,14 +51,8 @@ final class ExternalUserResolver
     {
         Assert::notNull($object);
 
-        $externalId = null;
-
-        if (is_string($object)) {
-            $externalId = $object;
-        } elseif ($object instanceof LinkDto) {
-            $externalId = $object->href;
-        } elseif ($object instanceof ObjectDto) {
-            $externalId = $object->id;
+        if (null === $externalId = $this->objectIdDeterminer->getId($object)) {
+            return null;
         }
 
         if (null !== $externalUser = $this->externalUserRepository->findOneByExternalId($externalId)) {
