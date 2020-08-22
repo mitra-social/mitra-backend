@@ -58,7 +58,7 @@ final class InstanceUserReadController
                     'https://www.w3.org/ns/activitystreams',
                     'https://w3id.org/security/v1',
                 ],
-                'type' => 'Application',
+                'type' => 'Person', // Some instances have problems with different actors -> 'Application',
                 'id' => $instanceUserUrl,
                 'url' => $instanceUserUrl,
                 'inbox' => $instanceUserUrl . "/inbox",
