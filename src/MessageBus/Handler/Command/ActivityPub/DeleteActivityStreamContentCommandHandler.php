@@ -7,6 +7,8 @@ namespace Mitra\MessageBus\Handler\Command\ActivityPub;
 use Doctrine\ORM\EntityManagerInterface;
 use Mitra\ActivityPub\Resolver\ObjectIdDeterminer;
 use Mitra\Dto\Response\ActivityStreams\Activity\DeleteDto;
+use Mitra\Dto\Response\ActivityStreams\LinkDto;
+use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\MessageBus\Command\ActivityPub\DeleteActivityStreamContentCommand;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 
@@ -50,16 +52,25 @@ final class DeleteActivityStreamContentCommandHandler
 
         /** @var DeleteDto $objectDto */
 
-        if (null === $objectId = $this->objectIdDeterminer->getId($objectDto->object)) {
+        if (null === $objectDto->object) {
             return;
         }
 
-        $existingContent = $this->activityStreamContentRepository->getByExternalId($objectId);
+        /** @var array<ObjectDto|string|LinkDto> $objectsToDelete */
+        $objectsToDelete = is_array($objectDto->object) ? $objectDto->object : [$objectDto->object];
 
-        if (null === $existingContent) {
-            return;
+        foreach ($objectsToDelete as $objectToDelete) {
+            if (null === $objectId = $this->objectIdDeterminer->getId($objectToDelete)) {
+                return;
+            }
+
+            $existingContent = $this->activityStreamContentRepository->getByExternalId($objectId);
+
+            if (null === $existingContent) {
+                return;
+            }
+
+            $this->entityManager->remove($existingContent);
         }
-
-        $this->entityManager->remove($existingContent);
     }
 }
