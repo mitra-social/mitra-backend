@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use Mitra\CommandBus\Command\ActivityPub\AssignActorCommand;
-use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
-use Mitra\CommandBus\Command\ActivityPub\SendObjectToRecipientsCommand;
-use Mitra\CommandBus\Command\ActivityPub\UndoCommand;
-use Mitra\CommandBus\CommandBusInterface;
-use Mitra\CommandBus\CommandInterface;
+use Mitra\MessageBus\Command\ActivityPub\AssignActorCommand;
+use Mitra\MessageBus\Command\ActivityPub\FollowCommand;
+use Mitra\MessageBus\Command\ActivityPub\SendObjectToRecipientsCommand;
+use Mitra\MessageBus\Command\ActivityPub\UndoCommand;
+use Mitra\MessageBus\CommandBusInterface;
+use Mitra\MessageBus\CommandInterface;
 use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Response\ActivityStreams\Activity\AbstractActivityDto;

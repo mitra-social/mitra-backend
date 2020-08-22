@@ -6,9 +6,9 @@ namespace Mitra\Controller\System;
 
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ApiProblem\BadRequestApiProblem;
-use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
-use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
-use Mitra\CommandBus\EventBusInterface;
+use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
+use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
+use Mitra\MessageBus\EventBusInterface;
 use Mitra\Dto\DataToDtoPopulatorException;
 use Mitra\Dto\DataToDtoPopulatorInterface;
 use Mitra\Dto\DtoToEntityMapper;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Mitra\Tests\Integration\Controller\ActivityPub;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
-use Mitra\CommandBus\CommandBusInterface;
+use Mitra\MessageBus\Command\ActivityPub\FollowCommand;
+use Mitra\MessageBus\CommandBusInterface;
 use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Entity\Media;
