@@ -244,7 +244,8 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
         ): AssignActivityStreamContentToActorCommandHandler {
             return new AssignActivityStreamContentToActorCommandHandler(
                 $container[EntityManagerInterface::class],
-                $container[EventEmitterInterface::class]
+                $container[EventEmitterInterface::class],
+                $container[InternalUserRepository::class]
             );
         };
 
