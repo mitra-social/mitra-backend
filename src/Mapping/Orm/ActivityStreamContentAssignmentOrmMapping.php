@@ -52,6 +52,7 @@ final class ActivityStreamContentAssignmentOrmMapping implements ClassMapMapping
                     'name' => 'content_id',
                     'referencedColumnName' => 'id',
                     'nullable' => false,
+                    'onDelete' => 'CASCADE',
                 ],
             ],
         ]);

@@ -10,6 +10,7 @@ use Mitra\ActivityPub\Client\ActivityPubClientInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
+use Mitra\ActivityPub\Resolver\ObjectIdDeterminer;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\MessageBus\CommandBusInterface;
 use Mitra\MessageBus\EventBusInterface;
@@ -19,6 +20,7 @@ use Mitra\MessageBus\Handler\Command\ActivityPub\AssignActivityStreamContentToAc
 use Mitra\MessageBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
+use Mitra\MessageBus\Handler\Command\ActivityPub\DeleteActivityStreamContentCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\DereferenceCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
@@ -283,6 +285,16 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
                 $container[ActivityStreamContentRepositoryInterface::class],
                 $container[RemoteObjectResolver::class],
                 $container[EventEmitterInterface::class]
+            );
+        };
+
+        $container[DeleteActivityStreamContentCommandHandler::class] = static function (
+            Container $container
+        ): DeleteActivityStreamContentCommandHandler {
+            return new DeleteActivityStreamContentCommandHandler(
+                $container[ActivityStreamContentRepositoryInterface::class],
+                $container[EntityManagerInterface::class],
+                $container[ObjectIdDeterminer::class]
             );
         };
     }
