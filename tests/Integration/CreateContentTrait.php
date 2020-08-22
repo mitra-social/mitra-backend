@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration;
 
-use Mitra\CommandBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
-use Mitra\CommandBus\EventBusInterface;
+use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
+use Mitra\MessageBus\EventBusInterface;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\Actor\Actor;

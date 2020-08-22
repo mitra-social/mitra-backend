@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use Mitra\CommandBus\Command\CreateUserCommand;
-use Mitra\CommandBus\CommandBusInterface;
+use Mitra\MessageBus\Command\CreateUserCommand;
+use Mitra\MessageBus\CommandBusInterface;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
 use Mitra\Dto\RequestToDtoTransformer;

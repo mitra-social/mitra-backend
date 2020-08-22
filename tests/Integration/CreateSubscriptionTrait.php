@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Tests\Integration;
 
-use Mitra\CommandBus\Command\ActivityPub\FollowCommand;
-use Mitra\CommandBus\CommandBusInterface;
+use Mitra\MessageBus\Command\ActivityPub\FollowCommand;
+use Mitra\MessageBus\CommandBusInterface;
 use Mitra\Dto\Response\ActivityStreams\Activity\FollowDto;
 use Mitra\Entity\Actor\Actor;
 use Psr\Container\ContainerInterface;
