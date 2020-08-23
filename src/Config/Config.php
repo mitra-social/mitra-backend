@@ -10,6 +10,7 @@ use Mitra\MessageBus\Command\ActivityPub\AssignActivityStreamContentToActorComma
 use Mitra\MessageBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\MessageBus\Command\ActivityPub\AssignActorCommand;
 use Mitra\MessageBus\Command\ActivityPub\AttributeActivityStreamContentCommand;
+use Mitra\MessageBus\Command\ActivityPub\DeleteActivityStreamContentCommand;
 use Mitra\MessageBus\Command\ActivityPub\DereferenceCommand;
 use Mitra\MessageBus\Command\ActivityPub\FollowCommand;
 use Mitra\MessageBus\Command\ActivityPub\PersistActivityStreamContentCommand;
@@ -29,6 +30,7 @@ use Mitra\MessageBus\Handler\Command\ActivityPub\AssignActivityStreamContentToAc
 use Mitra\MessageBus\Handler\Command\ActivityPub\AssignActivityStreamContentToFollowersCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\AssignActorCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\AttributeActivityStreamContentCommandHandler;
+use Mitra\MessageBus\Handler\Command\ActivityPub\DeleteActivityStreamContentCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\DereferenceCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\FollowCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\PersistActivityStreamContentCommandHandler;
@@ -324,6 +326,7 @@ final class Config implements ConfigInterface
                 UpdateExternalActorCommand::class => UpdateExternalActorCommandHandler::class,
                 UpdateActorIconCommand::class => UpdateActorIconCommandHandler::class,
                 DereferenceCommand::class => DereferenceCommandHandler::class,
+                DeleteActivityStreamContentCommand::class => DeleteActivityStreamContentCommandHandler::class,
             ],
             'event_handlers' => [
                 ActivityStreamContentReceivedEvent::class => [

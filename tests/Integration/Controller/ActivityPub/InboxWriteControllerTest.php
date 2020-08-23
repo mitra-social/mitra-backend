@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Integration\Controller\ActivityPub;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Mitra\Dto\Response\ActivityStreams\Activity\DeleteDto;
 use Mitra\Entity\ActivityStreamContent;
 use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
+use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
+use Mitra\Tests\Integration\CreateContentTrait;
 use Mitra\Tests\Integration\CreateSubscriptionTrait;
 use Mitra\Dto\Response\ActivityStreams\Activity\CreateDto;
 use Mitra\Dto\Response\ActivityStreams\NoteDto;
@@ -27,6 +31,7 @@ final class InboxWriteControllerTest extends IntegrationTestCase
     use CreateUserTrait;
     use CreateSubscriptionTrait;
     use ClientMockTrait;
+    use CreateContentTrait;
 
     /**
      * @var ResponseFactoryInterface
@@ -283,5 +288,86 @@ final class InboxWriteControllerTest extends IntegrationTestCase
         /** @var ActivityStreamContent $linkedObject2 */
         $linkedObject2 = $linkedObject->getLinkedObjects()[0];
         self::assertEquals($referencedInReplyToId, $linkedObject2->getExternalId());
+    }
+
+    public function testDeletesContentOnDeleteActivity(): void
+    {
+        /** @var UriGeneratorInterface $uriGenerator */
+        $uriGenerator = $this->getContainer()->get(UriGeneratorInterface::class);
+
+        $externalActorUsername = sprintf('bob.%s', uniqid());
+        $externalUser = $this->createExternalUser($externalActorUsername);
+
+        $toUser = $this->createInternalUser();
+        $toUserExternalId = $uriGenerator->fullUrlFor('user-read', ['username' => $toUser->getUsername()]);
+
+        $this->createSubscription($toUser->getActor(), $externalUser->getActor());
+
+        $dtoContent = 'Foo bar baz';
+
+        $dto = new CreateDto();
+        $dto->id = sprintf('https://example.com/user/%s/post/123456', $externalActorUsername);
+        $dto->actor = $externalUser->getExternalId();
+        $dto->object = new NoteDto();
+        $dto->object->content = $dtoContent;
+        $dto->to = [
+            $toUserExternalId,
+        ];
+
+        $this->createContent($dto, $toUser->getActor());
+
+        /** @var ActivityStreamContentRepositoryInterface $contentRepository */
+        $contentRepository = $this->getContainer()->get(
+            ActivityStreamContentRepositoryInterface::class
+        );
+
+        /** @var ActivityStreamContentAssignmentRepositoryInterface $contentAssignmentRepository */
+        $contentAssignmentRepository = $this->getContainer()->get(
+            ActivityStreamContentAssignmentRepositoryInterface::class
+        );
+
+        $content = $contentRepository->getByExternalId($dto->id);
+        self::assertNotNull($content);
+
+        /** @var ActivityStreamContentAssignment[] $userContent */
+        $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null, null);
+
+        self::assertCount(1, $userContent);
+        self::assertEquals($userContent[0]->getContent()->getExternalId(), $dto->id);
+
+        /** @var ReflectedIdGenerator $idGenerator */
+        $idGenerator = $this->getContainer()->get(IdGeneratorInterface::class);
+
+        $idGenerator->setIds([
+            'ed777377-8cdd-4f92-b618-e2d0c4e254da',
+        ]);
+
+        $dtoDelete = new DeleteDto();
+        $dtoDelete->id = sprintf('%s#delete', $dto->id);
+        $dtoDelete->actor = $externalUser->getExternalId();
+        $dtoDelete->object = $dto->id;
+        $dtoDelete->to = [
+            $toUserExternalId,
+        ];
+
+        /** @var EncoderInterface $encoder */
+        $encoder = $this->getContainer()->get(EncoderInterface::class);
+        /** @var NormalizerInterface $normalizer */
+        $normalizer = $this->getContainer()->get(NormalizerInterface::class);
+
+        $payload = $encoder->encode($normalizer->normalize($dtoDelete), 'application/json');
+
+        $request = $this->createRequest('POST', sprintf('/user/%s/inbox', $toUser->getUsername()), $payload);
+        $response = $this->executeRequest($request);
+
+        self::assertStatusCode(201, $response);
+
+        $content = $contentRepository->getByExternalId($dto->id);
+        self::assertNull($content);
+
+        /** @var ActivityStreamContentAssignment[] $userContent */
+        $userContent = $contentAssignmentRepository->findContentForActor($toUser->getActor(), null, null, null);
+
+        self::assertCount(0, $userContent);
     }
 }
