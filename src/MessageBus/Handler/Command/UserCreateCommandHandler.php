@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Mitra\MessageBus\Handler\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Mitra\MessageBus\Command\CreateUserCommand;
+use Mitra\Clock\ClockInterface;
+use Mitra\MessageBus\Command\UserCreateCommand;
 use Mitra\Entity\User\InternalUser;
+use Mitra\Security\PasswordHasherInterface;
 use Webmozart\Assert\Assert;
 
-final class CreateUserCommandHandler
+final class UserCreateCommandHandler
 {
 
     /**
@@ -18,20 +20,32 @@ final class CreateUserCommandHandler
     private $entityManager;
 
     /**
-     * @param EntityManagerInterface $entityManager
+     * @var ClockInterface
      */
-    public function __construct(EntityManagerInterface $entityManager)
-    {
+    private $clock;
+
+    /**
+     * @var PasswordHasherInterface
+     */
+    private $passwordHasher;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        ClockInterface $clock,
+        PasswordHasherInterface $passwordHasher
+    ) {
         $this->entityManager = $entityManager;
+        $this->clock = $clock;
+        $this->passwordHasher = $passwordHasher;
     }
 
-    public function __invoke(CreateUserCommand $command): void
+    public function __invoke(UserCreateCommand $command): void
     {
         $user = $command->getUser();
 
         Assert::notNull($user->getActor());
 
-        $user->setCreatedAt(new \DateTime());
+        $user->setCreatedAt($this->clock->now());
 
         $this->hashPassword($user);
 
@@ -44,13 +58,7 @@ final class CreateUserCommandHandler
 
     private function hashPassword(InternalUser $user): void
     {
-        $hashedPassword = password_hash($user->getPlaintextPassword(), PASSWORD_DEFAULT);
-
-        if (false === $hashedPassword) {
-            throw new \RuntimeException('Hashing the password failed');
-        }
-
-        $user->setHashedPassword($hashedPassword);
+        $user->setHashedPassword($this->passwordHasher->hash($user->getPlaintextPassword()));
         $user->setPlaintextPassword(null);
     }
 

@@ -87,7 +87,7 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
         string $mimeType,
         int $code = 200
     ): ResponseInterface {
-        $dto = $this->entityToDtoMapper->map($entity, $dtoClass);
+        $dto = $this->entityToDtoMapper->map($entity, $dtoClass, $request);
 
         return $this->createResponseFromDto($dto, $request, $mimeType, $code);
     }
@@ -116,7 +116,7 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
             ApiProblemDto::class,
             $request,
             $mimeType,
-            $apiProblem->getStatus()
+            $apiProblem->getHttpStatusCode()
         );
     }
 }

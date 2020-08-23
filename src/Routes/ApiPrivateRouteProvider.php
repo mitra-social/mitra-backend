@@ -8,6 +8,7 @@ use Mitra\Controller\User\FollowingListController;
 use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\User\OutboxWriteController;
+use Mitra\Controller\User\UserUpdateController;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 
 final class ApiPrivateRouteProvider implements RouteProviderInterface
@@ -19,5 +20,6 @@ final class ApiPrivateRouteProvider implements RouteProviderInterface
         $group->post('/user/{username}/outbox', OutboxWriteController::class)->setName('user-outbox-write');
         $group->get('/user/{username}/outbox', OutboxWriteController::class)->setName('user-outbox-read');
         $group->get('/user/{username}/following', FollowingListController::class)->setName('user-following');
+        $group->patch('/user/{username}', UserUpdateController::class)->setName('user-update');
     }
 }

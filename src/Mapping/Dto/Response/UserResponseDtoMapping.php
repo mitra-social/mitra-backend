@@ -6,6 +6,7 @@ namespace Mitra\Mapping\Dto\Response;
 
 use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
+use Mitra\Mapping\Dto\EntityToDtoMappingContext;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 use Mitra\Slim\UriGeneratorInterface;
@@ -34,10 +35,11 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|InternalUser $entity
+     * @param EntityToDtoMappingContext $context
      * @return object|UserResponseDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity): object
+    public function toDto(object $entity, EntityToDtoMappingContext $context): object
     {
         if (!$entity instanceof InternalUser) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -46,7 +48,16 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
         $userResponseDto = new UserResponseDto();
 
         $userResponseDto->internalUserId = $entity->getId();
-        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');
+        $userResponseDto->published = $entity->getCreatedAt()->format('c');
+
+        if (null !== $entity->getUpdatedAt()) {
+            $userResponseDto->updated = $entity->getUpdatedAt()->format('c');
+        }
+
+        if ($this->isResourceOwner($entity, $context)) {
+            $userResponseDto->context[2]['email'] = 'mitra:email';
+            $userResponseDto->email = $entity->getEmail();
+        }
 
         $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',
@@ -79,5 +90,25 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
         }
 
         return $userResponseDto;
+    }
+
+    /**
+     * @param object|InternalUser $entity
+     * @param EntityToDtoMappingContext $context
+     * @return bool
+     */
+    private function isResourceOwner(object $entity, EntityToDtoMappingContext $context): bool
+    {
+        if (null === $requestContext = $context->getRequest()) {
+            return false;
+        }
+
+        if (null === $authenticatedUser = $requestContext->getAttribute('authenticatedUser')) {
+            return false;
+        }
+
+        /** @var InternalUser $authenticatedUser */
+
+        return $authenticatedUser->getId() === $entity->getId();
     }
 }

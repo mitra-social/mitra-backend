@@ -21,6 +21,7 @@ use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
 use Mitra\Slim\UriGeneratorInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class FollowingListController extends AbstractCollectionController
 {
@@ -55,12 +56,13 @@ final class FollowingListController extends AbstractCollectionController
     }
 
     /**
+     * @param ServerRequestInterface $request
      * @param Actor $actorDto
      * @param Filter|null $filter
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
      */
-    protected function getItems(Actor $actorDto, ?Filter $filter, ?int $page): array
+    protected function getItems(ServerRequestInterface $request, Actor $actorDto, ?Filter $filter, ?int $page): array
     {
         $offset = null;
         $limit = null;
@@ -97,7 +99,8 @@ final class FollowingListController extends AbstractCollectionController
                 /** @var ObjectDto $actorDto */
                 $actorDto = $this->entityToDtoMapper->map(
                     $subscribedActorUser,
-                    $dtoClass
+                    $dtoClass,
+                    $request
                 );
             } elseif ($subscribedActorUser instanceof InternalUser) {
                 $actorDto->id = $this->uriGenerator->fullUrlFor('user-read', [

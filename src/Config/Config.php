@@ -6,6 +6,8 @@ namespace Mitra\Config;
 
 use ActivityPhp\Type\Extended\Object\Image;
 use Chubbyphp\Config\ConfigInterface;
+use Mitra\Dto\Request\UpdateUserRequestDto;
+use Mitra\Mapping\Validation\UpdateUserRequestDtoValidationMapping;
 use Mitra\MessageBus\Command\ActivityPub\AssignActivityStreamContentToActorCommand;
 use Mitra\MessageBus\Command\ActivityPub\AssignActivityStreamContentToFollowersCommand;
 use Mitra\MessageBus\Command\ActivityPub\AssignActorCommand;
@@ -18,8 +20,9 @@ use Mitra\MessageBus\Command\ActivityPub\SendObjectToRecipientsCommand;
 use Mitra\MessageBus\Command\ActivityPub\UndoCommand;
 use Mitra\MessageBus\Command\ActivityPub\UpdateExternalActorCommand;
 use Mitra\MessageBus\Command\ActivityPub\ValidateContentCommand;
-use Mitra\MessageBus\Command\CreateUserCommand;
+use Mitra\MessageBus\Command\UserCreateCommand;
 use Mitra\MessageBus\Command\UpdateActorIconCommand;
+use Mitra\MessageBus\Command\UserUpdateCommand;
 use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentAttributedEvent;
 use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentPersistedEvent;
 use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentReceivedEvent;
@@ -38,8 +41,9 @@ use Mitra\MessageBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHa
 use Mitra\MessageBus\Handler\Command\ActivityPub\UndoCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
-use Mitra\MessageBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\MessageBus\Handler\Command\UserCreateCommandHandler;
 use Mitra\MessageBus\Handler\Command\UpdateActorIconCommandHandler;
+use Mitra\MessageBus\Handler\Command\UserUpdateCommandHandler;
 use Mitra\MessageBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
 use Mitra\MessageBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\MessageBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
@@ -284,6 +288,7 @@ final class Config implements ConfigInterface
     {
         return [
             CreateUserRequestDto::class => CreateUserRequestDtoValidationMapping::class,
+            UpdateUserRequestDto::class => UpdateUserRequestDtoValidationMapping::class,
             TokenRequestDto::class => TokenRequestDtoValidationMapping::class,
 
             // ActivityPub
@@ -310,7 +315,8 @@ final class Config implements ConfigInterface
     {
         return [
             'command_handlers' => [
-                CreateUserCommand::class => CreateUserCommandHandler::class,
+                UserCreateCommand::class => UserCreateCommandHandler::class,
+                UserUpdateCommand::class => UserUpdateCommandHandler::class,
                 AssignActorCommand::class => AssignActorCommandHandler::class,
                 SendObjectToRecipientsCommand::class => SendObjectToRecipientsCommandHandler::class,
                 FollowCommand::class => FollowCommandHandler::class,
