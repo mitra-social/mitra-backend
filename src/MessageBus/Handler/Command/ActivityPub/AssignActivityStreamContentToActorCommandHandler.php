@@ -9,6 +9,7 @@ use Mitra\MessageBus\Command\ActivityPub\AssignActivityStreamContentToActorComma
 use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentAssignedEvent;
 use Mitra\MessageBus\EventEmitterInterface;
 use Mitra\Entity\ActivityStreamContentAssignment;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Ramsey\Uuid\Uuid;
 
 final class AssignActivityStreamContentToActorCommandHandler
@@ -24,6 +25,11 @@ final class AssignActivityStreamContentToActorCommandHandler
      */
     private $eventEmitter;
 
+    /**
+     * @var ActivityStreamContentAssignmentRepositoryInterface
+     */
+    private $activityStreamContentAssignmentRepository;
+
     public function __construct(EntityManagerInterface $entityManager, EventEmitterInterface $eventEmitter)
     {
         $this->eventEmitter = $eventEmitter;
@@ -34,6 +40,10 @@ final class AssignActivityStreamContentToActorCommandHandler
     {
         $entity = $command->getActivityStreamContentEntity();
         $actor = $command->getActor();
+
+        if (null !== $this->activityStreamContentAssignmentRepository->findAssignment($actor, $entity)) {
+            return;
+        }
 
         $assignment = new ActivityStreamContentAssignment(Uuid::uuid4()->toString(), $actor, $entity);
 
