@@ -32,7 +32,7 @@ final class UpdateUserRequestDtoValidationMapping implements ValidationMappingIn
                 new NotBlank(),
                 new Length(['min' => 8])
             ])
-            ->addPropertyConstraints('password', [
+            ->addPropertyConstraints('currentPassword', [
                 new Type('string'),
                 new NotNull(),
                 new NotBlank(),
