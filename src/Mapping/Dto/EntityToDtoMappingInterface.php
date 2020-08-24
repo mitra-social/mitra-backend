@@ -6,5 +6,5 @@ namespace Mitra\Mapping\Dto;
 
 interface EntityToDtoMappingInterface extends DtoMappingInterface
 {
-    public function toDto(object $entity): object;
+    public function toDto(object $entity, EntityToDtoMappingContext $context): object;
 }

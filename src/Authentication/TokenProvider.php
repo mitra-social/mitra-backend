@@ -6,6 +6,7 @@ namespace Mitra\Authentication;
 
 use Firebase\JWT\JWT;
 use Mitra\Repository\InternalUserRepository;
+use Mitra\Security\PasswordVerifierInterface;
 
 final class TokenProvider
 {
@@ -16,13 +17,22 @@ final class TokenProvider
     private $userRepository;
 
     /**
+     * @var PasswordVerifierInterface
+     */
+    private $passwordVerifier;
+
+    /**
      * @var string
      */
     private $secretKey;
 
-    public function __construct(InternalUserRepository $userRepository, string $secretKey)
-    {
+    public function __construct(
+        InternalUserRepository $userRepository,
+        PasswordVerifierInterface $passwordVerifier,
+        string $secretKey
+    ) {
         $this->userRepository = $userRepository;
+        $this->passwordVerifier = $passwordVerifier;
         $this->secretKey = $secretKey;
     }
 
@@ -40,7 +50,7 @@ final class TokenProvider
             throw new TokenIssueException(sprintf('Could not find user with preferredUsername `%s`', $username));
         }
 
-        if (false === password_verify($plaintextPassword, $user->getHashedPassword())) {
+        if (false === $this->passwordVerifier->verify($plaintextPassword, $user->getHashedPassword())) {
             throw new TokenIssueException('The provided password is invalid');
         }
 

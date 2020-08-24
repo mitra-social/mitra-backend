@@ -6,6 +6,8 @@ namespace Mitra\ServiceProvider;
 
 use Mitra\ActivityPub\HashGenerator;
 use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\Clock\Clock;
+use Mitra\Clock\ClockInterface;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Slim\UriGenerator;
 use Mitra\Slim\UriGeneratorInterface;
@@ -70,6 +72,10 @@ final class SlimServiceProvider implements ServiceProviderInterface
 
         $container[IdGeneratorInterface::class] = static function (): IdGeneratorInterface {
             return new UuidGenerator();
+        };
+
+        $container[ClockInterface::class] = static function (): ClockInterface {
+            return new Clock();
         };
     }
 }

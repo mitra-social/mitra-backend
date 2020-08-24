@@ -7,6 +7,7 @@ namespace Mitra\Mapping\Dto\Response;
 use Mitra\ApiProblem\ApiProblem;
 use Mitra\ApiProblem\ApiProblemInterface;
 use Mitra\Dto\Response\ApiProblemDto;
+use Mitra\Mapping\Dto\EntityToDtoMappingContext;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 
@@ -23,7 +24,7 @@ class ApiProblemDtoMapping implements EntityToDtoMappingInterface
         return ApiProblem::class;
     }
 
-    public function toDto(object $entity): object
+    public function toDto(object $entity, EntityToDtoMappingContext $context): object
     {
         if (!$entity instanceof ApiProblemInterface) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());

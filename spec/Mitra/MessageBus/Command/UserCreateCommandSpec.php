@@ -2,12 +2,12 @@
 
 namespace spec\Mitra\MessageBus\Command;
 
-use Mitra\MessageBus\Command\CreateUserCommand;
+use Mitra\MessageBus\Command\UserCreateCommand;
 use Mitra\Entity\User\InternalUser;
 use PhpSpec\ObjectBehavior;
 use Ramsey\Uuid\Uuid;
 
-final class CreateUserCommandSpec extends ObjectBehavior
+final class UserCreateCommandSpec extends ObjectBehavior
 {
 
     public function let(): void
@@ -18,6 +18,6 @@ final class CreateUserCommandSpec extends ObjectBehavior
 
     public function it_is_initializable(): void
     {
-        $this->shouldHaveType(CreateUserCommand::class);
+        $this->shouldHaveType(UserCreateCommand::class);
     }
 }

@@ -53,7 +53,7 @@ final class FollowingControllerTest extends IntegrationTestCase
         ]);
         $response = $this->executeRequest($request);
 
-        self::assertStatusCode(401, $response);
+        self::assertStatusCode(403, $response);
     }
 
     public function testReturnsFollowingActorsAsCollection(): void
@@ -127,7 +127,6 @@ final class FollowingControllerTest extends IntegrationTestCase
                 'https://w3id.org/security/v1',
                 [
                     'mitra' => 'https://mitra.social/#',
-                    'registeredAt' => 'mitra:registeredAt',
                     'internalUserId' => 'mitra:internalUserId',
                 ],
             ],

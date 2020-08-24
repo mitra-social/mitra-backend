@@ -13,7 +13,6 @@ final class UserResponseDto extends PersonDto
         'https://w3id.org/security/v1',
         [
             'mitra' => 'https://mitra.social/#',
-            'registeredAt' => 'mitra:registeredAt',
             'internalUserId' => 'mitra:internalUserId',
         ],
     ];
@@ -27,9 +26,4 @@ final class UserResponseDto extends PersonDto
      * @var string
      */
     public $email;
-
-    /**
-     * @var string
-     */
-    public $registeredAt;
 }

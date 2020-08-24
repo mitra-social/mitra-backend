@@ -9,7 +9,7 @@ use Mitra\Tests\Integration\IntegrationTestCase;
 /**
  * @group Integration
  */
-final class CreateUserControllerTest extends IntegrationTestCase
+final class UserCreateControllerTest extends IntegrationTestCase
 {
     public function testCreatingUserFailsWithWrongData(): void
     {
