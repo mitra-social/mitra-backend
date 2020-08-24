@@ -40,6 +40,7 @@ use Mitra\MessageBus\SymfonyMessengerCommandBus;
 use Mitra\MessageBus\SymfonyMessengerEventBus;
 use Mitra\MessageBus\SymfonyMessengerHandlersLocator;
 use Mitra\Factory\ActivityStreamContentFactoryInterface;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
@@ -245,6 +246,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): AssignActivityStreamContentToActorCommandHandler {
             return new AssignActivityStreamContentToActorCommandHandler(
+                $container[ActivityStreamContentAssignmentRepositoryInterface::class],
                 $container[EntityManagerInterface::class],
                 $container[EventEmitterInterface::class]
             );

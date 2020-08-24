@@ -30,8 +30,12 @@ final class AssignActivityStreamContentToActorCommandHandler
      */
     private $activityStreamContentAssignmentRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, EventEmitterInterface $eventEmitter)
-    {
+    public function __construct(
+        ActivityStreamContentAssignmentRepositoryInterface $activityStreamContentAssignmentRepository,
+        EntityManagerInterface $entityManager,
+        EventEmitterInterface $eventEmitter
+    ) {
+        $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->eventEmitter = $eventEmitter;
         $this->entityManager = $entityManager;
     }
