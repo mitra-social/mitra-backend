@@ -16,8 +16,10 @@ use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\SubscriptionRepository;
+use Mitra\Repository\SubscriptionRepositoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerInterface;
@@ -29,7 +31,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
     private const PUBLIC_URL = 'https://www.w3.org/ns/activitystreams#Public';
 
     /**
-     * @var SubscriptionRepository
+     * @var SubscriptionRepositoryInterface
      */
     private $subscriptionRepository;
 
@@ -37,6 +39,11 @@ final class AssignActivityStreamContentToFollowersCommandHandler
      * @var InternalUserRepository
      */
     private $internalUserRepository;
+
+    /**
+     * @var ActivityStreamContentAssignmentRepositoryInterface
+     */
+    private $activityStreamContentAssignmentRepository;
 
     /**
      * @var EntityManagerInterface
@@ -74,8 +81,9 @@ final class AssignActivityStreamContentToFollowersCommandHandler
     private $logger;
 
     public function __construct(
-        SubscriptionRepository $subscriptionRepository,
+        SubscriptionRepositoryInterface $subscriptionRepository,
         InternalUserRepository $internalUserRepository,
+        ActivityStreamContentAssignmentRepositoryInterface $activityStreamContentAssignmentRepository,
         EntityManagerInterface $entityManager,
         EventEmitterInterface $eventEmitter,
         UriInterface $baseUri,
@@ -86,6 +94,7 @@ final class AssignActivityStreamContentToFollowersCommandHandler
     ) {
         $this->subscriptionRepository = $subscriptionRepository;
         $this->internalUserRepository = $internalUserRepository;
+        $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->entityManager = $entityManager;
         $this->eventEmitter = $eventEmitter;
         $this->baseUri = $baseUri;
@@ -110,6 +119,10 @@ final class AssignActivityStreamContentToFollowersCommandHandler
             if (null === $this->subscriptionRepository->getByActors($audienceActor, $entity->getAttributedTo())) {
                 // Recipient has not subscribed to content of the content's actor
                 continue;
+            }
+
+            if (null !== $this->activityStreamContentAssignmentRepository->findAssignment($audienceActor, $entity)) {
+                return;
             }
 
             $assignment = new ActivityStreamContentAssignment(Uuid::uuid4()->toString(), $audienceActor, $entity);

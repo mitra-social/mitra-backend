@@ -232,6 +232,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             return new AssignActivityStreamContentToFollowersCommandHandler(
                 $container[SubscriptionRepositoryInterface::class],
                 $container[InternalUserRepository::class],
+                $container[ActivityStreamContentAssignmentRepositoryInterface::class],
                 $container[EntityManagerInterface::class],
                 $container[EventEmitterInterface::class],
                 $uriFactory->createUri($container['baseUrl']),
