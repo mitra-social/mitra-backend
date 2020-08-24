@@ -117,7 +117,7 @@ final class UserUpdateController
 
         if (
             false === $this->passwordVerifier->verify(
-                $updateUserRequestDto->password,
+                $updateUserRequestDto->currentPassword,
                 $requestedUser->getHashedPassword()
             )
         ) {

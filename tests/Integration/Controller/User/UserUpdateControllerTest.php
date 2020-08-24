@@ -36,7 +36,7 @@ final class UserUpdateControllerTest extends IntegrationTestCase
     {
         $user = $this->createInternalUser('foo');
         $token = $this->createTokenForUser($user);
-        $body = json_encode(['password' => 'bar']);
+        $body = json_encode(['currentPassword' => 'bar']);
 
         $request = $this->createRequest('PATCH', sprintf('/user/%s', $user->getUsername()), $body, [
             'Authorization' => sprintf('Bearer %s', $token)
@@ -49,14 +49,14 @@ final class UserUpdateControllerTest extends IntegrationTestCase
 
     public function testUpdateUserSuccessfully(): void
     {
-        $password = 'foo';
+        $currentPassword = 'foo';
         $newPassword = 'helloWorld';
-        $newEmail = 'updated.email@mitra.social';
+        $newEmail = sprintf('updated.email.%s@mitra.social', uniqid());
 
-        $user = $this->createInternalUser($password);
+        $user = $this->createInternalUser($currentPassword);
         $token = $this->createTokenForUser($user);
         $body = json_encode([
-            'password' => $password,
+            'currentPassword' => $currentPassword,
             'newPassword' => $newPassword,
             'email' => $newEmail,
         ]);
@@ -79,6 +79,74 @@ final class UserUpdateControllerTest extends IntegrationTestCase
 
         self::assertArrayHasKey('email', $responseData);
         self::assertEquals($newEmail, $responseData['email']);
+        self::assertArrayHasKey('updated', $responseData);
+        self::assertEquals($frozenNow->format('c'), $responseData['updated']);
+    }
+
+    public function testUpdateOnlyEmailSuccessfully(): void
+    {
+        $currentPassword = 'foo';
+        $newEmail = sprintf('updated.email.%s@mitra.social', uniqid());
+
+        $user = $this->createInternalUser($currentPassword);
+        $token = $this->createTokenForUser($user);
+        $body = json_encode([
+            'currentPassword' => $currentPassword,
+            'email' => $newEmail,
+        ]);
+
+        $request = $this->createRequest('PATCH', sprintf('/user/%s', $user->getUsername()), $body, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+
+        /** @var FreezableClock $clock */
+        $clock = $this->getContainer()->get(ClockInterface::class);
+        $frozenNow = $clock->freeze();
+
+        $response = $this->executeRequest($request);
+
+        $clock->unfreeze();
+
+        self::assertStatusCode(200, $response);
+
+        $responseData = json_decode((string) $response->getBody(), true);
+
+        self::assertArrayHasKey('email', $responseData);
+        self::assertEquals($newEmail, $responseData['email']);
+        self::assertArrayHasKey('updated', $responseData);
+        self::assertEquals($frozenNow->format('c'), $responseData['updated']);
+    }
+
+    public function testUpdateOnlyPasswordSuccessfully(): void
+    {
+        $currentPassword = 'foo';
+        $newPassword = 'helloWorld';
+
+        $user = $this->createInternalUser($currentPassword);
+        $token = $this->createTokenForUser($user);
+        $body = json_encode([
+            'currentPassword' => $currentPassword,
+            'newPassword' => $newPassword,
+        ]);
+
+        $request = $this->createRequest('PATCH', sprintf('/user/%s', $user->getUsername()), $body, [
+            'Authorization' => sprintf('Bearer %s', $token)
+        ]);
+
+        /** @var FreezableClock $clock */
+        $clock = $this->getContainer()->get(ClockInterface::class);
+        $frozenNow = $clock->freeze();
+
+        $response = $this->executeRequest($request);
+
+        $clock->unfreeze();
+
+        self::assertStatusCode(200, $response);
+
+        $responseData = json_decode((string) $response->getBody(), true);
+
+        self::assertArrayHasKey('email', $responseData);
+        self::assertEquals($user->getEmail(), $responseData['email']);
         self::assertArrayHasKey('updated', $responseData);
         self::assertEquals($frozenNow->format('c'), $responseData['updated']);
     }

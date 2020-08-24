@@ -14,7 +14,7 @@ final class UpdateUserRequestDto
     /**
      * @var string
      */
-    public $password;
+    public $currentPassword;
 
     /**
      * @var string|null
