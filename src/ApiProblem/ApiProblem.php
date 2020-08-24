@@ -23,9 +23,9 @@ class ApiProblem implements ApiProblemInterface, ArrayNormalizable
     protected $title;
 
     /**
-     * @var integer
+     * @var int
      */
-    protected $status;
+    protected $httpStatusCode;
 
     /**
      * @var string|null
@@ -37,11 +37,11 @@ class ApiProblem implements ApiProblemInterface, ArrayNormalizable
      */
     protected $instance;
 
-    public function __construct(string $type, string $title, int $status)
+    public function __construct(string $type, string $title, int $httpStatusCode)
     {
         $this->type = $type;
         $this->title = $title;
-        $this->status = $status;
+        $this->httpStatusCode = $httpStatusCode;
     }
 
     public function getType(): string
@@ -54,9 +54,9 @@ class ApiProblem implements ApiProblemInterface, ArrayNormalizable
         return $this->title;
     }
 
-    public function getStatus(): int
+    public function getHttpStatusCode(): int
     {
-        return $this->status;
+        return $this->httpStatusCode;
     }
 
     public function getDetail(): ?string

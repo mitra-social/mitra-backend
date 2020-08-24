@@ -25,10 +25,11 @@ final class CreateUserRequestDtoMapping implements DtoToEntityMappingInterface
 
     /**
      * @param object|CreateUserRequestDto $dto
+     * @param object|null $entity
      * @return object|InternalUser
-     * @throws \Exception
+     * @throws InvalidDtoException
      */
-    public function toEntity(object $dto): object
+    public function toEntity(object $dto, ?object $entity): object
     {
         if (!$dto instanceof CreateUserRequestDto) {
             throw InvalidDtoException::fromDto($dto, static::getDtoClass());

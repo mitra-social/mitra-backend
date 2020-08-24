@@ -12,6 +12,7 @@ use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
 use Mitra\ActivityPub\Resolver\ObjectIdDeterminer;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
+use Mitra\Clock\ClockInterface;
 use Mitra\MessageBus\CommandBusInterface;
 use Mitra\MessageBus\EventBusInterface;
 use Mitra\MessageBus\EventEmitter;
@@ -28,8 +29,9 @@ use Mitra\MessageBus\Handler\Command\ActivityPub\SendObjectToRecipientsCommandHa
 use Mitra\MessageBus\Handler\Command\ActivityPub\UndoCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\UpdateExternalActorCommandHandler;
 use Mitra\MessageBus\Handler\Command\ActivityPub\ValidateContentCommandHandler;
-use Mitra\MessageBus\Handler\Command\CreateUserCommandHandler;
+use Mitra\MessageBus\Handler\Command\UserCreateCommandHandler;
 use Mitra\MessageBus\Handler\Command\UpdateActorIconCommandHandler;
+use Mitra\MessageBus\Handler\Command\UserUpdateCommandHandler;
 use Mitra\MessageBus\Handler\Event\ActivityPub\ActivityStreamContentAttributedEventHandler;
 use Mitra\MessageBus\Handler\Event\ActivityPub\ActivityStreamContentPersistedEventHandler;
 use Mitra\MessageBus\Handler\Event\ActivityPub\ActivityStreamContentReceivedEventHandler;
@@ -45,6 +47,7 @@ use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepositoryInterface;
+use Mitra\Security\PasswordHasherInterface;
 use Mitra\Slim\UriGeneratorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -155,8 +158,19 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
 
     private function registerCommandHandlers(Container $container): void
     {
-        $container[CreateUserCommandHandler::class] = static function (Container $container): CreateUserCommandHandler {
-            return new CreateUserCommandHandler($container[EntityManagerInterface::class]);
+        $container[UserCreateCommandHandler::class] = static function (Container $container): UserCreateCommandHandler {
+            return new UserCreateCommandHandler(
+                $container[EntityManagerInterface::class],
+                $container[ClockInterface::class],
+                $container[PasswordHasherInterface::class]
+            );
+        };
+
+        $container[UserUpdateCommandHandler::class] = static function (Container $container): UserUpdateCommandHandler {
+            return new UserUpdateCommandHandler(
+                $container[ClockInterface::class],
+                $container[PasswordHasherInterface::class]
+            );
         };
 
         $container[AssignActorCommandHandler::class] = static function (
@@ -248,8 +262,9 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
         ): AssignActivityStreamContentToActorCommandHandler {
             return new AssignActivityStreamContentToActorCommandHandler(
                 $container[ActivityStreamContentAssignmentRepositoryInterface::class],
+                $container[InternalUserRepository::class],
                 $container[EntityManagerInterface::class],
-                $container[EventEmitterInterface::class]
+                $container[EventEmitterInterface::class],
             );
         };
 

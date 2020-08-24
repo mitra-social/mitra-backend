@@ -13,7 +13,7 @@ interface ApiProblemInterface
 
     public function getTitle(): string;
 
-    public function getStatus(): int;
+    public function getHttpStatusCode(): int;
 
     public function getDetail(): ?string;
 

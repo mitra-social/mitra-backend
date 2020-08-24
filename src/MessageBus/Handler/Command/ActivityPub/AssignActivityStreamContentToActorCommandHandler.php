@@ -10,6 +10,7 @@ use Mitra\MessageBus\Event\ActivityPub\ActivityStreamContentAssignedEvent;
 use Mitra\MessageBus\EventEmitterInterface;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
+use Mitra\Repository\InternalUserRepository;
 use Ramsey\Uuid\Uuid;
 
 final class AssignActivityStreamContentToActorCommandHandler
@@ -26,18 +27,25 @@ final class AssignActivityStreamContentToActorCommandHandler
     private $eventEmitter;
 
     /**
+     * @var InternalUserRepository
+     */
+    private $internalUserRepository;
+
+    /**
      * @var ActivityStreamContentAssignmentRepositoryInterface
      */
     private $activityStreamContentAssignmentRepository;
 
     public function __construct(
         ActivityStreamContentAssignmentRepositoryInterface $activityStreamContentAssignmentRepository,
+        InternalUserRepository $internalUserRepository,
         EntityManagerInterface $entityManager,
         EventEmitterInterface $eventEmitter
     ) {
         $this->activityStreamContentAssignmentRepository = $activityStreamContentAssignmentRepository;
         $this->eventEmitter = $eventEmitter;
         $this->entityManager = $entityManager;
+        $this->internalUserRepository = $internalUserRepository;
     }
 
     public function __invoke(AssignActivityStreamContentToActorCommand $command): void
@@ -49,9 +57,14 @@ final class AssignActivityStreamContentToActorCommandHandler
             return;
         }
 
-        $assignment = new ActivityStreamContentAssignment(Uuid::uuid4()->toString(), $actor, $entity);
+        $userId = $actor->getUser()->getId();
 
-        $this->entityManager->persist($actor);
+        if (null === $user = $this->internalUserRepository->findById($userId)) {
+            throw new \RuntimeException(sprintf('Could not find internal user with id `%s`', $userId));
+        }
+
+        $assignment = new ActivityStreamContentAssignment(Uuid::uuid4()->toString(), $user->getActor(), $entity);
+
         $this->entityManager->persist($assignment);
 
         $this->eventEmitter->raise(new ActivityStreamContentAssignedEvent($assignment));

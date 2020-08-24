@@ -8,7 +8,7 @@ use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\SharedInboxWriteController;
 use Mitra\Controller\System\TokenController;
 use Mitra\Controller\User\ActivityReadController;
-use Mitra\Controller\User\CreateUserController;
+use Mitra\Controller\User\UserCreateController;
 use Mitra\Controller\User\InboxWriteController;
 use Mitra\Controller\System\InstanceUserReadController;
 use Mitra\Controller\User\UserReadController;
@@ -29,7 +29,7 @@ final class ApiPublicRouterProvider implements RouteProviderInterface
             ->post('/inbox', SharedInboxWriteController::class)
             ->setName('shared-inbox-write');
         $group
-            ->post('/user', CreateUserController::class)
+            ->post('/user', UserCreateController::class)
             ->setName('user-create');
         $group
             ->get('/user/{username}', UserReadController::class)

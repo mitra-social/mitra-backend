@@ -8,24 +8,24 @@ interface TimestampableInterface
 {
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getCreatedAt(): \DateTime;
+    public function getCreatedAt(): \DateTimeInterface;
 
     /**
-     * @return \DateTime|null
+     * @return \DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTime;
+    public function getUpdatedAt(): ?\DateTimeInterface;
 
     /**
-     * @param \DateTime $createdAt
+     * @param \DateTimeInterface $createdAt
      * @return void
      */
-    public function setCreatedAt(\DateTime $createdAt): void;
+    public function setCreatedAt(\DateTimeInterface $createdAt): void;
 
     /**
-     * @param \DateTime $updatedAt
+     * @param \DateTimeInterface $updatedAt
      * @return void
      */
-    public function setUpdatedAt(\DateTime $updatedAt): void;
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): void;
 }

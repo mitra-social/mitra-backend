@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
+use Mitra\ApiProblem\ForbiddenApiProblem;
+use Mitra\ApiProblem\NotFoundApiProblem;
 use Mitra\Dto\Response\ActivityStreams\CollectionDto;
 use Mitra\Dto\Response\ActivityStreams\CollectionInterface;
 use Mitra\Dto\Response\ActivityStreams\CollectionPageDto;
@@ -12,6 +14,7 @@ use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
 use Mitra\Dto\Response\ActivityStreams\OrderedCollectionInterface;
 use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\User\InternalUser;
 use Mitra\Filtering\Filter;
 use Mitra\Filtering\FilterFactoryInterface;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -19,6 +22,7 @@ use Mitra\Repository\InternalUserRepository;
 use Mitra\Slim\UriGeneratorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use React\Http\Server;
 
 abstract class AbstractCollectionController
 {
@@ -61,14 +65,25 @@ abstract class AbstractCollectionController
         $accept = $request->getAttribute('accept');
         $username = $request->getAttribute('username');
 
-        $authenticatedUser = $this->internalUserRepository->resolveFromRequest($request);
+        /** @var InternalUser|null $authenticatedUser */
+        $authenticatedUser = $request->getAttribute('authenticatedUser');
 
         if (null === $requestedUser = $this->internalUserRepository->findByUsername($username)) {
-            return $this->responseFactory->createResponse(404);
+            return $this->responseFactory->createResponseFromApiProblem(
+                (new NotFoundApiProblem())->withDetail('The requested user cannot be found'),
+                $request,
+                $accept
+            );
         }
 
         if (null !== $authenticatedUser && $authenticatedUser->getId() !== $requestedUser->getId()) {
-            return $this->responseFactory->createResponse(401);
+            return $this->responseFactory->createResponseFromApiProblem(
+                (new ForbiddenApiProblem())->withDetail(
+                    'The authenticated user is not allowed to access this resource'
+                ),
+                $request,
+                $accept
+            );
         }
 
         $pageNo = $request->getQueryParams()['page'] ?? null;
@@ -126,9 +141,9 @@ abstract class AbstractCollectionController
             }
 
             if ($collectionDto instanceof OrderedCollectionInterface) {
-                $collectionDto->setOrderedItems($this->getItems($requestedActor, $filter, $pageNo));
+                $collectionDto->setOrderedItems($this->getItems($request, $requestedActor, $filter, $pageNo));
             } else {
-                $collectionDto->setItems($this->getItems($requestedActor, $filter, $pageNo));
+                $collectionDto->setItems($this->getItems($request, $requestedActor, $filter, $pageNo));
             }
         }
 
@@ -151,12 +166,18 @@ abstract class AbstractCollectionController
     }
 
     /**
+     * @param ServerRequestInterface $request
      * @param Actor $requestedActor
      * @param Filter|null $filter
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
      */
-    abstract protected function getItems(Actor $requestedActor, ?Filter $filter, ?int $page): array;
+    abstract protected function getItems(
+        ServerRequestInterface $request,
+        Actor $requestedActor,
+        ?Filter $filter,
+        ?int $page
+    ): array;
 
     abstract protected function getTotalItemCount(Actor $requestedActor, ?Filter $filter): int;
 

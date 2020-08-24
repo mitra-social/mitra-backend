@@ -33,9 +33,15 @@ final class DtoToEntityMapper
         }
     }
 
-    public function map(object $dto, string $entityClass): object
+    /**
+     * @param object $dto
+     * @param string|object $entity Either a FQCN or an entity instance
+     * @return object
+     */
+    public function map(object $dto, $entity): object
     {
         $dtoClass = get_class($dto);
+        $entityClass = is_object($entity) ? get_class($entity) : $entity;
 
         if (!isset($this->mappings[$entityClass . $dtoClass])) {
             throw new \RuntimeException(sprintf(
@@ -47,7 +53,10 @@ final class DtoToEntityMapper
 
         $mappingClass = $this->mappings[$entityClass . $dtoClass];
 
-        return $this->container->get($mappingClass)->toEntity($dto);
+        /** @var DtoToEntityMappingInterface $mapper */
+        $mapper = $this->container->get($mappingClass);
+
+        return $mapper->toEntity($dto, is_object($entity) ? $entity : null);
     }
 
     /**
