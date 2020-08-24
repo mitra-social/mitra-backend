@@ -8,7 +8,6 @@ use Mitra\ApiProblem\BadRequestApiProblem;
 
 final class BadRequestApiProblemDtoMapping extends ApiProblemDtoMapping
 {
-
     public static function getEntityClass(): string
     {
         return BadRequestApiProblem::class;

@@ -10,6 +10,7 @@ use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\ExternalUser;
+use Mitra\Mapping\Dto\EntityToDtoMappingContext;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 
@@ -22,10 +23,11 @@ abstract class ActorDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|ExternalUser $entity
+     * @param EntityToDtoMappingContext $context
      * @return object
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity): object
+    public function toDto(object $entity, EntityToDtoMappingContext $context): object
     {
         if (!$entity instanceof ExternalUser) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());

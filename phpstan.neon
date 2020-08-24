@@ -17,6 +17,9 @@ parameters:
     -
       message: '#Parameter \#2 \$handler of method Slim\\Middleware\\ErrorMiddleware::setErrorHandler\(\) expects callable\(\): mixed, ''.+?'' given\.#'
       path: src/AppFactory.php
+    -
+      message: '#Parameter \#2 \$algo of function password_hash expects int, int\|string given\.#'
+      path: src/Security/PasswordHasher.php
 
 rules:
   - Ergebnis\PHPStan\Rules\Expressions\NoEmptyRule

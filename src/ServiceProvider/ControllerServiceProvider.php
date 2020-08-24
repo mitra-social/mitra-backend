@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemInterface;
 use Mitra\ActivityPub\HashGeneratorInterface;
 use Mitra\Authentication\TokenProvider;
+use Mitra\Controller\User\UserUpdateController;
 use Mitra\MessageBus\CommandBusInterface;
 use Mitra\MessageBus\EventBusInterface;
 use Mitra\Controller\System\MediaController;
@@ -18,7 +19,7 @@ use Mitra\Controller\User\InboxReadController;
 use Mitra\Controller\Me\ProfileController;
 use Mitra\Controller\System\PingController;
 use Mitra\Controller\System\TokenController;
-use Mitra\Controller\User\CreateUserController;
+use Mitra\Controller\User\UserCreateController;
 use Mitra\Controller\User\InboxWriteController;
 use Mitra\Controller\System\InstanceUserReadController;
 use Mitra\Controller\User\OutboxWriteController;
@@ -37,6 +38,8 @@ use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
 use Mitra\Repository\SubscriptionRepositoryInterface;
+use Mitra\Security\PasswordVerifier;
+use Mitra\Security\PasswordVerifierInterface;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Slim\IdGeneratorInterface;
@@ -94,14 +97,27 @@ final class ControllerServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[CreateUserController::class] = static function (Container $container): CreateUserController {
-            return new CreateUserController(
+        $container[UserCreateController::class] = static function (Container $container): UserCreateController {
+            return new UserCreateController(
                 $container[ResponseFactoryInterface::class],
                 $container[EncoderInterface::class],
                 $container[ValidatorInterface::class],
                 $container[CommandBusInterface::class],
                 $container[RequestToDtoTransformer::class],
                 $container[DtoToEntityMapper::class]
+            );
+        };
+
+        $container[UserUpdateController::class] = static function (Container $container): UserUpdateController {
+            return new UserUpdateController(
+                $container[ResponseFactoryInterface::class],
+                $container[EncoderInterface::class],
+                $container[ValidatorInterface::class],
+                $container[CommandBusInterface::class],
+                $container[RequestToDtoTransformer::class],
+                $container[DtoToEntityMapper::class],
+                $container[InternalUserRepository::class],
+                $container[PasswordVerifierInterface::class]
             );
         };
 

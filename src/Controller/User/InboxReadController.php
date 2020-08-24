@@ -21,6 +21,7 @@ use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Slim\UriGeneratorInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class InboxReadController extends AbstractOrderedCollectionController
 {
@@ -56,13 +57,14 @@ final class InboxReadController extends AbstractOrderedCollectionController
     }
 
     /**
+     * @param ServerRequestInterface $request
      * @param Actor $actor
      * @param Filter|null $filter
      * @param int|null $page
      * @return array<ObjectDto|LinkDto>
-     * @throws \Exception
+     * @throws \Mitra\Dto\DataToDtoPopulatorException
      */
-    protected function getItems(Actor $actor, ?Filter $filter, ?int $page): array
+    protected function getItems(ServerRequestInterface $request, Actor $actor, ?Filter $filter, ?int $page): array
     {
         $offset = null;
         $limit = null;
@@ -116,7 +118,8 @@ final class InboxReadController extends AbstractOrderedCollectionController
                 /** @var ObjectDto $actorDto */
                 $actorDto = $this->entityToDtoMapper->map(
                     $author,
-                    $dtoClass
+                    $dtoClass,
+                    $request
                 );
                 $dto->actor = $actorDto;
             }

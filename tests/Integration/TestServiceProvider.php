@@ -6,10 +6,12 @@ namespace Mitra\Tests\Integration;
 
 use Mitra\ActivityPub\RequestSigner;
 use Mitra\ActivityPub\RequestSignerInterface;
+use Mitra\Clock\ClockInterface;
 use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Slim\UriGeneratorInterface;
 use Mitra\Tests\Helper\Generator\ReflectedIdGenerator;
 use Mitra\Tests\Helper\Http\MockClient;
+use Mitra\Tests\Helper\FreezableClock;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Log\LoggerInterface;
@@ -34,5 +36,6 @@ final class TestServiceProvider implements ServiceProviderInterface
         };
 
         $container[IdGeneratorInterface::class] =  new ReflectedIdGenerator();
+        $container[ClockInterface::class] = new FreezableClock();
     }
 }

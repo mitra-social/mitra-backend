@@ -8,9 +8,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use HttpSignatures\Verifier;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
-use Mitra\Middleware\LogErrorMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
+use Mitra\Middleware\ResolveAuthenticatedUserMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
+use Mitra\Repository\InternalUserRepository;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Log\LoggerInterface;
@@ -18,6 +19,8 @@ use Tuupola\Middleware\JwtAuthentication;
 
 final class MiddlewareServiceProvider implements ServiceProviderInterface
 {
+    private const REQUEST_ATTRIBUTE_NAME_DECODED_TOKEN = 'token';
+
     /**
      * @param Container $container
      * @return void
@@ -47,7 +50,18 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
                 'ignore' => [],
                 'secret' => $container['jwt.secret'],
                 'logger' => $container[LoggerInterface::class],
+                'token' => self::REQUEST_ATTRIBUTE_NAME_DECODED_TOKEN,
             ]);
+        };
+
+        $container[ResolveAuthenticatedUserMiddleware::class] = static function (
+            Container $container
+        ): ResolveAuthenticatedUserMiddleware {
+            return new ResolveAuthenticatedUserMiddleware(
+                $container[ResponseFactoryInterface::class],
+                $container[InternalUserRepository::class],
+                self::REQUEST_ATTRIBUTE_NAME_DECODED_TOKEN
+            );
         };
 
         $container[ValidateHttpSignatureMiddleware::class] = static function (

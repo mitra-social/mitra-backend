@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\User;
 
-use Mitra\MessageBus\Command\CreateUserCommand;
+use Mitra\MessageBus\Command\UserCreateCommand;
 use Mitra\MessageBus\CommandBusInterface;
 use Mitra\Dto\DtoToEntityMapper;
 use Mitra\Dto\Request\CreateUserRequestDto;
@@ -17,7 +17,7 @@ use Mitra\Validator\ValidatorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class CreateUserController
+final class UserCreateController
 {
 
     /**
@@ -80,7 +80,7 @@ final class CreateUserController
         /** @var InternalUser $user */
         $user = $this->dtoToEntityMapper->map($createUserRequestDto, InternalUser::class);
 
-        $this->commandBus->handle(new CreateUserCommand($user));
+        $this->commandBus->handle(new UserCreateCommand($user));
 
         return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $request, $accept, 201);
     }

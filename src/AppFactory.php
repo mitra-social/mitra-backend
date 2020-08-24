@@ -6,6 +6,7 @@ namespace Mitra;
 
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
+use Mitra\Middleware\ResolveAuthenticatedUserMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
 use Mitra\Routes\ApiPrivateRouteProvider;
 use Mitra\Routes\ApiPublicRouterProvider;
@@ -53,7 +54,10 @@ final class AppFactory
         // API group
         $app->group('', function () use ($app): void {
             $app->group('', new ApiPublicRouterProvider());
-            $app->group('', new ApiPrivateRouteProvider())->add(JwtAuthentication::class);
+            $app->group('', new ApiPrivateRouteProvider())
+                ->add(ResolveAuthenticatedUserMiddleware::class)
+                ->add(JwtAuthentication::class)
+            ;
         })
             ->add(ValidateHttpSignatureMiddleware::class)
             ->add(AcceptAndContentTypeMiddleware::class);

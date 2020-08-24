@@ -5,7 +5,7 @@ namespace Mitra\Tests\Integration;
 use Doctrine\ORM\EntityManagerInterface;
 use Firebase\JWT\JWT;
 use Mitra\ActivityPub\RequestSignerInterface;
-use Mitra\MessageBus\Command\CreateUserCommand;
+use Mitra\MessageBus\Command\UserCreateCommand;
 use Mitra\MessageBus\CommandBusInterface;
 use Mitra\Entity\Actor\Organization;
 use Mitra\Entity\Actor\Person;
@@ -71,7 +71,7 @@ trait CreateUserTrait
 
         $user->setActor($actor);
 
-        $this->getContainer()->get(CommandBusInterface::class)->handle(new CreateUserCommand($user));
+        $this->getContainer()->get(CommandBusInterface::class)->handle(new UserCreateCommand($user));
 
         return $user;
     }
