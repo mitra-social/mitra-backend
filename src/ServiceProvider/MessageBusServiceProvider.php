@@ -42,6 +42,7 @@ use Mitra\MessageBus\SymfonyMessengerCommandBus;
 use Mitra\MessageBus\SymfonyMessengerEventBus;
 use Mitra\MessageBus\SymfonyMessengerHandlersLocator;
 use Mitra\Factory\ActivityStreamContentFactoryInterface;
+use Mitra\Repository\ActivityStreamContentAssignmentRepositoryInterface;
 use Mitra\Repository\ActivityStreamContentRepositoryInterface;
 use Mitra\Repository\InternalUserRepository;
 use Mitra\Repository\MediaRepositoryInterface;
@@ -245,6 +246,7 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             return new AssignActivityStreamContentToFollowersCommandHandler(
                 $container[SubscriptionRepositoryInterface::class],
                 $container[InternalUserRepository::class],
+                $container[ActivityStreamContentAssignmentRepositoryInterface::class],
                 $container[EntityManagerInterface::class],
                 $container[EventEmitterInterface::class],
                 $uriFactory->createUri($container['baseUrl']),
@@ -259,9 +261,10 @@ final class MessageBusServiceProvider implements ServiceProviderInterface
             Container $container
         ): AssignActivityStreamContentToActorCommandHandler {
             return new AssignActivityStreamContentToActorCommandHandler(
+                $container[ActivityStreamContentAssignmentRepositoryInterface::class],
+                $container[InternalUserRepository::class],
                 $container[EntityManagerInterface::class],
                 $container[EventEmitterInterface::class],
-                $container[InternalUserRepository::class]
             );
         };
 

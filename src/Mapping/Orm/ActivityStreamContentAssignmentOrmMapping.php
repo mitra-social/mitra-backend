@@ -21,7 +21,12 @@ final class ActivityStreamContentAssignmentOrmMapping implements ClassMapMapping
      */
     public function configureMapping(ClassMetadata $metadata): void
     {
-        $metadata->setPrimaryTable(['name' => 'activity_stream_content_assignment']);
+        $metadata->setPrimaryTable([
+            'name' => 'activity_stream_content_assignment',
+            'uniqueConstraints' => [
+                'UNIQUE_ACTOR_CONTENT' => ['columns' => ['actor_id', 'content_id']],
+            ],
+        ]);
 
         $metadata->mapField([
             'fieldName' => 'id',

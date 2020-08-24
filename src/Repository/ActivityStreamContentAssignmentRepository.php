@@ -6,6 +6,7 @@ namespace Mitra\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Mitra\Entity\ActivityStreamContent;
 use Mitra\Entity\ActivityStreamContentAssignment;
 use Mitra\Entity\Actor\Actor;
 use Mitra\Filtering\Filter;
@@ -102,5 +103,25 @@ final class ActivityStreamContentAssignmentRepository implements ActivityStreamC
         );
 
         $filterRenderer->apply($filter);
+    }
+
+    /**
+     * @param Actor $actor
+     * @param ActivityStreamContent $content
+     * @return ActivityStreamContentAssignment|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findAssignment(Actor $actor, ActivityStreamContent $content): ?ActivityStreamContentAssignment
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->select('ca', 'c')
+            ->from(ActivityStreamContentAssignment::class, 'ca')
+            ->join('ca.content', 'c')
+            ->where('ca.actor = :actor')
+            ->andWhere('ca.content = :content')
+            ->setParameter('actor', $actor->getUser())
+            ->setParameter('content', $content);
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }
