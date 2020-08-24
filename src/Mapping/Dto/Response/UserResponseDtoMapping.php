@@ -93,11 +93,11 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
     }
 
     /**
-     * @param object|InternalUser $entity
+     * @param InternalUser $entity
      * @param EntityToDtoMappingContext $context
      * @return bool
      */
-    private function isResourceOwner(object $entity, EntityToDtoMappingContext $context): bool
+    private function isResourceOwner(InternalUser $entity, EntityToDtoMappingContext $context): bool
     {
         if (null === $requestContext = $context->getRequest()) {
             return false;
