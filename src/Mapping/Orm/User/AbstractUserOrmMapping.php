@@ -54,7 +54,7 @@ final class AbstractUserOrmMapping implements ClassMapMappingInterface
             'fieldName' => 'actor',
             'targetEntity' => Actor::class,
             'mappedBy' => 'user',
-            'cascade' => ['all'],
+            'cascade' => ['persist', 'remove'],
         ]);
     }
 }
