@@ -24,7 +24,7 @@
     "symfony/messenger": "^5.0.8",
     "symfony/doctrine-bridge": "^5.0.8",
     "mitra-social/php-env": "dev-master@dev",
-    "mitra-social/reactphp-process-manager": "dev-master@dev",
+    "mitra-social/reactphp-process-manager": "^0.1.0",
     "monolog/monolog": "^2.0.2",
     "pimple/pimple": "^3.2.3",
     "ramsey/uuid": "^3.9.2",

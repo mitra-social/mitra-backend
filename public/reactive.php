@@ -47,7 +47,7 @@ $processManager = new ReactProcessManager(
     }
 );
 
-$processManager->setProcessInterruptCallable(function (Process $process): void {
+$processManager->onProcessInterruption(function (Process $process): void {
     printf(
         'Process %d finished running, processed %d requests' . PHP_EOL,
         $process->getPid(),
