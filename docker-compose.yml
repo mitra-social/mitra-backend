@@ -86,7 +86,7 @@ services:
     hostname: mitra-backend-composer
     container_name: mitra-backend-composer
     volumes:
-      - ../:/app
+      - ./:/app
 secrets:
   ssh_host_key:
     file: ~/.ssh/id_rsa
