@@ -1,5 +1,6 @@
 {
   "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://example.com/content/47166d13-74ef-4e97-9027-798bbe675cb4",
   "type": "Video",
   "name": "Puppy Plays With Ball",
   "url": "http://example.org/video.mkv",

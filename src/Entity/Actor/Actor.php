@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Entity\Actor;
 
+use Mitra\Entity\Media;
 use Mitra\Entity\User\AbstractUser;
 
 class Actor
@@ -16,7 +17,7 @@ class Actor
 
     /**
      * An optional icon (avatar) of the actor
-     * @var null|string
+     * @var null|Media
      */
     private $icon;
 
@@ -48,17 +49,17 @@ class Actor
     }
 
     /**
-     * @return string|null
+     * @return Media|null
      */
-    public function getIcon(): ?string
+    public function getIcon(): ?Media
     {
         return $this->icon;
     }
 
     /**
-     * @param string|null $icon
+     * @param Media|null $icon
      */
-    public function setIcon(?string $icon): void
+    public function setIcon(?Media $icon): void
     {
         $this->icon = $icon;
     }
@@ -66,5 +67,14 @@ class Actor
     public function getUser(): AbstractUser
     {
         return $this->user;
+    }
+
+    public function __toString()
+    {
+        return sprintf(
+            'id:%s, name:%s',
+            $this->user->getId(),
+            $this->name
+        );
     }
 }

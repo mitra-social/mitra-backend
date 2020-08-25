@@ -16,15 +16,19 @@ final class ExternalUserOrmMapping implements ClassMapMappingInterface
      */
     public function configureMapping(ClassMetadata $metadata): void
     {
-        $metadata->setPrimaryTable(['name' => 'user_external']);
+        $metadata->setPrimaryTable([
+            'name' => 'user_external',
+            'uniqueConstraints' => [
+                'UNIQUE_EXTERNAL_USER_ID' => ['columns' => ['external_id_hash', 'external_id']],
+            ],
+        ]);
 
         $metadata->mapField([
             'fieldName' => 'externalId',
             'columnName' => 'external_id',
             'type' => 'string',
             'length' => 255,
-            'strategy' => 'none',
-            'nullable' => true,
+            'nullable' => false,
         ]);
 
         $metadata->mapField([
@@ -32,8 +36,7 @@ final class ExternalUserOrmMapping implements ClassMapMappingInterface
             'columnName' => 'external_id_hash',
             'type' => 'string',
             'length' => 64,
-            'strategy' => 'none',
-            'nullable' => true,
+            'nullable' => false,
         ]);
 
         $metadata->mapField([

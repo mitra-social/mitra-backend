@@ -11,7 +11,7 @@ abstract class AbstractUser
     /**
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
      * @var null|Actor
@@ -46,10 +46,5 @@ abstract class AbstractUser
     public function getPublicKey(): ?string
     {
         return $this->publicKey;
-    }
-
-    public function __toString()
-    {
-        return $this->id;
     }
 }

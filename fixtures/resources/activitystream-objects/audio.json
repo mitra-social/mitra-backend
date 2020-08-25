@@ -1,5 +1,6 @@
 {
   "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://example.com/content/3e3b5b96-edc3-40b9-802f-7845d9b8eacd",
   "type": "Audio",
   "name": "Interview With A Famous Technologist",
   "url": {

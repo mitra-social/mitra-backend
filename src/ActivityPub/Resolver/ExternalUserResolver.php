@@ -7,7 +7,8 @@ namespace Mitra\ActivityPub\Resolver;
 use Mitra\Dto\Response\ActivityPub\Actor\ActorInterface;
 use Mitra\Dto\Response\ActivityStreams\LinkDto;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
-use Mitra\Entity\Actor\Actor;
+use Mitra\Entity\Actor\Organization;
+use Mitra\Entity\Actor\Person;
 use Mitra\Entity\User\ExternalUser;
 use Mitra\Repository\ExternalUserRepository;
 use Ramsey\Uuid\Uuid;
@@ -25,38 +26,42 @@ final class ExternalUserResolver
      */
     private $externalUserRepository;
 
+    /**
+     * @var ObjectIdDeterminer
+     */
+    private $objectIdDeterminer;
+
     public function __construct(
         RemoteObjectResolver $remoteObjectResolver,
-        ExternalUserRepository $externalUserRepository
+        ExternalUserRepository $externalUserRepository,
+        ObjectIdDeterminer $objectIdDeterminer
     ) {
         $this->remoteObjectResolver = $remoteObjectResolver;
         $this->externalUserRepository = $externalUserRepository;
+        $this->objectIdDeterminer = $objectIdDeterminer;
     }
 
     /**
      * @param string|ObjectDto|LinkDto $object
+     * @param \Closure|null $onCreate
      * @return null|ExternalUser
-     * @throws \Mitra\ActivityPub\Resolver\RemoteObjectResolverException
+     * @throws \Exception
      */
-    public function resolve($object): ?ExternalUser
+    public function resolve($object, ?\Closure $onCreate = null): ?ExternalUser
     {
         Assert::notNull($object);
 
-        $externalId = null;
-
-        if (is_string($object)) {
-            $externalId = $object;
-        } elseif ($object instanceof LinkDto) {
-            $externalId = $object->href;
-        } elseif ($object instanceof ObjectDto) {
-            $externalId = $object->id;
+        if (null === $externalId = $this->objectIdDeterminer->getId($object)) {
+            return null;
         }
 
         if (null !== $externalUser = $this->externalUserRepository->findOneByExternalId($externalId)) {
             return $externalUser;
         }
 
-        if (null === $resolvedObject = $this->remoteObjectResolver->resolve($object)) {
+        try {
+            $resolvedObject = $this->remoteObjectResolver->resolve($object);
+        } catch (RemoteObjectResolverException $e) {
             return null;
         }
 
@@ -64,20 +69,38 @@ final class ExternalUserResolver
 
         /** @var ActorInterface $resolvedObject */
 
+        $externalId = $resolvedObject->getId();
+
+        // Check again because maybe the provided string was not really the object id itself in the first place but
+        // just an url to fetch the actor
+        if (null !== $externalUser = $this->externalUserRepository->findOneByExternalId($externalId)) {
+            return $externalUser;
+        }
+
         $externalUser = new ExternalUser(
             Uuid::uuid4()->toString(),
-            $resolvedObject->getId(),
-            hash('sha256', $resolvedObject->getId()),
+            $externalId,
+            hash('sha256', $externalId),
             $resolvedObject->getPreferredUsername(),
             $resolvedObject->getInbox(),
             $resolvedObject->getOutbox()
         );
 
-        $actor = new Actor($externalUser);
+        if ('Person' === $resolvedObject->getType()) {
+            $actor = new Person($externalUser);
+        } elseif ('Organization' === $resolvedObject->getType()) {
+            $actor = new Organization($externalUser);
+        } else {
+            throw new \RuntimeException(sprintf('Unsupported actor type `%s`', $resolvedObject->getType()));
+        }
+
         $actor->setName($resolvedObject->getName());
-        //$actor->setIcon($resolvedObject->getIcon()); could be array... which one to choose then?
 
         $externalUser->setActor($actor);
+
+        if (null !== $onCreate) {
+            $onCreate($externalUser, $resolvedObject);
+        }
 
         return $externalUser;
     }

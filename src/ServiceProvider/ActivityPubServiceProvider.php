@@ -8,14 +8,23 @@ use ActivityPhp\Server;
 use ActivityPhp\Type\TypeResolver;
 use ActivityPhp\TypeFactory;
 use ActivityPhp\Server\Http\GuzzleActivityPubClient;
+use Cache\Adapter\PHPArray\ArrayCachePool;
 use Mitra\ActivityPub\Client\ActivityPubClient;
 use Mitra\ActivityPub\Client\ActivityPubClientInterface;
+use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\ActivityPub\RequestSigner;
+use Mitra\ActivityPub\RequestSignerInterface;
 use Mitra\ActivityPub\Resolver\ExternalUserResolver;
+use Mitra\ActivityPub\Resolver\ObjectIdDeterminer;
 use Mitra\ActivityPub\Resolver\RemoteObjectResolver;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
+use Mitra\Entity\Actor\Person;
+use Mitra\Entity\User\InternalUser;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Repository\ExternalUserRepository;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
+use Mitra\Slim\UriGeneratorInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -69,6 +78,7 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
             return new ActivityPubClient(
                 $container['api_http_client'],
                 $container[RequestFactoryInterface::class],
+                $container[NormalizerInterface::class],
                 $container[EncoderInterface::class],
                 $container[DecoderInterface::class],
                 $container[ActivityPubDtoPopulator::class],
@@ -77,13 +87,46 @@ final class ActivityPubServiceProvider implements ServiceProviderInterface
         };
 
         $container[RemoteObjectResolver::class] = static function (Container $container): RemoteObjectResolver {
-            return new RemoteObjectResolver($container[ActivityPubClientInterface::class]);
+            return new RemoteObjectResolver(
+                $container[ActivityPubClientInterface::class],
+                new ArrayCachePool(),
+                $container[HashGeneratorInterface::class],
+                $container[RequestSignerInterface::class]
+            );
+        };
+
+        $container[ObjectIdDeterminer::class] = static function (): ObjectIdDeterminer {
+            return new ObjectIdDeterminer();
         };
 
         $container[ExternalUserResolver::class] = static function (Container $container): ExternalUserResolver {
             return new ExternalUserResolver(
                 $container[RemoteObjectResolver::class],
-                $container[ExternalUserRepository::class]
+                $container[ExternalUserRepository::class],
+                $container[ObjectIdDeterminer::class],
+            );
+        };
+
+        $container['instanceUser'] = static function (Container $container): InternalUser {
+            $user = new InternalUser(
+                '8d1a908c-5995-4f95-9745-aa377813ffaa',
+                'instance user',
+                'donotreply@instance.com'
+            );
+            $user->setActor(new Person($user));
+            $user->setKeyPair($container['instance']['publicKey'], $container['instance']['privateKey']);
+
+            return $user;
+        };
+
+        $container[RequestSignerInterface::class] = static function (
+            Container $container
+        ): RequestSignerInterface {
+            return new RequestSigner(
+                $container[UriGeneratorInterface::class],
+                $container['instance']['privateKey'],
+                $container[LoggerInterface::class],
+                ['Host', 'Date', 'Accept']
             );
         };
     }

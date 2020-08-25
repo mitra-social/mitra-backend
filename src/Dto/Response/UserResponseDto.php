@@ -8,18 +8,22 @@ use Mitra\Dto\Response\ActivityPub\Actor\PersonDto;
 
 final class UserResponseDto extends PersonDto
 {
+    public $context = [
+        'https://www.w3.org/ns/activitystreams',
+        'https://w3id.org/security/v1',
+        [
+            'mitra' => 'https://mitra.social/#',
+            'internalUserId' => 'mitra:internalUserId',
+        ],
+    ];
+
     /**
      * @var string
      */
-    public $userId;
+    public $internalUserId;
 
     /**
      * @var string
      */
     public $email;
-
-    /**
-     * @var string
-     */
-    public $registeredAt;
 }

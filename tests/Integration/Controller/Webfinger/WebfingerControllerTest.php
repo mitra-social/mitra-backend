@@ -16,7 +16,7 @@ final class WebfingerControllerTest extends IntegrationTestCase
 
     public function testWebfingerReturnsResourceInformation(): void
     {
-        $user = $this->createUser();
+        $user = $this->createInternalUser();
         $resource = sprintf('acct:%s@localhost', $user->getUsername());
 
         $request = $this->createRequest('GET', sprintf(
@@ -35,7 +35,7 @@ final class WebfingerControllerTest extends IntegrationTestCase
                 [
                     'rel' => 'self',
                     'type' => 'application/activity+json',
-                    'href' => sprintf('http://localhost:1337/user/%s', $user->getUsername()),
+                    'href' => sprintf('http://test.localhost/user/%s', $user->getUsername()),
                 ],
             ],
         ];

@@ -6,6 +6,7 @@ namespace Mitra\Mapping\Dto\Response;
 
 use Mitra\Dto\Response\ViolationDto;
 use Mitra\Dto\Response\ViolationListDto;
+use Mitra\Mapping\Dto\EntityToDtoMappingContext;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
 use Mitra\Validator\ViolationList;
@@ -37,10 +38,11 @@ final class ViolationListDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param ViolationList|object $entity
+     * @param EntityToDtoMappingContext $context
      * @return ViolationListDto|object
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity): object
+    public function toDto(object $entity, EntityToDtoMappingContext $context): object
     {
         if (!$entity instanceof ViolationList) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -50,7 +52,7 @@ final class ViolationListDtoMapping implements EntityToDtoMappingInterface
 
         foreach ($entity->getViolations() as $violation) {
             /** @var ViolationDto $violationDto */
-            $violationDto = $this->violationMapping->toDto($violation);
+            $violationDto = $this->violationMapping->toDto($violation, $context);
             $violationListDto->violations[] = $violationDto;
         }
 

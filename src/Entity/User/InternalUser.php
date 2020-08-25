@@ -49,6 +49,11 @@ class InternalUser extends AbstractUser implements TimestampableInterface
         return $this->email;
     }
 
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
     public function getUsername(): string
     {
         return $this->username;
@@ -89,5 +94,15 @@ class InternalUser extends AbstractUser implements TimestampableInterface
     {
         $this->publicKey = null;
         $this->privateKey = null;
+    }
+
+    public function __toString()
+    {
+        return sprintf(
+            'id:%s, username:%s, email:%s',
+            $this->id,
+            $this->username,
+            $this->email,
+        );
     }
 }

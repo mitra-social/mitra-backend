@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace Mitra\ActivityPub\Client;
 
-use HttpSignatures\Algorithm;
-use HttpSignatures\HeaderList;
-use HttpSignatures\Key;
-use HttpSignatures\Signer;
 use Mitra\Dto\Populator\ActivityPubDtoPopulator;
 use Mitra\Dto\Response\ActivityStreams\ObjectDto;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Serialization\Decode\DecoderInterface;
 use Mitra\Serialization\Encode\EncoderException;
 use Mitra\Serialization\Encode\EncoderInterface;
@@ -45,6 +42,11 @@ final class ActivityPubClient implements ActivityPubClientInterface
     private $encoder;
 
     /**
+     * @var NormalizerInterface
+     */
+    private $normalizer;
+
+    /**
      * @var ActivityPubDtoPopulator
      */
     private $activityPubDtoPopulator;
@@ -57,6 +59,7 @@ final class ActivityPubClient implements ActivityPubClientInterface
     public function __construct(
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
+        NormalizerInterface $normalizer,
         EncoderInterface $encoder,
         DecoderInterface $decoder,
         ActivityPubDtoPopulator $activityPubDtoPopulator,
@@ -64,6 +67,7 @@ final class ActivityPubClient implements ActivityPubClientInterface
     ) {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
+        $this->normalizer = $normalizer;
         $this->decoder = $decoder;
         $this->encoder = $encoder;
         $this->activityPubDtoPopulator = $activityPubDtoPopulator;
@@ -85,7 +89,10 @@ final class ActivityPubClient implements ActivityPubClientInterface
 
         if (null !== $content) {
             try {
-                $encodedType = $this->encoder->encode($content, 'application/json');
+                $encodedType = $this->encoder->encode(
+                    $this->normalizer->normalize($content),
+                    'application/json'
+                );
                 $request = $request->withHeader('Content-Type', 'application/activity+json');
                 $request->getBody()->write($encodedType);
             } catch (EncoderException $e) {
@@ -100,23 +107,6 @@ final class ActivityPubClient implements ActivityPubClientInterface
         }
 
         return $request;
-    }
-
-    public function signRequest(RequestInterface $request, string $privateKey, string $publicKeyUrl): RequestInterface
-    {
-        if (!$request->hasHeader('Host')) {
-            $request = $request->withHeader('Host', $request->getUri()->getHost());
-        }
-
-        if (!$request->hasHeader('Date')) {
-            $request = $request->withHeader('Date', (new \DateTimeImmutable())->format(\DateTime::RFC7231));
-        }
-
-        return (new Signer(
-            new Key($publicKeyUrl, $privateKey),
-            Algorithm::create('rsa-sha256'),
-            new HeaderList(['(request-target)', 'Host', 'Date', 'Accept'])
-        ))->sign($request);
     }
 
     /**
@@ -157,10 +147,11 @@ final class ActivityPubClient implements ActivityPubClientInterface
                 $request,
                 $response,
                 sprintf(
-                    'Request `%s %s` to remote server was answered with HTTP status code `%s`',
+                    'Request `%s %s` to remote server was answered with HTTP status code `%s` (body: %s)',
                     $request->getMethod(),
                     (string) $request->getUri(),
-                    $response->getStatusCode()
+                    $response->getStatusCode(),
+                    (string) $response->getBody()
                 ),
                 2
             );
@@ -184,7 +175,11 @@ final class ActivityPubClient implements ActivityPubClientInterface
 
         $negotiator = new EncodingNegotiator();
         /** @var AcceptEncoding|null $mediaType */
-        $mediaType = $negotiator->getBest($contentTypeHeader, ['application/json', 'application/activity+json']);
+        $mediaType = $negotiator->getBest($contentTypeHeader, [
+            'application/activity+json',
+            'application/json',
+            'application/ld+json'
+        ]);
 
         if (null === $mediaType) {
             throw new ActivityPubClientException(
@@ -199,7 +194,7 @@ final class ActivityPubClient implements ActivityPubClientInterface
             $decodedBody = $this->decoder->decode($responseBody, $mediaType->getType());
         } catch (\JsonException $e) {
             throw new ActivityPubClientException($request, $response, sprintf(
-                'Could not decode body from remote serve response: %s (body: %s, content-type: %s)',
+                'Could not decode body from remote server response: %s (body: %s, content-type: %s)',
                 $e->getMessage(),
                 (string) $response->getBody(),
                 $mediaType->getType()

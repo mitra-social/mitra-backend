@@ -4,7 +4,14 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Mitra\ActivityPub\HashGenerator;
+use Mitra\ActivityPub\HashGeneratorInterface;
+use Mitra\Clock\Clock;
+use Mitra\Clock\ClockInterface;
+use Mitra\Slim\IdGeneratorInterface;
 use Mitra\Slim\UriGenerator;
+use Mitra\Slim\UriGeneratorInterface;
+use Mitra\Slim\UuidGenerator;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -14,8 +21,10 @@ use Slim\CallableResolver;
 use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\RouteCollectorInterface;
+use Slim\Interfaces\RouteResolverInterface;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
+use Slim\Routing\RouteResolver;
 
 final class SlimServiceProvider implements ServiceProviderInterface
 {
@@ -44,13 +53,29 @@ final class SlimServiceProvider implements ServiceProviderInterface
             );
         };
 
-        $container[UriGenerator::class] = static function (Container $container): UriGenerator {
+        $container[RouteResolverInterface::class] = function () use ($container): RouteResolverInterface {
+            return new RouteResolver($container[RouteCollector::class]);
+        };
+
+        $container[UriGeneratorInterface::class] = static function (Container $container): UriGeneratorInterface {
             /** @var UriFactoryInterface $uriFactory */
             $uriFactory = $container[UriFactoryInterface::class];
             /** @var RouteCollectorInterface $routeCollector */
             $routeCollector = $container[RouteCollector::class];
 
             return new UriGenerator($uriFactory->createUri($container['baseUrl']), $routeCollector->getRouteParser());
+        };
+
+        $container[HashGeneratorInterface::class] = static function (): HashGeneratorInterface {
+            return new HashGenerator('md5');
+        };
+
+        $container[IdGeneratorInterface::class] = static function (): IdGeneratorInterface {
+            return new UuidGenerator();
+        };
+
+        $container[ClockInterface::class] = static function (): ClockInterface {
+            return new Clock();
         };
     }
 }

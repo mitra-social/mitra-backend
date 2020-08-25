@@ -3,7 +3,7 @@ The backend powering Mitra - the distributed social network.
 
 ## Install dependencies
 ```
-$ cd docker && docker-compose run composer install
+$ docker-compose run composer install
 ```
 
 ## Run
@@ -19,11 +19,16 @@ Add the following to your .bashrc (or to the respective dot file if you don't us
 export USER_ID=$(id -u)
 ```
 
+Create an rsa key with the following instructions
+```
+$ ssh-keygen 
+```
+
 ⚠️ Be sure to source your .bashrc or open a new console
 
 #### Start up docker
 ```
-$ cd docker && docker-compose up
+$ docker-compose up
 ```
 
 ### Fixtures

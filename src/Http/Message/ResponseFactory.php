@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Mitra\Http\Message;
 
+use Mitra\ApiProblem\ApiProblemInterface;
 use Mitra\Dto\EntityToDtoMapper;
 use Mitra\Dto\Response\ViolationListDto;
+use Mitra\Dto\Response\ApiProblemDto;
+use Mitra\Normalization\NormalizerInterface;
 use Mitra\Serialization\Encode\EncoderInterface;
 use Mitra\Validator\ViolationListInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -21,6 +24,11 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
     private $responseFactory;
 
     /**
+     * @var NormalizerInterface
+     */
+    private $normalizer;
+
+    /**
      * @var EncoderInterface
      */
     private $encoder;
@@ -32,15 +40,18 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
 
     /**
      * @param PsrResponseFactoryInterface $responseFactory
+     * @param NormalizerInterface $normalizer
      * @param EncoderInterface $encoder
      * @param EntityToDtoMapper $entityToDtoMapper
      */
     public function __construct(
         PsrResponseFactoryInterface $responseFactory,
+        NormalizerInterface $normalizer,
         EncoderInterface $encoder,
         EntityToDtoMapper $entityToDtoMapper
     ) {
         $this->responseFactory = $responseFactory;
+        $this->normalizer = $normalizer;
         $this->encoder = $encoder;
         $this->entityToDtoMapper = $entityToDtoMapper;
     }
@@ -76,12 +87,36 @@ final class ResponseFactory implements ResponseFactoryInterface, PsrResponseFact
         string $mimeType,
         int $code = 200
     ): ResponseInterface {
-        $dto = $this->entityToDtoMapper->map($entity, $dtoClass);
+        $dto = $this->entityToDtoMapper->map($entity, $dtoClass, $request);
+
+        return $this->createResponseFromDto($dto, $request, $mimeType, $code);
+    }
+
+    public function createResponseFromDto(
+        object $dto,
+        ServerRequestInterface $request,
+        string $mimeType,
+        int $code = 200
+    ): ResponseInterface {
         $response = $this->responseFactory->createResponse($code)
             ->withHeader('Content-Type', $mimeType);
 
-        $response->getBody()->write($this->encoder->encode($dto, $mimeType));
+        $response->getBody()->write($this->encoder->encode($this->normalizer->normalize($dto), $mimeType));
 
         return $response;
+    }
+
+    public function createResponseFromApiProblem(
+        ApiProblemInterface $apiProblem,
+        ServerRequestInterface $request,
+        string $mimeType
+    ): ResponseInterface {
+        return $this->createResponseFromEntity(
+            $apiProblem,
+            ApiProblemDto::class,
+            $request,
+            $mimeType,
+            $apiProblem->getHttpStatusCode()
+        );
     }
 }

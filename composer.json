@@ -21,8 +21,8 @@
     "doctrine/migrations": "^2.1.1",
     "doctrine/orm": "^2.7.1",
     "landrok/activitypub": "dev-improvements-destatized@dev",
-    "league/tactician": "dev-master@dev",
-    "league/tactician-doctrine": "dev-master@dev",
+    "symfony/messenger": "^5.0.8",
+    "symfony/doctrine-bridge": "^5.0.8",
     "mitra-social/php-env": "dev-master@dev",
     "mitra-social/reactphp-process-manager": "dev-master@dev",
     "monolog/monolog": "^2.0.2",
@@ -38,7 +38,9 @@
     "kriswallsmith/buzz": "^1.1",
     "webmozart/assert": "^1.7.0",
     "willdurand/negotiation": "^2.3",
-    "liamdennehy/http-signatures-php": "^10.0"
+    "liamdennehy/http-signatures-php": "^10.0",
+    "league/flysystem": "^1.0",
+    "league/flysystem-aws-s3-v3": "^1.0"
   },
   "require-dev": {
     "ergebnis/phpstan-rules": "^0.14.3",

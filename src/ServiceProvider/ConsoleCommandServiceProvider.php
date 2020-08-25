@@ -25,6 +25,7 @@ use Doctrine\Migrations\Tools\Console\Command\GenerateCommand;
 use Doctrine\Migrations\Tools\Console\Command\LatestCommand;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand;
 use Doctrine\Migrations\Tools\Console\Command\StatusCommand;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Console\Command\GenerateProxiesCommand;
 use Mitra\Command\FixtureLoadCommand;
 use Pimple\Container;
@@ -75,7 +76,7 @@ final class ConsoleCommandServiceProvider implements ServiceProviderInterface
             ];
 
             if ('dev' === $container['env']) {
-                $commands[] = new FixtureLoadCommand($container['doctrine.orm.em']);
+                $commands[] = new FixtureLoadCommand($container[EntityManagerInterface::class]);
             }
 
             return $commands;

@@ -6,28 +6,21 @@ namespace Mitra\Mapping\Dto\Response;
 
 use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
+use Mitra\Mapping\Dto\EntityToDtoMappingContext;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Mitra\Mapping\Dto\InvalidEntityException;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
-use Slim\Interfaces\RouteCollectorInterface;
+use Mitra\Slim\UriGeneratorInterface;
 
 final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 {
     /**
-     * @var RouteCollectorInterface
+     * @var UriGeneratorInterface
      */
-    private $routeCollector;
+    private $uriGenerator;
 
-    /**
-     * @var UriInterface
-     */
-    private $baseUri;
-
-    public function __construct(RouteCollectorInterface $routeCollector, UriInterface $baseUri)
+    public function __construct(UriGeneratorInterface $uriGenerator)
     {
-        $this->routeCollector = $routeCollector;
-        $this->baseUri = $baseUri;
+        $this->uriGenerator = $uriGenerator;
     }
 
     public static function getDtoClass(): string
@@ -42,10 +35,11 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
     /**
      * @param object|InternalUser $entity
+     * @param EntityToDtoMappingContext $context
      * @return object|UserResponseDto
      * @throws InvalidEntityException
      */
-    public function toDto(object $entity): object
+    public function toDto(object $entity, EntityToDtoMappingContext $context): object
     {
         if (!$entity instanceof InternalUser) {
             throw InvalidEntityException::fromEntity($entity, static::getEntityClass());
@@ -53,40 +47,68 @@ final class UserResponseDtoMapping implements EntityToDtoMappingInterface
 
         $userResponseDto = new UserResponseDto();
 
-        $userResponseDto->context = [
-            'https://www.w3.org/ns/activitystreams',
-            'https://w3id.org/security/v1'
-        ];
-        /*$userResponseDto->userId = $entity->getId();
-        $userResponseDto->email = $entity->getEmail();
-        $userResponseDto->registeredAt = $entity->getCreatedAt()->format('c');*/
+        $userResponseDto->internalUserId = $entity->getId();
+        $userResponseDto->published = $entity->getCreatedAt()->format('c');
 
-        $userUrl = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $this->baseUri,
+        if (null !== $entity->getUpdatedAt()) {
+            $userResponseDto->updated = $entity->getUpdatedAt()->format('c');
+        }
+
+        if ($this->isResourceOwner($entity, $context)) {
+            $userResponseDto->context[2]['email'] = 'mitra:email';
+            $userResponseDto->email = $entity->getEmail();
+        }
+
+        $userUrl = $this->uriGenerator->fullUrlFor(
             'user-read',
-            ['preferredUsername' => $entity->getUsername()]
+            ['username' => $entity->getUsername()]
         );
 
         // ActivityPub
         $userResponseDto->id = $userUrl;
         $userResponseDto->preferredUsername = $entity->getUsername();
-        $userResponseDto->inbox = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $this->baseUri,
+        $userResponseDto->inbox = $this->uriGenerator->fullUrlFor(
             'user-inbox-read',
-            ['preferredUsername' => $entity->getUsername()]
+            ['username' => $entity->getUsername()]
         );
-        $userResponseDto->outbox = $this->routeCollector->getRouteParser()->fullUrlFor(
-            $this->baseUri,
+        $userResponseDto->outbox = $this->uriGenerator->fullUrlFor(
             'user-outbox-read',
-            ['preferredUsername' => $entity->getUsername()]
+            ['username' => $entity->getUsername()]
+        );
+        $userResponseDto->following = $this->uriGenerator->fullUrlFor(
+            'user-following',
+            ['username' => $entity->getUsername()]
         );
         $userResponseDto->url = $userUrl;
-        $userResponseDto->publicKey = [
-            'id' => $userUrl . '#main-key',
-            'owner' =>  $userResponseDto->url,
-            'publicKeyPem' => $entity->getPublicKey(),
-        ];
+
+        if (null !== $publicKey = $entity->getPublicKey()) {
+            $userResponseDto->publicKey = [
+                'id' => $userUrl . '#main-key',
+                'owner' =>  $userResponseDto->id,
+                'publicKeyPem' => $publicKey,
+            ];
+        }
 
         return $userResponseDto;
+    }
+
+    /**
+     * @param InternalUser $entity
+     * @param EntityToDtoMappingContext $context
+     * @return bool
+     */
+    private function isResourceOwner(InternalUser $entity, EntityToDtoMappingContext $context): bool
+    {
+        if (null === $requestContext = $context->getRequest()) {
+            return false;
+        }
+
+        if (null === $authenticatedUser = $requestContext->getAttribute('authenticatedUser')) {
+            return false;
+        }
+
+        /** @var InternalUser $authenticatedUser */
+
+        return $authenticatedUser->getId() === $entity->getId();
     }
 }

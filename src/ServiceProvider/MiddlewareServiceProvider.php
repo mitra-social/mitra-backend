@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Mitra\ServiceProvider;
 
+use Doctrine\ORM\EntityManagerInterface;
 use HttpSignatures\Verifier;
 use Mitra\Http\Message\ResponseFactoryInterface;
 use Mitra\Middleware\AcceptAndContentTypeMiddleware;
 use Mitra\Middleware\RequestCycleCleanupMiddleware;
+use Mitra\Middleware\ResolveAuthenticatedUserMiddleware;
 use Mitra\Middleware\ValidateHttpSignatureMiddleware;
+use Mitra\Repository\InternalUserRepository;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Log\LoggerInterface;
@@ -16,6 +19,8 @@ use Tuupola\Middleware\JwtAuthentication;
 
 final class MiddlewareServiceProvider implements ServiceProviderInterface
 {
+    private const REQUEST_ATTRIBUTE_NAME_DECODED_TOKEN = 'token';
+
     /**
      * @param Container $container
      * @return void
@@ -26,7 +31,7 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
             Container $container
         ): RequestCycleCleanupMiddleware {
             return new RequestCycleCleanupMiddleware(
-                $container['doctrine.orm.em'],
+                $container[EntityManagerInterface::class],
                 $container[LoggerInterface::class]
             );
         };
@@ -45,7 +50,18 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
                 'ignore' => [],
                 'secret' => $container['jwt.secret'],
                 'logger' => $container[LoggerInterface::class],
+                'token' => self::REQUEST_ATTRIBUTE_NAME_DECODED_TOKEN,
             ]);
+        };
+
+        $container[ResolveAuthenticatedUserMiddleware::class] = static function (
+            Container $container
+        ): ResolveAuthenticatedUserMiddleware {
+            return new ResolveAuthenticatedUserMiddleware(
+                $container[ResponseFactoryInterface::class],
+                $container[InternalUserRepository::class],
+                self::REQUEST_ATTRIBUTE_NAME_DECODED_TOKEN
+            );
         };
 
         $container[ValidateHttpSignatureMiddleware::class] = static function (
@@ -53,7 +69,8 @@ final class MiddlewareServiceProvider implements ServiceProviderInterface
         ): ValidateHttpSignatureMiddleware {
             return new ValidateHttpSignatureMiddleware(
                 $container[Verifier::class],
-                $container[ResponseFactoryInterface::class]
+                $container[ResponseFactoryInterface::class],
+                $container[LoggerInterface::class]
             );
         };
     }

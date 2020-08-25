@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Dto;
 
+use Mitra\Mapping\Dto\EntityToDtoMappingContext;
 use Mitra\Mapping\Dto\EntityToDtoMappingInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -34,7 +35,7 @@ final class EntityToDtoMapper
         }
     }
 
-    public function map(object $entity, string $dtoClass): object
+    public function map(object $entity, string $dtoClass, ServerRequestInterface $request): object
     {
         $entityClass = get_class($entity);
 
@@ -48,7 +49,10 @@ final class EntityToDtoMapper
 
         $mappingClass = $this->mappings[$entityClass . $dtoClass];
 
-        return $this->container->get($mappingClass)->toDto($entity);
+        $context = new EntityToDtoMappingContext();
+        $context->setRequest($request);
+
+        return $this->container->get($mappingClass)->toDto($entity, $context);
     }
 
     /**

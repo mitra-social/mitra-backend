@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Integration\Controller\System;
 
 use Firebase\JWT\JWT;
-use Mitra\CommandBus\CommandBusInterface;
+use Mitra\MessageBus\CommandBusInterface;
 use Mitra\Tests\Integration\CreateUserTrait;
 use Mitra\Tests\Integration\IntegrationTestCase;
 
@@ -52,7 +52,7 @@ final class TokenControllerTest extends IntegrationTestCase
     public function testIssuingTokenSuccessful(): void
     {
         $password = 's0mePässw0rd';
-        $user = $this->createUser($password);
+        $user = $this->createInternalUser($password);
 
         $data = [
             'username' => $user->getUsername(),

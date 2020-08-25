@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mitra\Controller\Me;
 
+use Mitra\ApiProblem\NotFoundApiProblem;
 use Mitra\Dto\Response\UserResponseDto;
 use Mitra\Entity\User\InternalUser;
 use Mitra\Http\Message\ResponseFactoryInterface;
@@ -14,7 +15,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class ProfileController
 {
-
     /**
      * @var ResponseFactoryInterface
      */
@@ -43,15 +43,23 @@ final class ProfileController
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         $accept = $request->getAttribute('accept');
-        $userId = $request->getAttribute('token')['userId'];
 
-        /** @var InternalUser|null $user */
-        $user = $this->userRepository->findById($userId);
+        /** @var InternalUser|null $authenticatedUser */
+        $authenticatedUser = $request->getAttribute('authenticatedUser');
 
-        if (null === $user) {
-            return $this->responseFactory->createResponse(404);
+        if (null === $authenticatedUser) {
+            return $this->responseFactory->createResponseFromApiProblem(
+                (new NotFoundApiProblem())->withDetail('The requested user cannot be found'),
+                $request,
+                $accept
+            );
         }
 
-        return $this->responseFactory->createResponseFromEntity($user, UserResponseDto::class, $request, $accept);
+        return $this->responseFactory->createResponseFromEntity(
+            $authenticatedUser,
+            UserResponseDto::class,
+            $request,
+            $accept
+        );
     }
 }

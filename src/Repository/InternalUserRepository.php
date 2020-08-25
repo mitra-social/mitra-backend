@@ -4,27 +4,28 @@ declare(strict_types=1);
 
 namespace Mitra\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Mitra\Entity\User\InternalUser;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class InternalUserRepository
 {
     /**
-     * @var EntityRepository
+     * @var EntityManagerInterface
      */
-    private $entityRepository;
+    private $entityManager;
 
-    public function __construct(EntityRepository $entityRepository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->entityRepository = $entityRepository;
+        $this->entityManager = $entityManager;
     }
 
     public function findByUsername(string $username): ?InternalUser
     {
-        $qb = $this->entityRepository->createQueryBuilder('u');
+        $qb = $this->entityManager->createQueryBuilder();
         $qb
             ->select('u', 'a')
+            ->from(InternalUser::class, 'u')
             ->leftJoin('u.actor', 'a')
             ->where('u.username = :username')
             ->setParameter('username', $username);
@@ -34,9 +35,10 @@ final class InternalUserRepository
 
     public function findById(string $userId): ?InternalUser
     {
-        $qb = $this->entityRepository->createQueryBuilder('u');
+        $qb = $this->entityManager->createQueryBuilder();
         $qb
             ->select('u', 'a')
+            ->from(InternalUser::class, 'u')
             ->leftJoin('u.actor', 'a')
             ->where('u.id = :userId')
             ->setParameter('userId', $userId);

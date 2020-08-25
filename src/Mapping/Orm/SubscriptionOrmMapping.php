@@ -18,7 +18,12 @@ final class SubscriptionOrmMapping implements ClassMapMappingInterface
      */
     public function configureMapping(ClassMetadata $metadata): void
     {
-        $metadata->setPrimaryTable(['name' => 'subscription']);
+        $metadata->setPrimaryTable([
+            'name' => 'subscription',
+            'uniqueConstraints' => [
+                'UNIQUE_FOLLOW' => ['columns' => ['subscribing_actor_id', 'subscribed_actor_id']],
+            ],
+        ]);
 
         $metadata->mapField([
             'fieldName' => 'id',

@@ -45,13 +45,17 @@ final class DoctrineServiceProvider implements ServiceProviderInterface
 
         // Doctrine migrations configuration
         $container[Configuration::class] = function ($container): Configuration {
-            $configuration = new Configuration($container['doctrine.orm.em']->getConnection());
+            $configuration = new Configuration($container[EntityManagerInterface::class]->getConnection());
             $configuration->setMigrationsTableName($container['doctrine.migrations.table']);
             $configuration->setMigrationsDirectory($container['doctrine.migrations.directory']);
             $configuration->setMigrationsNamespace($container['doctrine.migrations.namespace']);
             $configuration->registerMigrationsFromDirectory($container['doctrine.migrations.directory']);
 
             return $configuration;
+        };
+
+        $container[EntityManagerInterface::class] = static function (Container $container): EntityManagerInterface {
+            return $container['doctrine.orm.em'];
         };
     }
 }
