@@ -1,0 +1,607 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/mitra-social/mitra-Backend-api/1.0.0
+  - description: Local
+    url: http://localhost:1337
+  - description: Preview
+    url: https://mitra-social-backend.herokupapp.com
+info:
+  description: This is the Mitra backend API
+  version: "1.0.0"
+  title: Mitra Backend API
+  contact:
+    email: development@timesplinter.ch
+  license:
+    name: MIT
+tags:
+  - name: User
+    description: General user operations
+  - name: System
+    description: General system operations
+paths:
+  /ping:
+    get:
+      tags:
+        - System
+      summary: May be used for monitoring purposes
+      operationId: ping
+      responses:
+        '235':
+          description: Ping was successful
+  /.well-known/webfinger:
+    get:
+      tags:
+        - System
+      summary: Returns resource information
+      parameters:
+        - name: resource
+          in: query
+          description: The requested resource
+          schema:
+            type: string
+            example: 'acct:john.doe@example.com'
+      responses:
+        '200':
+          description: The resource information
+        '404':
+          description: Resource not found on this server
+  /token:
+    post:
+      tags:
+        - System
+      summary: Issues an access token against valid credentials
+      operationId: issueToken
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      responses:
+        '201':
+          description: The issued token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Wrong or missing username and/or password
+  /user:
+    post:
+      tags:
+        - User
+      summary: Creates a new user
+      operationId: createUser
+      requestBody:
+        $ref: '#/components/requestBodies/UserCreate'
+      responses:
+        '201':
+          description: The created user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Actor'
+        '400':
+          description: Malformed or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+  /user/{preferredUsername}:
+    get:
+      tags:
+        - User
+      summary: Returns a user
+      operationId: user-read
+      parameters:
+        - name: preferredUsername
+          in: path
+          required: true
+          description: The username
+          schema:
+            type: string
+            example: john.doe
+      responses:
+        '201':
+          description: The currently logged in user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Actor'
+        '401':
+          description: Missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '403':
+          description: Invalid authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+    patch:
+      tags:
+        - User
+      summary: Updates the user resource
+      operationId: user-update
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: preferredUsername
+          in: path
+          required: true
+          description: The username
+          schema:
+            type: string
+            example: john.doe
+      requestBody:
+        $ref: '#/components/requestBodies/UserUpdate'
+      responses:
+        '200':
+          description: The currently logged in user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Actor'
+        '400':
+          description: Malformed or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '401':
+          description: Missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '403':
+          description: Invalid authentication token or not resource owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+  /me:
+    get:
+      tags:
+        - User
+      summary: Returns the currently logged in user including private data
+      operationId: user-read-me
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: The currently logged in user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Actor'
+        '401':
+          description: Missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '403':
+          description: Invalid authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+  /user/{preferredUsername}/inbox:
+    get:
+      tags:
+        - User
+      summary: Returns the user's inbox
+      operationId: user-inbox-read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: preferredUsername
+          in: path
+          required: true
+          description: The username
+          schema:
+            type: string
+            example: john.doe
+        - name: page
+          in: query
+          required: false
+          description: For a paginated inbox
+          schema:
+            type: integer
+            example: 1
+        - name: filter
+          in: query
+          required: false
+          description: URL encoded string for filtering the inbox
+          schema:
+            type: string
+            example: 'internalUserId%3Dacdd1a01-d2dd-480e-9962-b1e3fdaa3d6b'
+      responses:
+        '200':
+          description: The user's inbox content
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/OrderedCollection'
+                  - $ref: '#/components/schemas/OrderedCollectionPage'
+        '401':
+          description: Missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '403':
+          description: Invalid authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+    post:
+      tags:
+        - User
+      summary: Writes an activity into the user's inbox
+      operationId: user-inbox-write
+      parameters:
+        - name: preferredUsername
+          in: path
+          required: true
+          description: The username
+          schema:
+            type: string
+            example: john.doe
+        - name: Signature
+          in: header
+          required: true
+          description: The signature for the request
+          schema:
+            type: string
+            example: keyId="https://example.com/user/john.doe",algorithm="rsa-sha256",headers="(request-target) host date accept",signature="Vtf6pUyZxayB3OoOEByesfFtXY4Og=="
+      requestBody:
+        $ref: '#/components/requestBodies/ActivityPubObject'
+      responses:
+        '201':
+          description: The activity has been accepted
+        '400':
+          description: Malformed or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '401':
+          description: Missing signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '403':
+          description: Invalid signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+  /user/{preferredUsername}/outbox:
+    post:
+      tags:
+        - User
+      summary: Writes an activity into the user's outbox
+      operationId: user-outbox-write
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: preferredUsername
+          in: path
+          required: true
+          description: The username
+          schema:
+            type: string
+            example: john.doe
+      requestBody:
+        $ref: '#/components/requestBodies/ActivityPubObject'
+      responses:
+        '201':
+          description: The activity has been accepted
+        '400':
+          description: Malformed or invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '401':
+          description: Missing authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '403':
+          description: Invalid authentication token or not resource owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiProblem'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  requestBodies:
+    UserCreate:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserCreate'
+      description: User object
+      required: true
+    UserUpdate:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserUpdate'
+      description: User object
+      required: true
+    Credentials:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Credentials'
+      description: Credentials object
+      required: true
+    ActivityPubObject:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Object'
+      description: ActivityPub object
+      required: true
+  schemas:
+    UserCreate:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          writeOnly: true
+          type: string
+          example: john.d
+        displayName:
+          writeOnly: true
+          type: string
+          example: John Doe
+        email:
+          writeOnly: true
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          writeOnly: true
+          type: string
+          example: s3kr3t!
+    UserUpdate:
+      type: object
+      required:
+        - oldPassword
+      properties:
+        email:
+          writeOnly: true
+          type: string
+          format: email
+          example: john.doe@example.com
+        newPassword:
+          writeOnly: true
+          type: string
+          example: s3kr3t!
+        oldPassword:
+          writeOnly: true
+          type: string
+          example: '0lDs3kr3t!'
+    Actor:
+      type: object
+      required:
+        - preferredUsername
+        - email
+      properties:
+        '@context':
+          readOnly: true
+          type: array
+          items:
+            type: string
+            example: https://www.w3.org/ns/activitystreams
+        type:
+          readOnly: true
+          type: string
+          example: Person
+        id:
+          readOnly: true
+          type: string
+          format: uri
+          example: https://example.com/user/john.doe
+        following:
+          readOnly: true
+          type: string
+          format: uri
+          example: https://example.com/user/john.doe/following
+        followers:
+          readOnly: true
+          type: string
+          format: uri
+          example: https://example.com/user/john.doe/followers
+        liked:
+          readOnly: true
+          type: string
+          format: uri
+          example: https://example.com/user/john.doe/liked
+        inbox:
+          readOnly: true
+          type: string
+          format: uri
+          example: https://example.com/user/john.doe/inbox
+        outbox:
+          readOnly: true
+          type: string
+          format: uri
+          example: https://example.com/user/john.doe/outbox
+        preferredUsername:
+          readOnly: true
+          type: string
+          example: john.doe
+        name:
+          readOnly: true
+          type: string
+          example: John Doe
+        summary:
+          readOnly: true
+          type: string
+          example: I'm the first example user of Mitra.
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        createdAt:
+          readOnly: true
+          type: string
+          format: 'date-time'
+          example: '2019-01-01T00:00:00+02:00'
+        updatedAt:
+          readOnly: true
+          type: string
+          format: 'date-time'
+          example: '2019-01-01T02:10:00+02:00'
+    Credentials:
+      type: object
+      required:
+        - preferredUsername
+        - password
+      properties:
+        preferredUsername:
+          type: string
+          example: john.doe
+        password:
+          type: string
+          example: s3kr3t!
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        iat:
+          type: integer
+          format: unix timestamp
+          example: 1583686693
+        exp:
+          type: integer
+          format: unix timestamp
+          example: 1583686693
+    ApiProblem:
+      type: object
+      properties:
+        type:
+          type: string
+          example: https://tools.ietf.org/html/rfc7231#section-6.5.4
+        title:
+          type: string
+          example: Not Found
+        detail:
+          type: string
+          example: Could not find resource
+        instance:
+          type: string
+          example: '51459d2f-8d7a-44ba-b2e2-c64695aeeb2c'
+    Object:
+      type: object
+      description: See https://www.w3.org/TR/activitypub/#obj for more information
+      properties:
+        id:
+          type: string
+          example: https://example.com/user/john.doe/note/abc-123
+        '@context':
+          type: string
+          example: https://www.w3.org/ns/activitystreams
+        type:
+          type: string
+          example: Object
+        name:
+          type: string
+          example: Example note
+        content:
+          type: string
+          example: Lorem ipsum dolor sit amet...
+        published:
+          type: string
+          format: datetime
+          example: '2020-08-21T04:06:45Z'
+        updated:
+          type: string
+          format: datetime
+          example: '2020-08-24T12:31:03Z'
+    Link:
+      type: object
+      properties:
+        id:
+          type: string
+          example: https://example.com/user/john.doe/note/abc-123
+        '@context':
+          type: string
+          example: https://www.w3.org/ns/activitystreams
+        type:
+          type: string
+          example: Link
+    OrderedCollection:
+      allOf:
+        - $ref: '#/components/schemas/Object'
+        - type: object
+          properties:
+            totalItems:
+              type: integer
+              example: 5
+            orderedItems:
+              type: array
+              items:
+                anyOf:
+                  - $ref: '#/components/schemas/Object'
+                  - $ref: '#/components/schemas/Link'
+    OrderedCollectionPage:
+      allOf:
+        - $ref: '#/components/schemas/OrderedCollection'
+        - type: object
+          properties:
+            partOf:
+              type: string
+              format: link
+              example: https://example.com/user/john.doe/inbox
+            prev:
+              type: string
+              format: link
+              example: https://example.com/user/john.doe/inbox?page=0
+            next:
+              type: string
+              format: link
+              example: https://example.com/user/john.doe/inbox?page=2
